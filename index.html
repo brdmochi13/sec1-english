@@ -4444,14 +4444,20 @@ function renderUploadGallery() {
     + '</div>';
 
   filtered.forEach(function(u) {
-    // 1. Determine the thumbnail (PDF icon vs Image)
-    const thumb = u.type === 'pdf'
-      ? `<div class="pdf-preview"><div>📄</div><div style="font-size:.65rem;margin-top:3px;text-align:center;padding:0 4px">${(u.name||'PDF').substring(0,20)}</div></div>`
-      : `<img src="${u.data}" alt="${u.name||'photo'}" style="width:100%;height:110px;object-fit:cover;display:block">`;
+    // 1. Determine the thumbnail (PDF vs Image vs External Link)
+    let thumb = "";
+    if (u.type === 'pdf') {
+        thumb = `<div class="pdf-preview"><div>📄</div><div style="font-size:.65rem;margin-top:3px;text-align:center;padding:0 4px">${(u.name||'PDF').substring(0,20)}</div></div>`;
+    } else if (u.type === 'link') {
+        // NEW: Thumbnail for Google Drive links (takes almost zero storage)
+        thumb = `<div class="pdf-preview" style="background:var(--bluel); color:var(--blue);"><div>☁️</div><div style="font-size:.65rem;margin-top:3px;text-align:center;">GDrive Link</div></div>`;
+    } else {
+        thumb = `<img src="${u.data}" alt="${u.name||'photo'}" style="width:100%;height:110px;object-fit:cover;display:block">`;
+    }
 
-    // 2. Build the tile with your new TAG feature
+    // 2. Build the tile with your Content Tags
     html += `
-      <div class="upload-paper-tile">
+      <div class="upload-paper-tile" onclick="${u.type === 'link' ? `window.open('${u.data}', '_blank')` : ''}">
         ${thumb}
         <div class="tile-meta">
           <div class="tile-label">${tagLabel(u.paperTag)}</div>
@@ -4774,6 +4780,27 @@ window.addEventListener('input', function(e) {
             g.appendChild(cell);
         }
     }
+}
+
+function addRemoteLink() {
+  const d = safeLoad();
+  const url = prompt("Paste the Google Drive 'Share' link here:");
+  if (!url) return;
+
+  const tag = document.getElementById('uploadPaperTag').value;
+  const contentTags = prompt("What does this paper contain? (AI will use this for analysis)");
+
+  d.standaloneUploads.unshift({
+    id: 'link_' + Date.now(),
+    paperTag: tag,
+    type: 'link', // New type
+    data: url,    // Stores the URL string (very small!) instead of a huge image
+    contentTags: contentTags || "General Practice",
+    dateDisplay: new Date().toLocaleDateString('en-SG')
+  });
+
+  saveData(d);
+  renderUploadGallery();
 }
   function renderAll(){var a=getA();trend(a);mastery(a);heatmap(a);}
   function loadCJS(cb){if(window.Chart){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';s.onload=cb;s.onerror=function(){cb();};document.head.appendChild(s);}
