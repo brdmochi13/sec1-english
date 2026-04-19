@@ -4688,10 +4688,12 @@ window.addEventListener('input', function(e) {
     });
   }
   function heatmap(a) {
-    var g = document.getElementById('hmGrid'), lb = document.getElementById('hmMonthLabels'), b = document.getElementById('streakBadge');
+    var g = document.getElementById('hmGrid'), 
+        lb = document.getElementById('hmMonthLabels'), 
+        b = document.getElementById('streakBadge');
     if (!g || !lb) return;
 
-    // helper to get YYYY-MM-DD in local time
+    // Helper to get YYYY-MM-DD in local Singapore time
     function getLocalK(dateObj) {
         var y = dateObj.getFullYear();
         var m = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -4703,14 +4705,15 @@ window.addEventListener('input', function(e) {
     a.forEach(function(h) {
         var raw = h.datetime || h.date || '';
         if (raw) {
-            // Take the first 10 characters (YYYY-MM-DD) directly from the saved string
+            // Extracts the YYYY-MM-DD part directly from your saved timestamp
             var k = raw.slice(0, 10); 
             dm[k] = (dm[k] || 0) + 1;
         }
     });
 
     var today = new Date(), streak = 0, chk = new Date(today);
-    // STREAK FIX: Check using local date strings
+    
+    // Calculate Streak using local date strings to prevent UTC resets
     for (var i = 0; i < 366; i++) {
         var k = getLocalK(chk); 
         if (dm[k]) {
@@ -4720,38 +4723,53 @@ window.addEventListener('input', function(e) {
     }
     if (b) b.textContent = streak + '-day streak';
 
-    var W = 16, sd = new Date(today);
-    sd.setDate(sd.getDate() - 111);
-    sd.setDate(sd.getDate() - sd.getDay());
+    var W = 16; 
+    var sd = new Date(today);
+    // NEW LOGIC: Go back 15 weeks and align to the nearest Sunday 
+    // to ensure the "running week" is visible
+    sd.setDate(today.getDate() - (W - 1) * 7 - today.getDay());
+
     g.style.gridTemplateColumns = 'repeat(' + W + ',12px)';
     g.style.gridTemplateRows = 'repeat(7,12px)';
     g.innerHTML = ''; lb.innerHTML = '';
 
     var lm = -1;
+    // Render Month Labels
     for (var w = 0; w < W; w++) {
-        var wd = new Date(sd); wd.setDate(wd.getDate() + w * 7);
+        var wd = new Date(sd); 
+        wd.setDate(wd.getDate() + w * 7);
         var m = wd.getMonth();
         var sp = document.createElement('span');
-        sp.style.cssText = 'width:12px;flex-shrink:0;text-align:center;';
+        sp.style.cssText = 'width:12px;flex-shrink:0;text-align:center;font-size:9px;';
         sp.textContent = m !== lm ? wd.toLocaleString('default', { month: 'short' }) : '';
-        lb.appendChild(sp); lm = m;
+        lb.appendChild(sp); 
+        lm = m;
     }
 
+    // Render Grid
     for (var w2 = 0; w2 < W; w2++) {
         for (var dy = 0; dy < 7; dy++) {
             var dt = new Date(sd);
             dt.setDate(dt.getDate() + w2 * 7 + dy);
+            
+            // Don't color squares in the future
             if (dt > today) {
                 var bl = document.createElement('div');
                 bl.style.cssText = 'width:12px;height:12px;';
-                g.appendChild(bl); continue;
+                g.appendChild(bl); 
+                continue;
             }
-            // USE LOCAL DATE FOR GRID COLORING
+            
             var dk = getLocalK(dt);
-            var cnt = dm[dk] || 0, lv = cnt === 0 ? 0 : cnt === 1 ? 1 : cnt <= 3 ? 2 : 3;
+            var cnt = dm[dk] || 0;
+            // Level 0: 0, Level 1: 1, Level 2: 2-3, Level 3: 4+
+            var lv = cnt === 0 ? 0 : cnt === 1 ? 1 : cnt <= 3 ? 2 : 3;
+            
             var cell = document.createElement('div');
             cell.className = 'hm-cell';
             if (lv) cell.dataset.l = lv;
+            
+            // Tooltip for hovering over squares
             cell.dataset.tip = cnt ? dt.getDate() + ' ' + dt.toLocaleString('default', { month: 'short' }) + ': ' + cnt + ' attempt' + (cnt > 1 ? 's' : '') : dt.getDate() + ' ' + dt.toLocaleString('default', { month: 'short' });
             g.appendChild(cell);
         }
