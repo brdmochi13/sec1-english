@@ -987,30 +987,6 @@ button, input, select, textarea, a, label,
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 
-
-/* ══ AUTO-SAVE INDICATOR ══ */
-.autosave-bar{position:fixed;bottom:0;left:0;right:0;height:30px;background:rgba(28,28,30,.93);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:.71rem;color:rgba(255,255,255,.4);z-index:9998;transition:color .4s;pointer-events:none;font-family:'Source Sans 3',sans-serif}
-.autosave-bar.saved{color:#4ade80}.autosave-bar.saving{color:#fbbf24}.autosave-bar.error{color:#f87171}
-.as-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;animation:asdot 1.5s ease-in-out infinite}
-.autosave-bar.saved .as-dot{animation:none}
-@keyframes asdot{0%,100%{opacity:1}50%{opacity:.2}}
-/* ══ PROGRESS CHARTS ══ */
-.charts-section{margin:0 0 1rem;display:flex;flex-direction:column;gap:.9rem}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.9rem .95rem .75rem}
-.chart-card-title{font-size:.87rem;font-weight:700;color:var(--ink);margin:0 0 2px;display:flex;align-items:center;gap:.35rem}
-.chart-card-sub{font-size:.73rem;color:var(--muted);margin:0 0 9px}
-.chart-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;font-size:.7rem;color:var(--muted)}
-.chart-legend span{display:flex;align-items:center;gap:3px}
-.ldot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
-.mastery-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:.79rem}
-.m-lbl{width:100px;flex-shrink:0;color:var(--muted)}.m-track{flex:1;background:#e8e2d8;border-radius:999px;height:7px;overflow:hidden}
-.m-fill{height:100%;border-radius:999px}.m-pct{width:30px;text-align:right;font-weight:700;flex-shrink:0;font-size:.76rem}
-.m-badge{width:15px;height:15px;border-radius:3px;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
-.hm-cell{width:12px;height:12px;border-radius:2px;background:#e8e2d8;position:relative;cursor:default}
-.hm-cell[data-l="1"]{background:#bbf7d0}.hm-cell[data-l="2"]{background:#4ade80}.hm-cell[data-l="3"]{background:#16a34a}
-.hm-cell[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#f5f0e8;font-size:.63rem;padding:2px 5px;border-radius:3px;white-space:nowrap;z-index:99;pointer-events:none}
-.streak-badge{display:inline-flex;align-items:center;gap:3px;background:#fef3c7;color:#92400e;border-radius:20px;padding:2px 8px;font-size:.72rem;font-weight:700}
-
 </style>
 </head>
 <body>
@@ -1205,56 +1181,6 @@ button, input, select, textarea, a, label,
         onchange="handleStandaloneUpload(this)">
     </div>
   </div>
-
-  <!-- ══ STEP 3: PROGRESS CHARTS ══ -->
-  <div class="charts-section" id="progressCharts">
-    <div class="chart-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
-        <div><div class="chart-card-title">&#x1F4C8; Score Improvement</div>
-        <div class="chart-card-sub">Score % per attempt — one line per grammar section</div></div>
-      </div>
-      <div id="trendLegend" class="chart-legend"></div>
-      <div style="position:relative;width:100%;height:200px">
-        <canvas id="chartTrend" role="img" aria-label="Score improvement by section over time">Complete a paper to see your trend.</canvas>
-      </div>
-      <div id="trendEmpty" class="empty-state" style="display:none;padding:.9rem">
-        <div class="es-icon" style="font-size:1.8rem">&#x1F4C8;</div><p>Complete at least one paper to see your improvement trend.</p>
-      </div>
-    </div>
-    <div class="chart-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
-        <div><div class="chart-card-title">&#x1F3AF; Topic Mastery</div>
-        <div class="chart-card-sub">Weighted average of last 5 papers</div></div>
-        <div style="display:flex;gap:7px;font-size:.66rem;color:var(--muted);flex-shrink:0">
-          <span style="display:flex;align-items:center;gap:2px"><span style="width:7px;height:7px;border-radius:1px;background:#22c55e;display:inline-block"></span>&#x2265;80%</span>
-          <span style="display:flex;align-items:center;gap:2px"><span style="width:7px;height:7px;border-radius:1px;background:#f59e0b;display:inline-block"></span>50&#x2013;79%</span>
-          <span style="display:flex;align-items:center;gap:2px"><span style="width:7px;height:7px;border-radius:1px;background:#ef4444;display:inline-block"></span>&lt;50%</span>
-        </div>
-      </div>
-      <div id="masteryBars" style="margin-top:.75rem"></div>
-      <div id="masteryEmpty" class="empty-state" style="display:none;padding:.9rem">
-        <div class="es-icon" style="font-size:1.8rem">&#x1F3AF;</div><p>Complete a paper to see mastery breakdown.</p>
-      </div>
-    </div>
-    <div class="chart-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
-        <div><div class="chart-card-title">&#x1F525; Practice Streak</div>
-        <div class="chart-card-sub">Days practised in the last 16 weeks</div></div>
-        <div class="streak-badge" id="streakBadge">&#x1F525; 0-day streak</div>
-      </div>
-      <div id="hmMonthLabels" style="display:flex;gap:3px;margin-top:8px;font-size:.58rem;color:var(--muted);overflow-x:auto"></div>
-      <div id="hmGrid" style="display:grid;gap:3px;margin-top:3px;overflow-x:auto"></div>
-      <div style="display:flex;align-items:center;gap:3px;margin-top:6px;font-size:.66rem;color:var(--muted)">
-        Less
-        <div class="hm-cell" style="width:10px;height:10px;display:inline-block;vertical-align:middle"></div>
-        <div class="hm-cell" data-l="1" style="width:10px;height:10px;display:inline-block;vertical-align:middle"></div>
-        <div class="hm-cell" data-l="2" style="width:10px;height:10px;display:inline-block;vertical-align:middle"></div>
-        <div class="hm-cell" data-l="3" style="width:10px;height:10px;display:inline-block;vertical-align:middle"></div>
-        More
-      </div>
-    </div>
-  </div>
-
   <div class="card">
     <div class="card-head">
       <div class="card-title">📋 Paper Attempts Log</div>
@@ -2660,16 +2586,26 @@ function updateSectionReadiness() {
       if(done===s.len) badge.classList.add('complete');
     }
   });
-  // Check if all sections done for "Submit Paper"
+  // Submit button always enabled — partial submission allowed
   const submitBtn = document.getElementById('submitPaperBtn');
   if(submitBtn) {
-    const allDone = sections.every(s=>{
-      let done=0;
-      for(let i=0;i<s.len;i++){const el=document.getElementById(`${s.pre}${pn}_${i}`);if(el&&(el.disabled||el.classList.contains('ok')||el.classList.contains('bad')))done++;}
-      return done===s.len;
+    submitBtn.disabled = false;
+    // Count how many questions have been answered
+    let totalQ = 0, answeredQ = 0;
+    sections.forEach(s => {
+      for(let i=0;i<s.len;i++){
+        totalQ++;
+        const el=document.getElementById(`${s.pre}${pn}_${i}`);
+        if(el&&(el.disabled||el.classList.contains('ok')||el.classList.contains('bad')))answeredQ++;
+      }
     });
-    submitBtn.disabled = !allDone;
-    submitBtn.textContent = allDone ? '📋 Submit & See My Score' : `📋 Submit Paper (answer all questions first)`;
+    if(answeredQ === 0) {
+      submitBtn.textContent = '📋 Submit Paper';
+    } else if(answeredQ < totalQ) {
+      submitBtn.textContent = `📋 Submit Paper (${answeredQ}/${totalQ} answered)`;
+    } else {
+      submitBtn.textContent = '📋 Submit & See My Score';
+    }
   }
 }
 
@@ -2700,6 +2636,39 @@ function updateLiveScore() {
 function submitPaper() {
   const pn = currentPaper;
   const p = WA1[pn];
+  // Count answered vs total auto-marked questions
+  const sections = [
+    {pre:'T',  len:p.tenses.length},
+    {pre:'AR', len:p.articles.length},
+    {pre:'PR', len:p.preps.length},
+    {pre:'CJ', len:p.conj.length},
+    {pre:'EC', len:p.editing.length},
+  ];
+  let totalQ=0, answeredQ=0;
+  sections.forEach(s=>{
+    for(let i=0;i<s.len;i++){
+      totalQ++;
+      const el=document.getElementById(`${s.pre}${pn}_${i}`);
+      if(el&&(el.disabled||el.classList.contains('ok')||el.classList.contains('bad')))answeredQ++;
+    }
+  });
+  const unanswered = totalQ - answeredQ;
+  // If partially answered, show a confirmation prompt
+  if(unanswered > 0) {
+    const proceed = confirm(
+      '⚠️ You have ' + unanswered + ' unanswered question' + (unanswered>1?'s':'') + ' out of ' + totalQ + '.
+
+' +
+      'Answered: ' + answeredQ + '/' + totalQ + ' marks (auto-marked)
+' +
+      'Unanswered questions will be marked as 0.
+
+' +
+      'Do you want to submit now, or go back and attempt more?'
+    );
+    if(!proceed) return; // Student chose to go back
+  }
+  // Mark all unanswered as wrong and submit
   ['T','AR','PR'].forEach((pre,pi)=>{
     const lens=[p.tenses.length,p.articles.length,p.preps.length];
     for(let i=0;i<lens[pi];i++){
@@ -4530,176 +4499,6 @@ window.addEventListener('input', function(e) {
   }
 }, true);
 
-
-// ══════════════════════════════════════════════════════════════
-//  AUTO-SAVE ENGINE
-// ══════════════════════════════════════════════════════════════
-(function initAutoSave(){
-  'use strict';
-  var _t=null, _last=null;
-  function bar(){return document.getElementById('autosaveBar');}
-  function msg(){return document.getElementById('autosaveMsg');}
-  function setState(cls,txt){var b=bar(),m=msg();if(!b||!m)return;b.className='autosave-bar '+cls;m.textContent=txt;}
-  function collect(){
-    var snap={};
-    document.querySelectorAll('.ainp,.csel,.txtarea,textarea,input[type="text"]').forEach(function(el){
-      if(el.id&&el.id!=='keyPwdInp'&&el.id!=='newPwd1'&&el.id!=='newPwd2'&&el.id!=='apikeyInp')snap[el.id]=el.value;
-    });
-    return snap;
-  }
-  function doSave(){
-    try{
-      var raw=localStorage.getItem('sec1_mastery_v2');
-      var d;try{d=JSON.parse(raw)||{};}catch(e){d={};}
-      if(!d.answers)d.answers={};if(!d.timeSpent)d.timeSpent={};
-      var pn=window.currentPaper||1,mode=window.currentMode||'WA1',key=mode+'_'+pn;
-      var snap=collect();
-      if(!d.answers[key])d.answers[key]={};
-      d.answers[key].answers=snap;d.answers[key].updated=new Date().toISOString();
-      var j=JSON.stringify(d);
-      if(j===_last){setState('saved','All changes saved \u2713');return;}
-      localStorage.setItem('sec1_mastery_v2',j);_last=j;
-      var now=new Date(),t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
-      setState('saved','Auto-saved at '+t+' \u2713');
-    }catch(e){setState('error','\u26a0 Could not save \u2014 storage may be full');}
-  }
-  function schedule(){setState('saving','Saving\u2026');clearTimeout(_t);_t=setTimeout(doSave,1000);}
-  document.addEventListener('input',function(e){var id=e.target&&e.target.id;if(id&&id!=='keyPwdInp'&&id!=='newPwd1'&&id!=='newPwd2')schedule();},true);
-  document.addEventListener('change',function(e){var id=e.target&&e.target.id;if(id&&id!=='keyPwdInp'&&id!=='newPwd1'&&id!=='newPwd2')schedule();},true);
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')doSave();});
-  window.addEventListener('beforeunload',doSave);
-  window.addEventListener('pagehide',doSave);
-  // Patch loadWA1 to save before switching + restore after render
-  var _oLW=window.loadWA1;
-  window.loadWA1=function(n,btn){doSave();if(_oLW)_oLW(n,btn);};
-  var _oRW=window.renderWA1Paper;
-  window.renderWA1Paper=function(n){
-    if(_oRW)_oRW(n);
-    setTimeout(function(){
-      try{
-        var d=JSON.parse(localStorage.getItem('sec1_mastery_v2')||'{}');
-        var saved=d.answers&&d.answers['WA1_'+n]&&d.answers['WA1_'+n].answers;
-        if(!saved)return;
-        var restored=0;
-        Object.keys(saved).forEach(function(id){
-          if(!saved[id])return;
-          var el=document.getElementById(id);
-          if(!el||el.disabled)return;
-          if(el.tagName==='SELECT'){for(var i=0;i<(el.options||[]).length;i++){if(el.options[i].value===saved[id]){el.value=saved[id];restored++;break;}}}
-          else{el.value=saved[id];restored++;}
-        });
-        if(restored>0){
-          setState('saved','\u21ba Restored '+restored+' saved answers \u2713');
-          setTimeout(function(){try{if(typeof updateLiveScore==='function')updateLiveScore();}catch(e){}try{if(typeof updateSectionReadiness==='function')updateSectionReadiness();}catch(e){}},60);
-          setTimeout(function(){setState('saved','All changes saved \u2713');},3000);
-        }
-      }catch(e){}
-    },120);
-  };
-  setTimeout(function(){setState('saved','Auto-save active \u2014 your answers are safe');},700);
-  setTimeout(function(){setState('saved','All changes saved \u2713');},3200);
-  window._autoSaveNow=doSave;
-})();
-
-// ══════════════════════════════════════════════════════════════
-//  STEP 3: PROGRESS CHARTS
-// ══════════════════════════════════════════════════════════════
-(function initCharts(){
-  'use strict';
-  var SECS=[
-    {key:'Tenses',color:'#6366f1',dash:[]},
-    {key:'Articles',color:'#0ea5e9',dash:[5,3]},
-    {key:'Prepositions',color:'#f59e0b',dash:[2,2]},
-    {key:'Conjunctions',color:'#ec4899',dash:[4,2,1,2]},
-    {key:'SVA',color:'#10b981',dash:[8,3]},
-    {key:'Editing',color:'#f97316',dash:[6,2]},
-  ];
-  var _ci=null;
-  function getAttempts(){
-    try{var d=JSON.parse(localStorage.getItem('sec1_mastery_v2')||'{}');return(d.history||[]).filter(function(h){return h&&h.sections&&Object.keys(h.sections).length>0;});}catch(e){return[];}
-  }
-  function buildTrend(attempts){
-    var canvas=document.getElementById('chartTrend'),emptyEl=document.getElementById('trendEmpty'),legEl=document.getElementById('trendLegend');
-    if(!canvas)return;
-    if(!attempts.length){canvas.style.display='none';if(emptyEl)emptyEl.style.display='';return;}
-    canvas.style.display='';if(emptyEl)emptyEl.style.display='none';if(legEl)legEl.innerHTML='';
-    if(_ci){try{_ci.destroy();}catch(e){}_ci=null;}
-    if(window.Chart&&window.Chart.getChart){var ex=window.Chart.getChart(canvas);if(ex){try{ex.destroy();}catch(e){}}}
-    var sl=attempts.slice(-12);
-    var labels=sl.map(function(h,i){try{var d=new Date(h.datetime||h.date||'');if(!isNaN(d.getTime()))return d.getDate()+'/'+(d.getMonth()+1);}catch(e){}return'A'+(i+1);});
-    var datasets=[];
-    SECS.forEach(function(s){
-      var data=sl.map(function(h){var sec=h.sections&&h.sections[s.key];return(sec&&sec.max)?Math.round((sec.correct/sec.max)*100):null;});
-      if(data.every(function(v){return v===null;}))return;
-      datasets.push({label:s.key,data:data,borderColor:s.color,backgroundColor:s.color+'18',borderDash:s.dash,borderWidth:2,pointRadius:4,tension:0.35,fill:false,spanGaps:true});
-      if(legEl)legEl.innerHTML+='<span><span class="ldot" style="background:'+s.color+'"></span>'+s.key+'</span>';
-    });
-    if(!window.Chart)return;
-    _ci=new Chart(canvas,{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return' '+ctx.dataset.label+': '+(ctx.parsed.y!==null?ctx.parsed.y+'%':'\u2014');} }}},scales:{x:{ticks:{autoSkip:true,maxRotation:30,font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},y:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10},stepSize:20},grid:{color:'rgba(0,0,0,.05)'}}}}});
-  }
-  function buildMastery(attempts){
-    var container=document.getElementById('masteryBars'),emptyEl=document.getElementById('masteryEmpty');
-    if(!container)return;container.innerHTML='';
-    if(!attempts.length){if(emptyEl)emptyEl.style.display='';return;}if(emptyEl)emptyEl.style.display='none';
-    var recent=attempts.slice(-5),map={};
-    SECS.forEach(function(s){var vals=recent.map(function(h){var sec=h.sections&&h.sections[s.key];return(sec&&sec.max)?Math.round((sec.correct/sec.max)*100):null;}).filter(function(v){return v!==null;});if(vals.length)map[s.key]=Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length);});
-    var sorted=SECS.filter(function(s){return map[s.key]!==undefined;}).sort(function(a,b){return map[a.key]-map[b.key];});
-    if(!sorted.length){if(emptyEl)emptyEl.style.display='';return;}
-    sorted.forEach(function(s){
-      var pct=map[s.key],col=pct>=80?'#22c55e':pct>=50?'#f59e0b':'#ef4444',bg=pct>=80?'#dcfce7':pct>=50?'#fef3c7':'#fee2e2',tc=pct>=80?'#166534':pct>=50?'#92400e':'#991b1b',ic=pct>=80?'\u2713':pct>=50?'~':'!';
-      var row=document.createElement('div');row.className='mastery-row';
-      row.innerHTML='<div class="m-lbl">'+s.key+'</div><div class="m-track"><div class="m-fill" style="width:'+pct+'%;background:'+col+'"></div></div><div class="m-pct" style="color:'+col+'">'+pct+'%</div><div class="m-badge" style="background:'+bg+';color:'+tc+'">'+ic+'</div>';
-      container.appendChild(row);
-    });
-  }
-  function buildHeatmap(attempts){
-    var gridEl=document.getElementById('hmGrid'),labsEl=document.getElementById('hmMonthLabels'),badgeEl=document.getElementById('streakBadge');
-    if(!gridEl||!labsEl)return;
-    var dayMap={};
-    attempts.forEach(function(h){var raw=h.datetime||h.date||'',key='';try{var d=new Date(raw);if(!isNaN(d.getTime()))key=d.toISOString().slice(0,10);else if(raw.length>=10)key=raw.slice(0,10);}catch(e){}if(key)dayMap[key]=(dayMap[key]||0)+1;});
-    var today=new Date(),streak=0,chk=new Date(today);
-    for(var si=0;si<366;si++){var k=chk.toISOString().slice(0,10);if(dayMap[k]){streak++;chk.setDate(chk.getDate()-1);}else break;}
-    if(badgeEl)badgeEl.textContent='\uD83D\uDD25 '+streak+'-day streak';
-    var WEEKS=16,sd=new Date(today);sd.setDate(sd.getDate()-111);sd.setDate(sd.getDate()-sd.getDay());
-    gridEl.style.gridTemplateColumns='repeat('+WEEKS+',12px)';gridEl.style.gridTemplateRows='repeat(7,12px)';
-    gridEl.innerHTML='';labsEl.innerHTML='';
-    var lastM=-1;
-    for(var w=0;w<WEEKS;w++){
-      var wd=new Date(sd);wd.setDate(wd.getDate()+w*7);var m=wd.getMonth();
-      var sp=document.createElement('span');sp.style.cssText='width:12px;flex-shrink:0;text-align:center;';
-      sp.textContent=m!==lastM?wd.toLocaleString('default',{month:'short'}):'';labsEl.appendChild(sp);lastM=m;
-    }
-    for(var w2=0;w2<WEEKS;w2++){
-      for(var day=0;day<7;day++){
-        var dt=new Date(sd);dt.setDate(dt.getDate()+w2*7+day);
-        if(dt>today){var blank=document.createElement('div');blank.style.cssText='width:12px;height:12px;';gridEl.appendChild(blank);continue;}
-        var dkey=dt.toISOString().slice(0,10),cnt=dayMap[dkey]||0,lvl=cnt===0?0:cnt===1?1:cnt<=3?2:3;
-        var cell=document.createElement('div');cell.className='hm-cell';
-        if(lvl)cell.dataset.l=lvl;
-        cell.dataset.tip=cnt?dt.getDate()+' '+dt.toLocaleString('default',{month:'short'})+': '+cnt+' attempt'+(cnt>1?'s':''):dt.getDate()+' '+dt.toLocaleString('default',{month:'short'});
-        gridEl.appendChild(cell);
-      }
-    }
-  }
-  function renderAll(){var a=getAttempts();buildTrend(a);buildMastery(a);buildHeatmap(a);}
-  function loadCJS(cb){
-    if(window.Chart){cb();return;}
-    var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
-    s.onload=cb;s.onerror=function(){cb();};document.head.appendChild(s);
-  }
-  window.refreshProgressCharts=function(){loadCJS(renderAll);};
-  // Patch renderDashboard to also refresh charts
-  var _oRD=window.renderDashboard;
-  window.renderDashboard=function(){if(_oRD)_oRD();setTimeout(function(){window.refreshProgressCharts&&window.refreshProgressCharts();},60);};
-  // Patch showTab to refresh charts when dashboard opens
-  var _oST=window.showTab;
-  window.showTab=function(id,btn){if(_oST)_oST(id,btn);if(id==='dashTab')setTimeout(function(){window.refreshProgressCharts&&window.refreshProgressCharts();},100);};
-  loadCJS(function(){setTimeout(renderAll,400);});
-})();
-
 </script>
-
-<!-- AUTO-SAVE BAR -->
-<div class="autosave-bar" id="autosaveBar"><div class="as-dot"></div><span id="autosaveMsg">Auto-save active</span></div>
 </body>
 </html>
