@@ -708,7 +708,7 @@ button, input, select, textarea, a, label,
 
 
 /* ══ PAPER ATTEMPTS LOG ══ */
-.attempts-log { }
+.attempts-log { padding-top: 0.5rem;}
 .attempt-entry {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -2703,19 +2703,31 @@ function updateLiveScore() {
 function submitPaper() {
   const pn = currentPaper;
   const p = WA1[pn];
-  const allSecs=[{pre:'T',len:p.tenses.length},{pre:'AR',len:p.articles.length},{pre:'PR',len:p.preps.length},{pre:'CJ',len:p.conj.length},{pre:'EC',len:p.editing.length}];
-  let totalQ=0,answeredQ=0;
-  allSecs.forEach(s=>{for(let i=0;i<s.len;i++){totalQ++;const el=document.getElementById(`${s.pre}${pn}_${i}`);if(el&&(el.disabled||el.classList.contains('ok')||el.classList.contains('bad')))answeredQ++;}});
-  if(answeredQ<totalQ){
-    const go=confirm('You have answered '+answeredQ+' out of '+totalQ+' questions.\nUnanswered questions will score 0.\n\nSubmit now?');
-    if(!go)return;
-  }
-  ['T','AR','PR'].forEach((pre,pi)=>{
-    const lens=[p.tenses.length,p.articles.length,p.preps.length];
-    for(let i=0;i<lens[pi];i++){const el=document.getElementById(`${pre}${pn}_${i}`);if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}}
+  
+  // 1. We include ALL sections, including Section D (SV)
+  const allSecs = [
+    {pre:'T',  len:p.tenses.length},
+    {pre:'AR', len:p.articles.length},
+    {pre:'PR', len:p.preps.length},
+    {pre:'SV', len:p.sva.length},      // Section D added
+    {pre:'CJ', len:p.conj.length},
+    {pre:'EC', len:p.editing.length}
+  ];
+
+  // 2. Mark all unanswered questions as "checked" so the math doesn't fail
+  allSecs.forEach(s => {
+    for(let i = 0; i < s.len; i++){
+      const el = document.getElementById(`${s.pre}${pn}_${i}`);
+      // If student didn't answer, we lock it and mark it wrong (bad) 
+      // but keep the code running.
+      if(el && !el.disabled){
+        el.classList.add('bad');
+        el.disabled = true;
+      }
+    }
   });
-  for(let i=0;i<p.conj.length;i++){const el=document.getElementById(`CJ${pn}_${i}`);if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}}
-  for(let i=0;i<p.editing.length;i++){const el=document.getElementById(`EC${pn}_${i}`);if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}}
+
+  // 3. Finalize the score and push to Dashboard
   showWA1Summary();
 }
 
