@@ -2844,11 +2844,32 @@ function initAI() {
   }
 }
 
-function saveKey(){
-  const val=document.getElementById('apikeyInp').value.trim();
-  if(!val.startsWith('sk-ant-')&&!val.startsWith('sk-')){ document.getElementById('apikeyStatus').textContent='❌ Key should start with sk-ant-…'; return; }
-  const d=loadData(); d.apiKey=val; saveData(d);
-  document.getElementById('apikeyStatus').textContent='✅ Key saved! Ready to generate papers.';
+function saveKey() {
+  const provider = document.getElementById('apiProvider').value;
+  const val = document.getElementById('apikeyInp').value.trim();
+  const status = document.getElementById('apikeyStatus');
+
+  // New flexible validation logic
+  if (provider === 'anthropic' && !val.startsWith('sk-ant-')) {
+    status.textContent = '❌ Anthropic keys should start with sk-ant-...';
+    return;
+  } 
+  if (provider === 'groq' && !val.startsWith('gsk_')) {
+    status.textContent = '❌ Groq keys usually start with gsk_...';
+    return;
+  }
+  if (val.length < 20) {
+    status.textContent = '❌ Key looks too short. Please check again.';
+    return;
+  }
+
+  const d = loadData();
+  d.apiKey = val;
+  d.apiProvider = provider; // Store the provider choice too!
+  saveData(d);
+
+  status.style.color = 'var(--green)';
+  status.textContent = '✅ Config saved! Ready to generate using ' + provider;
 }
 
 function buildAdaptivePrompt(type,marks,topic,diff,weakAreas){
