@@ -1362,14 +1362,19 @@ button, input, select, textarea, a, label,
 <!-- ═══════════════════════════════ AI PRACTICE ═══════════════════════════════ -->
 <div id="aiTab" class="tab-content">
   <div class="apikey-box" id="apikeyBox">
-    <h4>🔑 API Key Required for AI Generation</h4>
-    <p>Get a free key from <a href="https://console.anthropic.com" target="_blank" style="color:#92400e">console.anthropic.com</a> — new accounts get $5 free credit (~250 papers). Your key is saved in this browser only.</p>
-    <div class="apikey-row">
-      <input type="password" class="apikey-inp" id="apikeyInp" placeholder="sk-ant-api03-...">
-      <button class="tbtn tbtn-primary" onclick="saveKey()">Save Key</button>
-    </div>
-    <div class="apikey-status" id="apikeyStatus"></div>
+  <h4>🔑 Global API Configuration</h4>
+  <p>Select your provider and enter your key. Gemini and Groq often have free tiers.</p>
+  <div class="apikey-row">
+    <select id="apiProvider" class="apikey-inp" style="flex:0; min-width:120px;">
+      <option value="anthropic">Anthropic (Claude)</option>
+      <option value="groq">Groq (Llama 3)</option>
+      <option value="gemini">Google Gemini</option>
+    </select>
+    <input type="password" class="apikey-inp" id="apikeyInp" placeholder="Enter API Key...">
+    <button class="tbtn tbtn-primary" onclick="saveKey()">Save Config</button>
   </div>
+  <div class="apikey-status" id="apikeyStatus"></div>
+</div>
 
   <div class="weak-focus-bar" id="weakFocusBar" style="display:none">
     🎯 <strong>Adaptive Focus:</strong> Based on your practice history, this paper will focus on: <span id="weakFocusText">—</span>
@@ -2950,49 +2955,85 @@ RESPOND WITH ONLY VALID JSON — no markdown, no preamble:
 RULES: Original passages only. 4 options for each question. Cloze word bank has ~4 extra words. All answers must be unambiguous. Passages for 13-year-olds. Return ONLY the JSON.`;
 }
 
-async function generateAI(){
-  const d=loadData();
-  const apiKey=d.apiKey||document.getElementById('apikeyInp').value.trim();
-  if(!apiKey){document.getElementById('genStatus').textContent='❌ Please enter your API key first.';return;}
+async function generateAI() {
+  const d = loadData();
+  const provider = document.getElementById('apiProvider').value;
+  const apiKey = d.apiKey || document.getElementById('apikeyInp').value.trim();
+  
+  if (!apiKey) { alert('Please enter an API key.'); return; }
 
-  const btn=document.getElementById('genBtn');
-  const status=document.getElementById('genStatus');
-  btn.classList.add('loading');btn.disabled=true;
-  document.getElementById('aiPaperArea').innerHTML='';
-  document.getElementById('aiScoreSummary').classList.remove('show');
-  aiAnswers={};aiScore=0;aiAnswered=0;aiTotal=0;c1Picks={};
-  currentAITest=null;
+  const btn = document.getElementById('genBtn');
+  const status = document.getElementById('genStatus');
+  btn.classList.add('loading'); btn.disabled = true;
 
-  const weakAreas=getWeakAreas(d);
-  const type=document.getElementById('cfgType').value;
-  const marks=parseInt(document.getElementById('cfgMarks').value);
-  const topic=document.getElementById('cfgTopic').value;
-  const diff=document.getElementById('cfgDiff').value;
+  // Configuration mapping for different providers
+  const config = {
+    anthropic: {
+      url: 'https://api.anthropic.com/v1/messages',
+      headers: { 
+        'x-api-key': apiKey, 
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json' 
+      },
+      body: { model: 'claude-3-sonnet-20240229', max_tokens: 4000 }
+    },
+    groq: {
+      url: 'https://api.groq.com/openai/v1/chat/completions',
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+      body: { model: 'llama3-8b-8192' }
+    },
+    gemini: {
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      headers: { 'Content-Type': 'application/json' },
+      body: {} // Gemini structure is slightly different, handled below
+    }
+  };
 
-  let dots=0;
-  const dotInterval=setInterval(()=>{dots=(dots+1)%4;status.textContent='⏳ Generating your adaptive paper'+'.'.repeat(dots+1);},500);
+  const current = config[provider];
+  const prompt = buildAdaptivePrompt(document.getElementById('cfgType').value, 
+                                     document.getElementById('cfgMarks').value, 
+                                     document.getElementById('cfgTopic').value, 
+                                     document.getElementById('cfgDiff').value, 
+                                     getWeakAreas(d));
 
-  try{
-    const prompt=buildAdaptivePrompt(type,marks,topic,diff,weakAreas);
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})
-    });
-    clearInterval(dotInterval);
-    if(!res.ok) throw new Error('API error '+res.status);
-    const data=await res.json();
-    const text=data.content.map(c=>c.text||'').join('');
-    const match=text.match(/\{[\s\S]*\}/);
-    if(!match) throw new Error('No JSON in response');
-    currentAITest=JSON.parse(match[0]);
-    status.textContent='✅ Adaptive paper ready — answer all questions below!';
+  try {
+    let response;
+    
+    // Handle the specific request format for each provider
+    if (provider === 'anthropic') {
+      response = await fetch(current.url, {
+        method: 'POST', headers: current.headers,
+        body: JSON.stringify({ ...current.body, messages: [{ role: 'user', content: prompt }] })
+      });
+    } else if (provider === 'gemini') {
+      response = await fetch(current.url, {
+        method: 'POST', headers: current.headers,
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+    } else { // Groq / OpenAI Format
+      response = await fetch(current.url, {
+        method: 'POST', headers: current.headers,
+        body: JSON.stringify({ ...current.body, messages: [{ role: 'user', content: prompt }] })
+      });
+    }
+
+    const data = await response.json();
+    let text = "";
+    
+    // Extract text based on provider response structure
+    if (provider === 'anthropic') text = data.content[0].text;
+    else if (provider === 'gemini') text = data.candidates[0].content.parts[0].text;
+    else text = data.choices[0].message.content; // Groq
+
+    const match = text.match(/\{[\s\S]*\}/);
+    currentAITest = JSON.parse(match[0]);
     renderAIPaper(currentAITest);
-  }catch(e){
-    clearInterval(dotInterval);
-    status.textContent='❌ '+e.message+'. Check your API key and try again.';
+    status.textContent = '✅ Paper generated using ' + provider;
+  } catch (e) {
+    status.textContent = '❌ Error: ' + e.message;
+  } finally {
+    btn.classList.remove('loading'); btn.disabled = false;
   }
-  btn.classList.remove('loading');btn.disabled=false;
 }
 
 
