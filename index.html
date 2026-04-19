@@ -1167,7 +1167,7 @@ button, input, select, textarea, a, label,
       <div class="card-marks" style="background:var(--purple);color:white">Photos &amp; PDFs</div>
     </div>
     <div class="card-body">
-      <p style="font-size:.81rem;color:var(--muted);margin-bottom:.7rem">Upload photos of Mokshith's hand-written papers, teacher-marked sheets, or scanned PDFs. Tag each upload with a paper number and date for easy review.</p>
+      <p style="font-size:.81rem;color:var(--muted);margin-bottom:.7rem">Upload photos of Student's hand-written papers, teacher-marked sheets, or scanned PDFs. Tag each upload with a paper number and date for easy review.</p>
       <div class="upload-filter-row">
         <label>Paper:</label>
         <select id="uploadPaperTag" style="font-size:16px">
@@ -4373,7 +4373,15 @@ function handleStandaloneUpload(input) {
 
   const d = safeLoad();
   if (!d.standaloneUploads) d.standaloneUploads = [];
+  // Add a prompt to ask for tags during upload
+const contentTags = prompt("What does this paper contain? (e.g., 'Tense errors', 'Weak vocabulary')");
 
+// Store this inside the upload object
+d.standaloneUploads.unshift({
+    // ... existing properties ...
+    contentTags: contentTags || "General Practice",
+    // ...
+});
   let done = 0;
   const total = input.files.length;
 
@@ -4436,19 +4444,23 @@ function renderUploadGallery() {
     + '</div>';
 
   filtered.forEach(function(u) {
+    // 1. Determine the thumbnail (PDF icon vs Image)
     const thumb = u.type === 'pdf'
-      ? '<div class="pdf-preview"><div>📄</div><div style="font-size:.65rem;margin-top:3px;text-align:center;padding:0 4px">' + (u.name||'PDF').substring(0,20) + '</div></div>'
-      : '<img src="' + u.data + '" alt="' + (u.name||'photo') + '" style="width:100%;height:110px;object-fit:cover;display:block">';
+      ? `<div class="pdf-preview"><div>📄</div><div style="font-size:.65rem;margin-top:3px;text-align:center;padding:0 4px">${(u.name||'PDF').substring(0,20)}</div></div>`
+      : `<img src="${u.data}" alt="${u.name||'photo'}" style="width:100%;height:110px;object-fit:cover;display:block">`;
 
-    html += '<div class="upload-paper-tile">'
-      + thumb
-      + '<div class="tile-meta">'
-      + '<div class="tile-label">' + tagLabel(u.paperTag) + '</div>'
-      + '<div>' + (u.dateDisplay || '—') + '</div>'
-      + '</div>'
-      + '<button class="tile-del" onclick="deleteStandaloneUpload(\'' + u.id + '\',event)" title="Delete">✕</button>'
-      + '</div>';
-  });
+    // 2. Build the tile with your new TAG feature
+    html += `
+      <div class="upload-paper-tile">
+        ${thumb}
+        <div class="tile-meta">
+          <div class="tile-label">${tagLabel(u.paperTag)}</div>
+          <div style="font-size:0.7rem; color:var(--blue); font-weight:bold;">🏷️ ${u.contentTags || 'General'}</div>
+          <div>${u.dateDisplay || '—'}</div>
+        </div>
+        <button class="tile-del" onclick="deleteStandaloneUpload('${u.id}', event)" title="Delete">✕</button>
+      </div>`;
+});
 
   // If nothing uploaded yet (besides the add tile)
   if (filtered.length === 0) {
@@ -4532,7 +4544,7 @@ function saveAsHTML() {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       const dateStr = new Date().toISOString().slice(0,10);
-      a.download = 'sec1_english_mokshith_' + dateStr + '.html';
+      a.download = 'sec1_english_Student_' + dateStr + '.html';
       a.click();
       URL.revokeObjectURL(a.href);
 
