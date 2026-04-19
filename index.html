@@ -692,8 +692,12 @@ button, input, select, textarea, a, label,
 }
 /* key banner must not block tab bar */
 .key-active-banner {
-  z-index: 80 !important;
-  top: 90px !important;
+  z-index: 79 !important;
+  top: 96px !important;
+  pointer-events: none;
+}
+.key-active-banner.show {
+  pointer-events: auto;
 }
 /* result overlay: only active when shown */
 .result-overlay { pointer-events: none; }
@@ -987,6 +991,30 @@ button, input, select, textarea, a, label,
   cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 
+
+/* AUTO-SAVE BAR */
+.autosave-bar{position:fixed;bottom:0;left:0;right:0;height:30px;background:rgba(28,28,30,.93);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:.71rem;color:rgba(255,255,255,.4);z-index:9998;transition:color .4s;pointer-events:none}
+.autosave-bar.saved{color:#4ade80}.autosave-bar.saving{color:#fbbf24}.autosave-bar.error{color:#f87171}
+.as-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;animation:asdot 1.5s ease-in-out infinite}
+.autosave-bar.saved .as-dot{animation:none}
+@keyframes asdot{0%,100%{opacity:1}50%{opacity:.2}}
+/* PROGRESS CHARTS */
+.charts-section{margin:0 0 1rem;display:flex;flex-direction:column;gap:.9rem}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.9rem .95rem .75rem}
+.chart-card-title{font-size:.87rem;font-weight:700;color:var(--ink);margin:0 0 2px;display:flex;align-items:center;gap:.35rem}
+.chart-card-sub{font-size:.73rem;color:var(--muted);margin:0 0 9px}
+.chart-legend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;font-size:.7rem;color:var(--muted)}
+.chart-legend span{display:flex;align-items:center;gap:3px}
+.ldot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.mastery-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:.79rem}
+.m-lbl{width:100px;flex-shrink:0;color:var(--muted)}.m-track{flex:1;background:#e8e2d8;border-radius:999px;height:7px;overflow:hidden}
+.m-fill{height:100%;border-radius:999px}.m-pct{width:30px;text-align:right;font-weight:700;flex-shrink:0;font-size:.76rem}
+.m-badge{width:15px;height:15px;border-radius:3px;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.hm-cell{width:12px;height:12px;border-radius:2px;background:#e8e2d8;position:relative;cursor:default}
+.hm-cell[data-l="1"]{background:#bbf7d0}.hm-cell[data-l="2"]{background:#4ade80}.hm-cell[data-l="3"]{background:#16a34a}
+.hm-cell[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#f5f0e8;font-size:.63rem;padding:2px 5px;border-radius:3px;white-space:nowrap;z-index:99;pointer-events:none}
+.streak-badge{display:inline-flex;align-items:center;gap:3px;background:#fef3c7;color:#92400e;border-radius:20px;padding:2px 8px;font-size:.72rem;font-weight:700}
+
 </style>
 </head>
 <body>
@@ -1029,15 +1057,7 @@ button, input, select, textarea, a, label,
   </div>
 </div>
 
-<!-- ANSWER KEY ACTIVE BANNER -->
-<div class="key-active-banner" id="keyBanner">
-  🔓 Answer Key Active — Student: close this tab or scroll down
-  <button class="key-lock-btn" onclick="lockKey()">🔒 Lock</button>
-
-
-
-
-<!-- LIGHTBOX for viewing uploads -->
+<!-- LIGHTBOX<!-- LIGHTBOX for viewing uploads -->
 <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img class="lightbox-img" id="lightboxImg" src="" alt="">
@@ -1181,7 +1201,55 @@ button, input, select, textarea, a, label,
         onchange="handleStandaloneUpload(this)">
     </div>
   </div>
-  <div class="card">
+  
+  <!-- PROGRESS CHARTS -->
+  <div class="charts-section" id="progressCharts">
+    <div class="chart-card">
+      <div class="chart-card-title">&#x1F4C8; Score Improvement</div>
+      <div class="chart-card-sub">Score % per attempt — one line per grammar section</div>
+      <div id="trendLegend" class="chart-legend"></div>
+      <div style="position:relative;width:100%;height:200px">
+        <canvas id="chartTrend">Complete a paper to see your trend.</canvas>
+      </div>
+      <div id="trendEmpty" class="empty-state" style="display:none;padding:.8rem">
+        <div class="es-icon" style="font-size:1.6rem">&#x1F4C8;</div><p>Complete at least one paper.</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem;margin-bottom:6px">
+        <div><div class="chart-card-title">&#x1F3AF; Topic Mastery</div>
+        <div class="chart-card-sub">Weighted avg of last 5 papers</div></div>
+        <div style="display:flex;gap:6px;font-size:.65rem;color:var(--muted)">
+          <span><span style="display:inline-block;width:7px;height:7px;background:#22c55e;border-radius:1px"></span> &ge;80</span>
+          <span><span style="display:inline-block;width:7px;height:7px;background:#f59e0b;border-radius:1px"></span> 50-79</span>
+          <span><span style="display:inline-block;width:7px;height:7px;background:#ef4444;border-radius:1px"></span> &lt;50</span>
+        </div>
+      </div>
+      <div id="masteryBars"></div>
+      <div id="masteryEmpty" class="empty-state" style="display:none;padding:.8rem">
+        <div class="es-icon" style="font-size:1.6rem">&#x1F3AF;</div><p>Complete a paper to see mastery.</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
+        <div><div class="chart-card-title">&#x1F525; Practice Streak</div>
+        <div class="chart-card-sub">Days practised — last 16 weeks</div></div>
+        <div class="streak-badge" id="streakBadge">0-day streak</div>
+      </div>
+      <div id="hmMonthLabels" style="display:flex;gap:3px;margin-top:8px;font-size:.58rem;color:var(--muted);overflow-x:auto"></div>
+      <div id="hmGrid" style="display:grid;gap:3px;margin-top:3px"></div>
+      <div style="display:flex;align-items:center;gap:3px;margin-top:6px;font-size:.65rem;color:var(--muted)">
+        Less
+        <div class="hm-cell" style="width:10px;height:10px;display:inline-block;vertical-align:middle"></div>
+        <div class="hm-cell" data-l="1" style="width:10px;height:10px;display:inline-block;vertical-align:middle"></div>
+        <div class="hm-cell" data-l="2" style="width:10px;height:10px;display:inline-block;vertical-align:middle"></div>
+        <div class="hm-cell" data-l="3" style="width:10px;height:10px;display:inline-block;vertical-align:middle"></div>
+        More
+      </div>
+    </div>
+  </div>
+
+<div class="card">
     <div class="card-head">
       <div class="card-title">📋 Paper Attempts Log</div>
       <div class="card-marks" style="background:var(--amber);color:white">🔐 Review = Parent Only</div>
@@ -1463,13 +1531,25 @@ function startTimerForPaper(type, n) {
 }
 function stopTimerForPaper(type, n) {
   const key = getPaperKey(type, n);
-  const d = safeLoad();
   const start = window.__paperTimerStart || Date.now();
   const elapsed = Math.round((Date.now() - start)/1000);
-  if (!d.timeSpent[key]) d.timeSpent[key] = {total:0, start:null};
-  d.timeSpent[key].total = elapsed;
-  d.timeSpent[key].start = null;
-  saveData(d);
+  // Always re-read from localStorage so we never lose the history entry
+  // that recordAttemptFull wrote just before this call.
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    const d = raw ? JSON.parse(raw) : safeLoad();
+    if (!d.timeSpent) d.timeSpent = {};
+    if (!d.timeSpent[key]) d.timeSpent[key] = {total:0, start:null};
+    d.timeSpent[key].total = elapsed;
+    d.timeSpent[key].start = null;
+    saveData(d);
+  } catch(e) {
+    const d = safeLoad();
+    if (!d.timeSpent[key]) d.timeSpent[key] = {total:0, start:null};
+    d.timeSpent[key].total = elapsed;
+    d.timeSpent[key].start = null;
+    saveData(d);
+  }
   updateTimerUI();
 }
 function updateTimerUI() {
@@ -2123,7 +2203,7 @@ function showTab(id, btn) {
   if (btn) btn.classList.add('active');
   const strip=document.getElementById('scoreStrip');
   if(strip) strip.classList.toggle('visible', id==='wa1Tab');
-  if (id === 'dashTab') { renderDashboard(); updateStorageMeter(); }
+  if (id === 'dashTab') { renderDashboard(); updateStorageMeter(); setTimeout(function(){try{window.refreshProgressCharts&&window.refreshProgressCharts();}catch(e){}},150); }
   if (id === 'notesTab') {
     if (!notesRendered) renderNotes();
     // Always show wa1notes first when switching to this tab
@@ -2586,26 +2666,13 @@ function updateSectionReadiness() {
       if(done===s.len) badge.classList.add('complete');
     }
   });
-  // Submit button always enabled — partial submission allowed
+  // Submit always enabled
   const submitBtn = document.getElementById('submitPaperBtn');
   if(submitBtn) {
     submitBtn.disabled = false;
-    // Count how many questions have been answered
-    let totalQ = 0, answeredQ = 0;
-    sections.forEach(s => {
-      for(let i=0;i<s.len;i++){
-        totalQ++;
-        const el=document.getElementById(`${s.pre}${pn}_${i}`);
-        if(el&&(el.disabled||el.classList.contains('ok')||el.classList.contains('bad')))answeredQ++;
-      }
-    });
-    if(answeredQ === 0) {
-      submitBtn.textContent = '📋 Submit Paper';
-    } else if(answeredQ < totalQ) {
-      submitBtn.textContent = `📋 Submit Paper (${answeredQ}/${totalQ} answered)`;
-    } else {
-      submitBtn.textContent = '📋 Submit & See My Score';
-    }
+    let totalQ=0, answeredQ=0;
+    sections.forEach(s=>{for(let i=0;i<s.len;i++){totalQ++;const el=document.getElementById(`${s.pre}${pn}_${i}`);if(el&&(el.disabled||el.classList.contains('ok')||el.classList.contains('bad')))answeredQ++;}});
+    submitBtn.textContent = answeredQ===totalQ ? '📋 Submit & See My Score' : answeredQ===0 ? '📋 Submit Paper' : `📋 Submit Paper (${answeredQ}/${totalQ} answered)`;
   }
 }
 
@@ -2636,54 +2703,19 @@ function updateLiveScore() {
 function submitPaper() {
   const pn = currentPaper;
   const p = WA1[pn];
-  // Count answered vs total auto-marked questions
-  const sections = [
-    {pre:'T',  len:p.tenses.length},
-    {pre:'AR', len:p.articles.length},
-    {pre:'PR', len:p.preps.length},
-    {pre:'CJ', len:p.conj.length},
-    {pre:'EC', len:p.editing.length},
-  ];
-  let totalQ=0, answeredQ=0;
-  sections.forEach(s=>{
-    for(let i=0;i<s.len;i++){
-      totalQ++;
-      const el=document.getElementById(`${s.pre}${pn}_${i}`);
-      if(el&&(el.disabled||el.classList.contains('ok')||el.classList.contains('bad')))answeredQ++;
-    }
-  });
-  const unanswered = totalQ - answeredQ;
-  // If partially answered, show a confirmation prompt
-  if(unanswered > 0) {
-    const proceed = confirm(
-      '⚠️ You have ' + unanswered + ' unanswered question' + (unanswered>1?'s':'') + ' out of ' + totalQ + '.
-
-' +
-      'Answered: ' + answeredQ + '/' + totalQ + ' marks (auto-marked)
-' +
-      'Unanswered questions will be marked as 0.
-
-' +
-      'Do you want to submit now, or go back and attempt more?'
-    );
-    if(!proceed) return; // Student chose to go back
+  const allSecs=[{pre:'T',len:p.tenses.length},{pre:'AR',len:p.articles.length},{pre:'PR',len:p.preps.length},{pre:'CJ',len:p.conj.length},{pre:'EC',len:p.editing.length}];
+  let totalQ=0,answeredQ=0;
+  allSecs.forEach(s=>{for(let i=0;i<s.len;i++){totalQ++;const el=document.getElementById(`${s.pre}${pn}_${i}`);if(el&&(el.disabled||el.classList.contains('ok')||el.classList.contains('bad')))answeredQ++;}});
+  if(answeredQ<totalQ){
+    const go=confirm('You have answered '+answeredQ+' out of '+totalQ+' questions.\nUnanswered questions will score 0.\n\nSubmit now?');
+    if(!go)return;
   }
-  // Mark all unanswered as wrong and submit
   ['T','AR','PR'].forEach((pre,pi)=>{
     const lens=[p.tenses.length,p.articles.length,p.preps.length];
-    for(let i=0;i<lens[pi];i++){
-      const el=document.getElementById(`${pre}${pn}_${i}`);
-      if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}
-    }
+    for(let i=0;i<lens[pi];i++){const el=document.getElementById(`${pre}${pn}_${i}`);if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}}
   });
-  for(let i=0;i<p.conj.length;i++){
-    const el=document.getElementById(`CJ${pn}_${i}`);
-    if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}
-  }
-  for(let i=0;i<p.editing.length;i++){
-    const el=document.getElementById(`EC${pn}_${i}`);
-    if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}
-  }
+  for(let i=0;i<p.conj.length;i++){const el=document.getElementById(`CJ${pn}_${i}`);if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}}
+  for(let i=0;i<p.editing.length;i++){const el=document.getElementById(`EC${pn}_${i}`);if(el&&!el.disabled){el.classList.add('bad');el.disabled=true;markAttempted(el,false);}}
   showWA1Summary();
 }
 
@@ -2726,22 +2758,7 @@ function showWA1Summary() {
     </div>`;
   });
   rowsHtml+=`<div class="result-row" style="opacity:.55"><span class="result-row-name">Direct Speech (F) + Punctuation (G)</span><div class="result-row-bar"></div><span class="result-row-score" style="color:rgba(255,255,255,.35)">4+3 = manual</span></div>`;
-  document.getElementById('resultBox').innerHTML=`
-    <div class="result-score-big">${total}<span style="font-size:1.6rem;opacity:.5">/${maxTotal}</span></div>
-    <div class="result-score-max">auto-marked out of 23 &nbsp;·&nbsp; Sections F+G add up to 7 more (manual)</div>
-    <div class="result-msg">${msg}</div>
-    ${weakHtml}
-    <div class="result-breakdown">${rowsHtml}</div>
-    <div class="result-note">Sections F (Direct Speech) and G (Punctuation) require teacher/parent marking. Use 🔐 Answer Key to check them.</div>
-    <div class="result-actions">
-      <button class="result-btn result-btn-retry" onclick="retryPaper()">🔄 Retry Paper</button>
-      <button class="result-btn result-btn-close" onclick="document.getElementById('resultOverlay').classList.remove('show')">📖 Review My Answers</button>
-    </div>`;
-  document.getElementById('resultOverlay').classList.add('show');
-  completedPapers.add(pn);
-  const ptab=document.getElementById('pt'+pn);
-  if(ptab) ptab.classList.add('done');
-  // Collect answers snapshot for review
+  // Collect answers snapshot FIRST
   const snap = {};
   const pp = WA1[pn];
   if(pp) {
@@ -2756,8 +2773,26 @@ function showWA1Summary() {
     const sp=document.getElementById('SP'+pn);if(sp)snap['SP']=sp.value;
     const pu=document.getElementById('PU'+pn);if(pu)snap['PU']=pu.value;
   }
+  // Save to history BEFORE showing result so dashboard is ready
   recordAttemptFull(pn,'WA1',secResults,total,35,snap);
   stopTimerForPaper('WA1',pn);
+  // Now render result with Go to Dashboard button
+  document.getElementById('resultBox').innerHTML=`
+    <div class="result-score-big">${total}<span style="font-size:1.6rem;opacity:.5">/${maxTotal}</span></div>
+    <div class="result-score-max">auto-marked out of 23 &nbsp;·&nbsp; Sections F+G add up to 7 more (manual)</div>
+    <div class="result-msg">${msg}</div>
+    ${weakHtml}
+    <div class="result-breakdown">${rowsHtml}</div>
+    <div class="result-note">Sections F (Direct Speech) and G (Punctuation) require teacher/parent marking. Use the Answer Key to check them.</div>
+    <div class="result-actions">
+      <button class="result-btn" style="background:var(--green);color:#fff;font-weight:700" onclick="document.getElementById('resultOverlay').classList.remove('show');showTab('dashTab',document.querySelector('.mtab[onclick*=dashTab]'))">&#x1F4CA; Go to Dashboard</button>
+      <button class="result-btn result-btn-retry" onclick="retryPaper()">&#x1F504; Retry Paper</button>
+      <button class="result-btn result-btn-close" onclick="document.getElementById('resultOverlay').classList.remove('show')">&#x1F4D6; Review My Answers</button>
+    </div>`;
+  document.getElementById('resultOverlay').classList.add('show');
+  completedPapers.add(pn);
+  const ptab=document.getElementById('pt'+pn);
+  if(ptab) ptab.classList.add('done');
 }
 
 function retryPaper() {
@@ -2766,11 +2801,7 @@ function retryPaper() {
 }
 
 
-function checkAllWA1() {
-  if(ansKeyMode) { _origCheckAll(); return; }
-  // Don't block check all — it just checks the student's own answers
-  _origCheckAll();
-}
+// checkAllWA1 defined above
 
 
 // ══════════════════════════════════════════
@@ -2949,6 +2980,24 @@ async function generateAI(){
     status.textContent='❌ '+e.message+'. Check your API key and try again.';
   }
   btn.classList.remove('loading');btn.disabled=false;
+}
+
+
+function renderC1Passage(sec, si) {
+  if (!sec || !sec.passage) return '';
+  var p = sec.passage;
+  (sec.questions || []).forEach(function(q) {
+    p = p.split('(' + q.num + ') _____').join('(' + q.num + ') <span id="c1span_' + si + '_' + q.num + '" style="display:inline-block;min-width:70px;border-bottom:2px solid var(--blue);padding:0 4px;color:var(--blue);font-weight:600">_____</span>');
+  });
+  return p;
+}
+function renderC2Passage(sec, si) {
+  if (!sec || !sec.passage) return '';
+  var p = sec.passage;
+  (sec.questions || []).forEach(function(q) {
+    p = p.split('(' + q.num + ') _____').join('(' + q.num + ') <span id="c2span_' + si + '_' + q.num + '" style="display:inline-block;min-width:70px;border-bottom:2px solid var(--green);padding:0 4px;color:var(--green);font-weight:600">_____</span>');
+  });
+  return p;
 }
 
 function renderAIPaper(test) {
@@ -4499,6 +4548,126 @@ window.addEventListener('input', function(e) {
   }
 }, true);
 
+
+// AUTO-SAVE ENGINE
+(function(){
+  var _t=null,_last=null;
+  function ss(cls,txt){var b=document.getElementById('autosaveBar'),m=document.getElementById('autosaveMsg');if(!b||!m)return;b.className='autosave-bar '+cls;m.textContent=txt;}
+  function collect(){var s={};document.querySelectorAll('.ainp,.csel,.txtarea,textarea').forEach(function(el){if(el.id&&el.id!=='keyPwdInp'&&el.id!=='newPwd1'&&el.id!=='newPwd2'&&el.id!=='apikeyInp')s[el.id]=el.value;});return s;}
+  function save(){
+    try{
+      var raw=localStorage.getItem(window.STORE_KEY||'sec1_mastery_v2'),d;
+      try{d=JSON.parse(raw)||{};}catch(e){d={};}
+      if(!d.answers)d.answers={};
+      var k=(window.currentMode||'WA1')+'_'+(window.currentPaper||1);
+      if(!d.answers[k])d.answers[k]={};
+      d.answers[k].answers=collect();d.answers[k].updated=new Date().toISOString();
+      var j=JSON.stringify(d);if(j===_last){ss('saved','All changes saved ✓');return;}
+      localStorage.setItem(window.STORE_KEY||'sec1_mastery_v2',j);_last=j;
+      var n=new Date(),t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0')+':'+n.getSeconds().toString().padStart(2,'0');
+      ss('saved','Auto-saved at '+t+' ✓');
+    }catch(e){ss('error','Storage full');}
+  }
+  function sch(){ss('saving','Saving...');clearTimeout(_t);_t=setTimeout(save,1000);}
+  document.addEventListener('input',function(e){var id=e.target&&e.target.id;if(id&&id!=='keyPwdInp'&&id!=='newPwd1'&&id!=='newPwd2')sch();},true);
+  document.addEventListener('change',function(e){var id=e.target&&e.target.id;if(id&&id!=='keyPwdInp'&&id!=='newPwd1'&&id!=='newPwd2')sch();},true);
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')save();});
+  window.addEventListener('beforeunload',save);window.addEventListener('pagehide',save);
+  var _oLW=window.loadWA1;
+  window.loadWA1=function(n,b){save();if(_oLW)_oLW(n,b);};
+  var _oRW=window.renderWA1Paper;
+  window.renderWA1Paper=function(n){
+    if(_oRW)_oRW(n);
+    setTimeout(function(){
+      try{
+        var stk=window.STORE_KEY||'sec1_mastery_v2';
+        var d=JSON.parse(localStorage.getItem(stk)||'{}');
+        var sv=d.answers&&d.answers['WA1_'+n]&&d.answers['WA1_'+n].answers;
+        if(!sv)return;
+        var r=0;
+        Object.keys(sv).forEach(function(id){
+          if(!sv[id])return;var el=document.getElementById(id);if(!el||el.disabled)return;
+          if(el.tagName==='SELECT'){for(var i=0;i<(el.options||[]).length;i++){if(el.options[i].value===sv[id]){el.value=sv[id];r++;break;}}}
+          else{el.value=sv[id];r++;}
+        });
+        if(r>0){ss('saved','Restored '+r+' answers ✓');setTimeout(function(){try{updateLiveScore();}catch(e){}try{updateSectionReadiness();}catch(e){}},80);setTimeout(function(){ss('saved','All changes saved ✓');},3000);}
+      }catch(e){}
+    },150);
+  };
+  setTimeout(function(){ss('saved','Auto-save active');},800);
+  setTimeout(function(){ss('saved','All changes saved ✓');},3500);
+})();
+
+// PROGRESS CHARTS
+(function(){
+  var S=[{key:'Tenses',color:'#6366f1',dash:[]},{key:'Articles',color:'#0ea5e9',dash:[5,3]},{key:'Prepositions',color:'#f59e0b',dash:[2,2]},{key:'Conjunctions',color:'#ec4899',dash:[4,2,1,2]},{key:'SVA',color:'#10b981',dash:[8,3]},{key:'Editing',color:'#f97316',dash:[6,2]}];
+  var _ci=null;
+  function getA(){try{var stk=window.STORE_KEY||'sec1_mastery_v2';var d=JSON.parse(localStorage.getItem(stk)||'{}');return(d.history||[]).filter(function(h){return h&&h.sections&&Object.keys(h.sections).length>0;});}catch(e){return[];}}
+  function trend(a){
+    var cv=document.getElementById('chartTrend'),em=document.getElementById('trendEmpty'),lg=document.getElementById('trendLegend');
+    if(!cv)return;
+    if(!a.length){cv.style.display='none';if(em)em.style.display='';return;}
+    cv.style.display='';if(em)em.style.display='none';if(lg)lg.innerHTML='';
+    if(_ci){try{_ci.destroy();}catch(e){}_ci=null;}
+    if(window.Chart&&window.Chart.getChart){var ex=window.Chart.getChart(cv);if(ex)try{ex.destroy();}catch(e){}}
+    var sl=a.slice(-12),labels=sl.map(function(h,i){try{var d=new Date(h.datetime||h.date||'');if(!isNaN(d.getTime()))return d.getDate()+'/'+(d.getMonth()+1);}catch(e){}return'A'+(i+1);});
+    var ds=[];
+    S.forEach(function(s){
+      var data=sl.map(function(h){var sec=h.sections&&h.sections[s.key];return(sec&&sec.max)?Math.round((sec.correct/sec.max)*100):null;});
+      if(data.every(function(v){return v===null;}))return;
+      ds.push({label:s.key,data:data,borderColor:s.color,backgroundColor:s.color+'18',borderDash:s.dash,borderWidth:2,pointRadius:4,tension:0.35,fill:false,spanGaps:true});
+      if(lg)lg.innerHTML+='<span><span class="ldot" style="background:'+s.color+'"></span>'+s.key+'</span>';
+    });
+    if(!window.Chart)return;
+    _ci=new Chart(cv,{type:'line',data:{labels:labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.dataset.label+': '+(c.parsed.y!==null?c.parsed.y+'%':'-');}}}},scales:{x:{ticks:{autoSkip:true,maxRotation:30,font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},y:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10},stepSize:20},grid:{color:'rgba(0,0,0,.05)'}}}}});
+  }
+  function mastery(a){
+    var c=document.getElementById('masteryBars'),em=document.getElementById('masteryEmpty');
+    if(!c)return;c.innerHTML='';
+    if(!a.length){if(em)em.style.display='';return;}if(em)em.style.display='none';
+    var r=a.slice(-5),map={};
+    S.forEach(function(s){var vals=r.map(function(h){var sec=h.sections&&h.sections[s.key];return(sec&&sec.max)?Math.round((sec.correct/sec.max)*100):null;}).filter(function(v){return v!==null;});if(vals.length)map[s.key]=Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length);});
+    S.filter(function(s){return map[s.key]!==undefined;}).sort(function(a,b){return map[a.key]-map[b.key];}).forEach(function(s){
+      var p=map[s.key],col=p>=80?'#22c55e':p>=50?'#f59e0b':'#ef4444',bg=p>=80?'#dcfce7':p>=50?'#fef3c7':'#fee2e2',tc=p>=80?'#166534':p>=50?'#92400e':'#991b1b',ic=p>=80?'OK':p>=50?'~':'!';
+      var row=document.createElement('div');row.className='mastery-row';
+      row.innerHTML='<div class="m-lbl">'+s.key+'</div><div class="m-track"><div class="m-fill" style="width:'+p+'%;background:'+col+'"></div></div><div class="m-pct" style="color:'+col+'">'+p+'%</div><div class="m-badge" style="background:'+bg+';color:'+tc+'">'+ic+'</div>';
+      c.appendChild(row);
+    });
+  }
+  function heatmap(a){
+    var g=document.getElementById('hmGrid'),lb=document.getElementById('hmMonthLabels'),b=document.getElementById('streakBadge');
+    if(!g||!lb)return;
+    var dm={};
+    a.forEach(function(h){var raw=h.datetime||h.date||'',k='';try{var d=new Date(raw);if(!isNaN(d.getTime()))k=d.toISOString().slice(0,10);else if(raw.length>=10)k=raw.slice(0,10);}catch(e){}if(k)dm[k]=(dm[k]||0)+1;});
+    var today=new Date(),streak=0,chk=new Date(today);
+    for(var i=0;i<366;i++){var k=chk.toISOString().slice(0,10);if(dm[k]){streak++;chk.setDate(chk.getDate()-1);}else break;}
+    if(b)b.textContent=streak+'-day streak';
+    var W=16,sd=new Date(today);sd.setDate(sd.getDate()-111);sd.setDate(sd.getDate()-sd.getDay());
+    g.style.gridTemplateColumns='repeat('+W+',12px)';g.style.gridTemplateRows='repeat(7,12px)';g.innerHTML='';lb.innerHTML='';
+    var lm=-1;
+    for(var w=0;w<W;w++){var wd=new Date(sd);wd.setDate(wd.getDate()+w*7);var m=wd.getMonth();var sp=document.createElement('span');sp.style.cssText='width:12px;flex-shrink:0;text-align:center;';sp.textContent=m!==lm?wd.toLocaleString('default',{month:'short'}):'';lb.appendChild(sp);lm=m;}
+    for(var w2=0;w2<W;w2++){for(var dy=0;dy<7;dy++){var dt=new Date(sd);dt.setDate(dt.getDate()+w2*7+dy);if(dt>today){var bl=document.createElement('div');bl.style.cssText='width:12px;height:12px;';g.appendChild(bl);continue;}var dk=dt.toISOString().slice(0,10),cnt=dm[dk]||0,lv=cnt===0?0:cnt===1?1:cnt<=3?2:3;var cell=document.createElement('div');cell.className='hm-cell';if(lv)cell.dataset.l=lv;cell.dataset.tip=cnt?dt.getDate()+' '+dt.toLocaleString('default',{month:'short'})+': '+cnt+' attempt'+(cnt>1?'s':''):dt.getDate()+' '+dt.toLocaleString('default',{month:'short'});g.appendChild(cell);}}
+  }
+  function renderAll(){var a=getA();trend(a);mastery(a);heatmap(a);}
+  function loadCJS(cb){if(window.Chart){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';s.onload=cb;s.onerror=function(){cb();};document.head.appendChild(s);}
+  window.refreshProgressCharts=function(){loadCJS(renderAll);};
+  // Patch renderDashboard to also refresh charts
+  var _oRD=window.renderDashboard;
+  window.renderDashboard=function(){
+    if(_oRD)_oRD();
+    setTimeout(function(){window.refreshProgressCharts&&window.refreshProgressCharts();},80);
+  };
+  // Patch showTab — refresh charts whenever dashboard tab is opened
+  var _oST=window.showTab;
+  window.showTab=function(id,btn){
+    if(_oST)_oST(id,btn);
+    if(id==='dashTab')setTimeout(function(){window.refreshProgressCharts&&window.refreshProgressCharts();},150);
+  };
+  loadCJS(function(){setTimeout(renderAll,500);});
+})();
+
 </script>
+
+<div class="autosave-bar" id="autosaveBar"><div class="as-dot"></div><span id="autosaveMsg">Auto-save active</span></div>
 </body>
 </html>
