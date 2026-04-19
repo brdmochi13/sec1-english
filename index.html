@@ -4687,20 +4687,76 @@ window.addEventListener('input', function(e) {
       c.appendChild(row);
     });
   }
-  function heatmap(a){
-    var g=document.getElementById('hmGrid'),lb=document.getElementById('hmMonthLabels'),b=document.getElementById('streakBadge');
-    if(!g||!lb)return;
-    var dm={};
-    a.forEach(function(h){var raw=h.datetime||h.date||'',k='';try{var d=new Date(raw);if(!isNaN(d.getTime()))k=d.toISOString().slice(0,10);else if(raw.length>=10)k=raw.slice(0,10);}catch(e){}if(k)dm[k]=(dm[k]||0)+1;});
-    var today=new Date(),streak=0,chk=new Date(today);
-    for(var i=0;i<366;i++){var k=chk.toISOString().slice(0,10);if(dm[k]){streak++;chk.setDate(chk.getDate()-1);}else break;}
-    if(b)b.textContent=streak+'-day streak';
-    var W=16,sd=new Date(today);sd.setDate(sd.getDate()-111);sd.setDate(sd.getDate()-sd.getDay());
-    g.style.gridTemplateColumns='repeat('+W+',12px)';g.style.gridTemplateRows='repeat(7,12px)';g.innerHTML='';lb.innerHTML='';
-    var lm=-1;
-    for(var w=0;w<W;w++){var wd=new Date(sd);wd.setDate(wd.getDate()+w*7);var m=wd.getMonth();var sp=document.createElement('span');sp.style.cssText='width:12px;flex-shrink:0;text-align:center;';sp.textContent=m!==lm?wd.toLocaleString('default',{month:'short'}):'';lb.appendChild(sp);lm=m;}
-    for(var w2=0;w2<W;w2++){for(var dy=0;dy<7;dy++){var dt=new Date(sd);dt.setDate(dt.getDate()+w2*7+dy);if(dt>today){var bl=document.createElement('div');bl.style.cssText='width:12px;height:12px;';g.appendChild(bl);continue;}var dk=dt.toISOString().slice(0,10),cnt=dm[dk]||0,lv=cnt===0?0:cnt===1?1:cnt<=3?2:3;var cell=document.createElement('div');cell.className='hm-cell';if(lv)cell.dataset.l=lv;cell.dataset.tip=cnt?dt.getDate()+' '+dt.toLocaleString('default',{month:'short'})+': '+cnt+' attempt'+(cnt>1?'s':''):dt.getDate()+' '+dt.toLocaleString('default',{month:'short'});g.appendChild(cell);}}
-  }
+  function heatmap(a) {
+    var g = document.getElementById('hmGrid'), lb = document.getElementById('hmMonthLabels'), b = document.getElementById('streakBadge');
+    if (!g || !lb) return;
+
+    // helper to get YYYY-MM-DD in local time
+    function getLocalK(dateObj) {
+        var y = dateObj.getFullYear();
+        var m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        var d = String(dateObj.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + d;
+    }
+
+    var dm = {};
+    a.forEach(function(h) {
+        var raw = h.datetime || h.date || '';
+        if (raw) {
+            // Take the first 10 characters (YYYY-MM-DD) directly from the saved string
+            var k = raw.slice(0, 10); 
+            dm[k] = (dm[k] || 0) + 1;
+        }
+    });
+
+    var today = new Date(), streak = 0, chk = new Date(today);
+    // STREAK FIX: Check using local date strings
+    for (var i = 0; i < 366; i++) {
+        var k = getLocalK(chk); 
+        if (dm[k]) {
+            streak++;
+            chk.setDate(chk.getDate() - 1);
+        } else break;
+    }
+    if (b) b.textContent = streak + '-day streak';
+
+    var W = 16, sd = new Date(today);
+    sd.setDate(sd.getDate() - 111);
+    sd.setDate(sd.getDate() - sd.getDay());
+    g.style.gridTemplateColumns = 'repeat(' + W + ',12px)';
+    g.style.gridTemplateRows = 'repeat(7,12px)';
+    g.innerHTML = ''; lb.innerHTML = '';
+
+    var lm = -1;
+    for (var w = 0; w < W; w++) {
+        var wd = new Date(sd); wd.setDate(wd.getDate() + w * 7);
+        var m = wd.getMonth();
+        var sp = document.createElement('span');
+        sp.style.cssText = 'width:12px;flex-shrink:0;text-align:center;';
+        sp.textContent = m !== lm ? wd.toLocaleString('default', { month: 'short' }) : '';
+        lb.appendChild(sp); lm = m;
+    }
+
+    for (var w2 = 0; w2 < W; w2++) {
+        for (var dy = 0; dy < 7; dy++) {
+            var dt = new Date(sd);
+            dt.setDate(dt.getDate() + w2 * 7 + dy);
+            if (dt > today) {
+                var bl = document.createElement('div');
+                bl.style.cssText = 'width:12px;height:12px;';
+                g.appendChild(bl); continue;
+            }
+            // USE LOCAL DATE FOR GRID COLORING
+            var dk = getLocalK(dt);
+            var cnt = dm[dk] || 0, lv = cnt === 0 ? 0 : cnt === 1 ? 1 : cnt <= 3 ? 2 : 3;
+            var cell = document.createElement('div');
+            cell.className = 'hm-cell';
+            if (lv) cell.dataset.l = lv;
+            cell.dataset.tip = cnt ? dt.getDate() + ' ' + dt.toLocaleString('default', { month: 'short' }) + ': ' + cnt + ' attempt' + (cnt > 1 ? 's' : '') : dt.getDate() + ' ' + dt.toLocaleString('default', { month: 'short' });
+            g.appendChild(cell);
+        }
+    }
+}
   function renderAll(){var a=getA();trend(a);mastery(a);heatmap(a);}
   function loadCJS(cb){if(window.Chart){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';s.onload=cb;s.onerror=function(){cb();};document.head.appendChild(s);}
   window.refreshProgressCharts=function(){loadCJS(renderAll);};
