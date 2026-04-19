@@ -3953,6 +3953,30 @@ function recordAttemptFull(paperNum, type, sectionResults, total, max, answersSn
   renderDashboard();
 }
 
+function deleteAttempt(entryId) {
+  if (!confirm("Are you sure you want to delete this attempt? This will permanently remove it from your Dashboard stats.")) return;
+  
+  const d = safeLoad();
+  // Filter out the specific attempt by ID
+  d.history = d.history.filter(h => h.id !== entryId);
+  
+  // Recalculate Skill Mastery based on remaining history
+  d.skills = {}; // Reset skills and rebuild from remaining history
+  d.history.forEach(h => {
+    if (h.sections) {
+      Object.entries(h.sections).forEach(([sec, v]) => {
+        if (!d.skills[sec]) d.skills[sec] = [0, 0];
+        d.skills[sec][0] += v.max;
+        d.skills[sec][1] += v.correct;
+      });
+    }
+  });
+
+  saveData(d);
+  renderDashboard(); // This automatically refreshes all charts and stats
+  alert("Attempt deleted. Dashboard updated.");
+}
+
 // ── Render the attempts log on dashboard ──
 function renderAttemptsLog() {
   const d = safeLoad();
@@ -3996,27 +4020,32 @@ function renderAttemptsLog() {
       });
     }
 
-    html += `<div class="attempt-entry" id="ae_${h.id||idx}">
-      <div class="attempt-header">
-        <span class="attempt-paper-badge">${h.type} P${h.paperNum || 'AI'}</span>
-        <span class="attempt-score ${scoreClass}">${h.total}/${autoMax} auto &nbsp;(${pct}%)</span>
-        <span class="attempt-meta">
-          <span>📅 ${h.dateDisplay || h.date || '—'}</span>
-          <span>⏱ ${mins}</span>
-          ${h.uploads && h.uploads.length ? `<span>📎 ${h.uploads.length} file(s)</span>` : ''}
-        </span>
-      </div>
-      ${secBars ? `<div style="padding:.4rem .8rem;background:white">${secBars}</div>` : ''}
-      ${thumbs ? `<div class="att-upload-area open"><div class="uploaded-imgs">${thumbs}</div></div>` : ''}
-      <div class="attempt-actions">
-        <button class="att-btn parent" onclick="reviewAttempt('${h.id||idx}')">🔐 Parent Review</button>
-        <button class="att-btn upload-btn" onclick="toggleUploadArea('ae_${h.id||idx}','${h.id||idx}')">📎 Add Photo/PDF</button>
-        <input type="file" class="hidden-upload" id="upl_${h.id||idx}"
-          accept="image/*,application/pdf" multiple
-          data-entryid="${h.id||idx}"
-          onchange="handleUploadFiles(this)">
-      </div>
-    </div>`;
+    // Inside your d.history.forEach loop:
+html += `<div class="attempt-entry" id="ae_${h.id||idx}">
+  <div class="attempt-header">
+    <span class="attempt-paper-badge">${h.type} P${h.paperNum || 'AI'}</span>
+    <span class="attempt-score ${scoreClass}">${h.total}/${autoMax} auto &nbsp;(${pct}%)</span>
+    <span class="attempt-meta">
+      <span>📅 ${h.dateDisplay || h.date || '—'}</span>
+      <span>⏱ ${mins}</span>
+      ${h.uploads && h.uploads.length ? `<span>📎 ${h.uploads.length} file(s)</span>` : ''}
+    </span>
+  </div>
+  ${secBars ? `<div style="padding:.4rem .8rem;background:white">${secBars}</div>` : ''}
+  ${thumbs ? `<div class="att-upload-area open"><div class="uploaded-imgs">${thumbs}</div></div>` : ''}
+  
+  <div class="attempt-actions">
+    <button class="att-btn parent" onclick="reviewAttempt('${h.id||idx}')">🔐 Parent Review</button>
+    <button class="att-btn upload-btn" onclick="toggleUploadArea('ae_${h.id||idx}','${h.id||idx}')">📎 Add Photo/PDF</button>
+    
+    <button class="att-btn" style="border-color:var(--red); color:var(--red)" onclick="deleteAttempt('${h.id||idx}')">🗑️ Delete</button>
+    
+    <input type="file" class="hidden-upload" id="upl_${h.id||idx}"
+      accept="image/*,application/pdf" multiple
+      data-entryid="${h.id||idx}"
+      onchange="handleUploadFiles(this)">
+  </div>
+</div>`;
   });
 
   el.innerHTML = html;
