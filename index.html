@@ -3039,16 +3039,31 @@ async function generateAI() {
     }
 
     const data = await response.json();
-    let text = "";
-    
-    // Extract text based on provider response structure
-    if (provider === 'anthropic') text = data.content[0].text;
-    else if (provider === 'gemini') text = data.candidates[0].content.parts[0].text;
-    else text = data.choices[0].message.content; // Groq
+    // ... inside your try block, after the 'data' is fetched ...
 
-    const match = text.match(/\{[\s\S]*\}/);
-    currentAITest = JSON.parse(match[0]);
-    renderAIPaper(currentAITest);
+let text = "";
+try {
+  if (provider === 'anthropic' && data.content && data.content[0]) {
+    text = data.content[0].text;
+  } else if (provider === 'gemini' && data.candidates && data.candidates[0]) {
+    text = data.candidates[0].content.parts[0].text;
+  } else if (data.choices && data.choices[0] && data.choices[0].message) {
+    // This handles Groq and OpenAI-style providers
+    text = data.choices[0].message.content;
+  } else {
+    // If the API returned an error message instead of a result
+    throw new Error(data.error ? data.error.message : "Invalid API response structure");
+  }
+} catch (extractErr) {
+  console.error("Data extraction failed:", data); // Helpful for debugging in F12
+  throw new Error("Could not read the AI response. Please check your API key or limits.");
+}
+
+// Now the JSON matching logic continues safely...
+const match = text.match(/\{[\s\S]*\}/);
+if (!match) throw new Error("The AI didn't return a valid paper format. Try again!");
+currentAITest = JSON.parse(match[0]);
+renderAIPaper(currentAITest);
     status.textContent = '✅ Paper generated using ' + provider;
   } catch (e) {
     status.textContent = '❌ Error: ' + e.message;
