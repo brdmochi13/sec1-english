@@ -2522,9 +2522,8 @@ function sab(id) { return `<button class="sab" onclick="toggleReveal('${id}')">S
 function rTenses(qs, pn) {
   let b = '';
   qs.forEach((q, i) => {
-    // We use getDynamicExplanation(q) to build the three-example box
     const guidance = getDynamicExplanation(q); 
-    const revId = `T${pn}_${i}_rev`; // Creating a consistent ID variable
+    const revId = `T${pn}_${i}_rev`; 
     
     b += `<div class="qrow">
             <div class="qn">${i + 1}.</div>
