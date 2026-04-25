@@ -2517,6 +2517,30 @@ function mkCard(letter, title, marks, instr, body, secPre, pn2) {
 function mkReveal(ans, reason) {
   return `<div class="reveal info"><div class="rlabel">✓ Answer & Explanation</div><div class="rans">${ans}</div><div class="rreason">${reason}</div></div>`;
 }
+
+// ── getDynamicExplanation: bridge between rTenses/rArticles call
+//    and the renamed generateDynamicExamples engine ──
+function getDynamicExplanation(q) {
+  if (!q) return '';
+  const answer = q.a || q.ans || '';
+  const rule   = q.r || q.reason || '';
+  // Determine topic
+  let topic = 'Tense';
+  if      (q.hasOwnProperty('opts'))  topic = 'SVA';
+  else if (q.hasOwnProperty('q1'))    topic = 'Conjunction';
+  else if (q.hasOwnProperty('s'))     topic = 'Editing';
+  else if (['a','an','the','-','–'].includes(answer.toLowerCase())) topic = 'Article';
+  else if (q.hasOwnProperty('v'))     topic = 'Tense';
+  else                                topic = 'Preposition';
+  let html = rule
+    ? '<div class="exp-case"><b>Rule:</b> ' + rule + '</div>'
+    : '';
+  html += (typeof generateDynamicExamples === 'function')
+    ? generateDynamicExamples(answer, topic)
+    : '';
+  return html;
+}
+
 function sab(id) { return `<button class="sab" onclick="toggleReveal('${id}')">Show Answer</button>`; }
 
 function rTenses(qs, pn) {
