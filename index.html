@@ -135,6 +135,19 @@ body{font-family:'Source Sans 3',sans-serif;background:var(--paper);color:var(--
 .empty-state{text-align:center;padding:2rem 1rem;color:var(--muted)}
 .empty-state .es-icon{font-size:2.5rem;margin-bottom:.5rem}
 .empty-state p{font-size:.85rem}
+/* New Explanation Box Styling */
+.explanation-box {
+    background: #f0f7ff;
+    border-left: 4px solid #007bff;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    line-height: 1.5;
+}
+.exp-case { margin-bottom: 8px; border-bottom: 1px dashed #cfe2ff; padding-bottom: 4px; }
+.exp-case:last-child { border-bottom: none; }
+.exp-case b { color: #0056b3; }
 
 /* ═══ STUDY NOTES ═══ */
 .accordion{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.9rem;overflow:hidden}
@@ -1488,13 +1501,30 @@ button, input, select, textarea, a, label,
 </div>
 
 <script>
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════ 
 //  STORAGE HELPERS
 // ══════════════════════════════════════════
 const STORE_KEY = 'sec1_mastery_v2';
 function loadData() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || initData(); }
   catch { return initData(); }
+}
+function startPaperTimer() {
+    clearInterval(paperTimer); 
+    secondsActive = 0; 
+    paperTimer = setInterval(() => {
+        secondsActive++;
+        // FIX: Match the ID used in your HTML (Line 367)
+        const display = document.getElementById('paperTimer');
+        if(display) {
+            display.textContent = new Date(secondsActive * 1000).toISOString().substr(11, 8);
+        }
+    }, 1000);
+}
+
+function formatTime(s) {
+    if (!s) return "00:00:00";
+    return new Date(s * 1000).toISOString().substr(11, 8);
 }
 function saveData(d) { localStorage.setItem(STORE_KEY, JSON.stringify(d)); }
 function initData() {
@@ -2432,6 +2462,8 @@ let currentPaper = 1;
 let currentMode = "WA1";
 let ansKeyMode = false;
 let completedPapers = new Set();
+let paperTimer; // This holds the "heartbeat" of the clock
+let secondsActive = 0; // This counts the actual seconds
 
 function initWA1() {
   wa1Rendered = true;
@@ -2488,20 +2520,43 @@ function mkReveal(ans, reason) {
 function sab(id) { return `<button class="sab" onclick="toggleReveal('${id}')">Show Answer</button>`; }
 
 function rTenses(qs, pn) {
-  let b='';
-  qs.forEach((q,i)=>{
-    b+=`<div class="qrow"><div class="qn">${i+1}.</div><div class="qc">${q.q.replace('_____',`<input class="ainp" id="T${pn}_${i}" data-ans="${q.a}" placeholder="___________" onchange="chkInp(this)">`)} <span class="vhint">(${q.v})</span>${sab(`T${pn}_${i}_rev`)}${mkReveal(q.a,q.r)}</div></div>`;
+  let b = '';
+  qs.forEach((q, i) => {
+    // We use getDynamicExplanation(q) to build the three-example box
+    const guidance = getDynamicExplanation(q); 
+    const revId = `T${pn}_${i}_rev`; // Creating a consistent ID variable
+    
+    b += `<div class="qrow">
+            <div class="qn">${i + 1}.</div>
+            <div class="qc">
+                ${q.q.replace('_____', `<input class="ainp" id="T${pn}_${i}" data-ans="${q.a}" placeholder="___________" onchange="chkInp(this)">`)} 
+                <span class="vhint">(${q.v})</span>
+                ${sab(revId)}
+                <div id="${revId}" class="reveal">${guidance}</div>
+            </div>
+          </div>`;
   });
-  b+=`<button class="csb" id="csb_T_${pn}" onclick="chkSec('T',${pn},${qs.length})">✓ Check Section A</button>`;
-  return mkCard('A','Tenses',5,'Write the correct tense of the verb given in brackets.',b,'T',pn);
+  b += `<button class="csb" id="csb_T_${pn}" onclick="chkSec('T',${pn},${qs.length})">✓ Check Section A</button>`;
+  return mkCard('A', 'Tenses', 5, 'Write the correct tense of the verb given in brackets.', b, 'T', pn);
 }
+
 function rArticles(qs, pn) {
-  let b='';
-  qs.forEach((q,i)=>{
-    b+=`<div class="qrow"><div class="qn">${i+1}.</div><div class="qc">${q.q.replace('_____',`<input class="ainp sm" id="AR${pn}_${i}" data-ans="${q.a}" placeholder="____" onchange="chkInp(this)">`)}${sab(`AR${pn}_${i}_rev`)}${mkReveal(q.a,q.r)}</div></div>`;
+  let b = '';
+  qs.forEach((q, i) => {
+    const guidance = getDynamicExplanation(q);
+    const revId = `AR${pn}_${i}_rev`;
+    
+    b += `<div class="qrow">
+            <div class="qn">${i + 1}.</div>
+            <div class="qc">
+                ${q.q.replace('_____', `<input class="ainp sm" id="AR${pn}_${i}" data-ans="${q.a}" placeholder="____" onchange="chkInp(this)">`)}
+                ${sab(revId)}
+                <div id="${revId}" class="reveal">${guidance}</div>
+            </div>
+          </div>`;
   });
-  b+=`<button class="csb" id="csb_AR_${pn}" onclick="chkSec('AR',${pn},${qs.length})">✓ Check Section B</button>`;
-  return mkCard('B',"Articles — 'a' / 'an' / 'the' / '–'",5,"Write the correct article in each blank.",b,'AR',pn);
+  b += `<button class="csb" id="csb_AR_${pn}" onclick="chkSec('AR',${pn},${qs.length})">✓ Check Section B</button>`;
+  return mkCard('B', "Articles — 'a' / 'an' / 'the' / '–'", 5, "Write the correct article in each blank.", b, 'AR', pn);
 }
 function rPreps(qs, pn) {
   let b='';
@@ -2616,7 +2671,11 @@ function chkSec(pre, pn, len) {
   updateLiveScore();
 }
 
-function checkAllWA1() { submitPaper(); }
+function checkAllWA1() {
+  if(confirm("This will lock all answers and score the paper. Proceed?")) {
+    submitPaper();
+  }
+}
 
 // Called after every question attempt — shows "Show Answer" btn, adds chip, updates score
 function markAttempted(el, ok) {
@@ -2707,34 +2766,75 @@ function updateLiveScore() {
 }
 
 function submitPaper() {
+  clearInterval(paperTimer); // Stop clock
+  
   const pn = currentPaper;
   const p = WA1[pn];
   
-  // 1. We include ALL sections, including Section D (SV)
   const allSecs = [
     {pre:'T',  len:p.tenses.length},
     {pre:'AR', len:p.articles.length},
     {pre:'PR', len:p.preps.length},
-    {pre:'SV', len:p.sva.length},      // Section D added
+    {pre:'SV', len:p.sva.length},
     {pre:'CJ', len:p.conj.length},
     {pre:'EC', len:p.editing.length}
   ];
 
-  // 2. Mark all unanswered questions as "checked" so the math doesn't fail
+  let totalQ = 0;
+  let totalCorrect = 0;
+  const snap = {}; // Snapshot for Parent Review
+
   allSecs.forEach(s => {
     for(let i = 0; i < s.len; i++){
+      totalQ++;
       const el = document.getElementById(`${s.pre}${pn}_${i}`);
-      // If student didn't answer, we lock it and mark it wrong (bad) 
-      // but keep the code running.
-      if(el && !el.disabled){
-        el.classList.add('bad');
-        el.disabled = true;
+      if(el) {
+        snap[`${s.pre}${i}`] = el.value || (el.classList.contains('ok') ? '✓' : '');
+        if(el.classList.contains('ok')) totalCorrect++;
+        
+        // Lock unanswered/incorrect questions
+        if(!el.disabled) {
+          if(!el.classList.contains('ok')) el.classList.add('bad');
+          el.disabled = true;
+        }
       }
     }
   });
 
-  // 3. Finalize the score and push to Dashboard
+  const h = {
+    id: Date.now() + '_' + pn,
+    paperNum: pn,
+    type: 'WA1',
+    total: totalCorrect,
+    autoMax: totalQ,
+    timeSpentSec: secondsActive,
+    timeDisplay: formatTime(secondsActive),
+    date: new Date().toISOString(),
+    answers: snap,
+    sections: {
+       "Tenses": {correct: countSec('T',pn,p.tenses.length), max: 5},
+       "Articles": {correct: countSec('AR',pn,p.articles.length), max: 5},
+       "Prepositions": {correct: countSec('PR',pn,p.preps.length), max: 5},
+       "SVA": {correct: countSec('SV',pn,p.sva.length), max: 5},
+       "Conjunctions": {correct: countSec('CJ',pn,p.conj.length), max: 5},
+       "Editing": {correct: countSec('EC',pn,p.editing.length), max: 3}
+    }
+  };
+
+  const d = safeLoad();
+  d.history.unshift(h);
+  saveData(d);
   showWA1Summary();
+}
+
+// Helper needed for the above
+function countSec(pre, pn, len) {
+  let c = 0;
+  for(let i=0; i<len; i++){
+    const el = document.getElementById(`${pre}${pn}_${i}`);
+    if(el && el.classList.contains('ok')) c++;
+  }
+  return c;
 }
 
 function showWA1Summary() {
@@ -2829,6 +2929,21 @@ let aiAnswers={}, aiScore=0, aiAnswered=0, aiTotal=0;
 let c1Picks={};
 let currentAITest=null;
 
+function generateDynamicExamples(answer, topic) {
+  const isPlural = answer.toLowerCase().endsWith('s') || answer.toLowerCase().includes('are');
+  const subject = isPlural ? "They" : "He";
+  const verb = isPlural ? "have" : "has";
+
+  if (topic.includes("Tense")) {
+    return `
+      <div class="exp-case"><b>Positive:</b> ${subject} ${verb} already ${answer.replace("n't", "")}.</div>
+      <div class="exp-case"><b>Negative:</b> ${subject} ${answer} yet.</div>
+      <div class="exp-case"><b>Question:</b> ${verb.charAt(0).toUpperCase() + verb.slice(1)} ${subject.toLowerCase()} ${answer.replace("n't", "")} yet?</div>
+    `;
+  }
+  // Add more logic for Articles or Prepositions here later
+  return `<div class="exp-case">Try practicing this rule with different subjects (I, You, We, They).</div>`;
+}
 function initAI() {
   const d=loadData();
   if(d.apiKey){
@@ -4686,54 +4801,7 @@ window.addEventListener('input', function(e) {
 }, true);
 
 
-// AUTO-SAVE ENGINE
-(function(){
-  var _t=null,_last=null;
-  function ss(cls,txt){var b=document.getElementById('autosaveBar'),m=document.getElementById('autosaveMsg');if(!b||!m)return;b.className='autosave-bar '+cls;m.textContent=txt;}
-  function collect(){var s={};document.querySelectorAll('.ainp,.csel,.txtarea,textarea').forEach(function(el){if(el.id&&el.id!=='keyPwdInp'&&el.id!=='newPwd1'&&el.id!=='newPwd2'&&el.id!=='apikeyInp')s[el.id]=el.value;});return s;}
-  function save(){
-    try{
-      var raw=localStorage.getItem(window.STORE_KEY||'sec1_mastery_v2'),d;
-      try{d=JSON.parse(raw)||{};}catch(e){d={};}
-      if(!d.answers)d.answers={};
-      var k=(window.currentMode||'WA1')+'_'+(window.currentPaper||1);
-      if(!d.answers[k])d.answers[k]={};
-      d.answers[k].answers=collect();d.answers[k].updated=new Date().toISOString();
-      var j=JSON.stringify(d);if(j===_last){ss('saved','All changes saved ✓');return;}
-      localStorage.setItem(window.STORE_KEY||'sec1_mastery_v2',j);_last=j;
-      var n=new Date(),t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0')+':'+n.getSeconds().toString().padStart(2,'0');
-      ss('saved','Auto-saved at '+t+' ✓');
-    }catch(e){ss('error','Storage full');}
-  }
-  function sch(){ss('saving','Saving...');clearTimeout(_t);_t=setTimeout(save,1000);}
-  document.addEventListener('input',function(e){var id=e.target&&e.target.id;if(id&&id!=='keyPwdInp'&&id!=='newPwd1'&&id!=='newPwd2')sch();},true);
-  document.addEventListener('change',function(e){var id=e.target&&e.target.id;if(id&&id!=='keyPwdInp'&&id!=='newPwd1'&&id!=='newPwd2')sch();},true);
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')save();});
-  window.addEventListener('beforeunload',save);window.addEventListener('pagehide',save);
-  var _oLW=window.loadWA1;
-  window.loadWA1=function(n,b){save();if(_oLW)_oLW(n,b);};
-  var _oRW=window.renderWA1Paper;
-  window.renderWA1Paper=function(n){
-    if(_oRW)_oRW(n);
-    setTimeout(function(){
-      try{
-        var stk=window.STORE_KEY||'sec1_mastery_v2';
-        var d=JSON.parse(localStorage.getItem(stk)||'{}');
-        var sv=d.answers&&d.answers['WA1_'+n]&&d.answers['WA1_'+n].answers;
-        if(!sv)return;
-        var r=0;
-        Object.keys(sv).forEach(function(id){
-          if(!sv[id])return;var el=document.getElementById(id);if(!el||el.disabled)return;
-          if(el.tagName==='SELECT'){for(var i=0;i<(el.options||[]).length;i++){if(el.options[i].value===sv[id]){el.value=sv[id];r++;break;}}}
-          else{el.value=sv[id];r++;}
-        });
-        if(r>0){ss('saved','Restored '+r+' answers ✓');setTimeout(function(){try{updateLiveScore();}catch(e){}try{updateSectionReadiness();}catch(e){}},80);setTimeout(function(){ss('saved','All changes saved ✓');},3000);}
-      }catch(e){}
-    },150);
-  };
-  setTimeout(function(){ss('saved','Auto-save active');},800);
-  setTimeout(function(){ss('saved','All changes saved ✓');},3500);
-})();
+
 
 // PROGRESS CHARTS
 (function(){
@@ -4860,6 +4928,23 @@ window.addEventListener('input', function(e) {
     }
 }
 
+function getAIBrief() {
+  const d = loadData();
+  const weak = getWeakAreas(d);
+  if (!weak.length) return "No data yet. Complete a paper first.";
+
+  let brief = `### MOKSHITH'S TUTORING BRIEF\n`;
+  brief += `Mokshith has completed ${d.history.length} papers.\n\n`;
+  brief += `**STRENGTHS:** ${SKILL_NAMES.filter(s => (d.skills[s]?.[1]/d.skills[s]?.[0]) > 0.8).join(', ') || 'N/A'}\n`;
+  brief += `**WEAK AREAS:**\n`;
+  weak.forEach(w => {
+    brief += `- ${w.name}: Score is ${w.pct}%\n`;
+  });
+  
+  brief += `\n**TASK:** Generate a 15-mark practice paper. Focus heavily on ${weak[0].name}. Use vocabulary suitable for a 13-year-old student. Provide a dynamic explanation for each answer.`;
+  
+  return brief;
+}
 function addRemoteLink() {
   const d = safeLoad();
   const url = prompt("Paste the Google Drive 'Share' link here:");
