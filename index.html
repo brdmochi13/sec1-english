@@ -1375,18 +1375,64 @@ button, input, select, textarea, a, label,
 <!-- ═══════════════════════════════ AI PRACTICE ═══════════════════════════════ -->
 <div id="aiTab" class="tab-content">
   <div class="apikey-box" id="apikeyBox">
-  <h4>🔑 Global API Configuration</h4>
-  <p>Select your provider and enter your key. Gemini and Groq often have free tiers.</p>
-  <div class="apikey-row">
-    <select id="apiProvider" class="apikey-inp" style="flex:0; min-width:120px;">
-      <option value="anthropic">Anthropic (Claude)</option>
-      <option value="groq">Groq (Llama 3)</option>
-      <option value="gemini">Google Gemini</option>
+  <h4>🔑 AI Provider Configuration</h4>
+  <p>Use a cloud provider (paid) or your local Ollama install (free, private).</p>
+  <div class="apikey-row" style="flex-wrap:wrap;gap:.5rem">
+    <select id="apiProvider" class="apikey-inp" style="flex:0;min-width:160px;font-size:16px" onchange="onProviderChange()">
+      <option value="ollama">🏠 Ollama (Local — Free)</option>
+      <option value="anthropic">☁️ Anthropic (Claude)</option>
+      <option value="groq">☁️ Groq (Llama 3 — Free tier)</option>
+      <option value="gemini">☁️ Google Gemini</option>
     </select>
-    <input type="password" class="apikey-inp" id="apikeyInp" placeholder="Enter API Key...">
+    <input type="text" class="apikey-inp" id="ollamaHost" placeholder="http://localhost:11434"
+      style="min-width:200px;display:none" value="http://localhost:11434">
+    <select id="ollamaModel" class="apikey-inp" style="min-width:160px;font-size:16px;display:none">
+      <option value="llama3.2">llama3.2 (recommended)</option>
+      <option value="llama3.1">llama3.1</option>
+      <option value="llama3">llama3</option>
+      <option value="mistral">mistral</option>
+      <option value="gemma2">gemma2</option>
+      <option value="gemma3">gemma3</option>
+      <option value="phi3">phi3</option>
+      <option value="phi4">phi4</option>
+      <option value="qwen2.5">qwen2.5</option>
+      <option value="deepseek-r1">deepseek-r1</option>
+      <option value="custom">custom (type below)</option>
+    </select>
+    <input type="text" class="apikey-inp" id="ollamaCustomModel" placeholder="e.g. llama3.2:3b"
+      style="min-width:140px;display:none">
+    <input type="password" class="apikey-inp" id="apikeyInp" placeholder="Enter API Key..."
+      style="display:none">
     <button class="tbtn tbtn-primary" onclick="saveKey()">Save Config</button>
+    <button class="tbtn tbtn-outline" id="ollamaTestBtn" onclick="testOllamaConnection()"
+      style="display:none;color:var(--ink)">🔌 Test Connection</button>
+  </div>
+  <div style="margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap">
+    <button class="tbtn tbtn-outline" onclick="testAPIKey()" 
+      style="font-size:.8rem;color:var(--ink);background:white;border-color:var(--border);min-height:36px">
+      🔌 Test API Key
+    </button>
   </div>
   <div class="apikey-status" id="apikeyStatus"></div>
+  <!-- Ollama info panel -->
+  <div id="ollamaInfoPanel" style="margin-top:.6rem;background:#f0faf4;border:1px solid #86efac;border-radius:7px;padding:.6rem .85rem;font-size:.8rem">
+    <strong style="color:var(--green)">🏠 Ollama — Local LLM (Zero Cost, 100% Private)</strong><br>
+    <span style="color:var(--muted)">Papers generated on your M4 Pro, never sent to the cloud.</span>
+    <div style="margin-top:.4rem;display:flex;flex-wrap:wrap;gap:.3rem">
+      <span style="background:var(--greenl);border:1px solid #86efac;border-radius:4px;padding:1px 6px;font-size:.73rem">✓ Free forever</span>
+      <span style="background:var(--greenl);border:1px solid #86efac;border-radius:4px;padding:1px 6px;font-size:.73rem">✓ No API key needed</span>
+      <span style="background:var(--greenl);border:1px solid #86efac;border-radius:4px;padding:1px 6px;font-size:.73rem">✓ Works offline</span>
+      <span style="background:var(--amberl);border:1px solid #fbbf24;border-radius:4px;padding:1px 6px;font-size:.73rem">⚠ Must run from the same Mac (CORS)</span>
+    </div>
+    <div style="margin-top:.45rem;font-size:.77rem;color:var(--muted)">
+      Need to install? Open Terminal on your Mac and run:<br>
+      <code style="background:#e8e2d8;padding:2px 6px;border-radius:3px;font-size:.75rem">brew install ollama</code> then
+      <code style="background:#e8e2d8;padding:2px 6px;border-radius:3px;font-size:.75rem">ollama pull llama3.2</code>
+    </div>
+  </div>
+  <div id="cloudKeyInfo" style="display:none;margin-top:.6rem;font-size:.8rem;color:var(--muted)">
+    Enter your API key above. It is stored only in this browser.
+  </div>
 </div>
 
   <div class="weak-focus-bar" id="weakFocusBar" style="display:none">
@@ -1501,6 +1547,16 @@ button, input, select, textarea, a, label,
 </div>
 
 <script>
+// ── esc: HTML-escape utility — must be first, used everywhere ──
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ══════════════════════════════════════════ 
 //  STORAGE HELPERS
 // ══════════════════════════════════════════
@@ -1628,7 +1684,7 @@ async function importProgressFile(file) {
   updateTimerUI();
 }
 
-const SKILL_NAMES = ['Tenses','Articles','Prepositions','SVA','Conjunctions','Editing','ClozeI','ClozeII','DirectSpeech','Punctuation'];
+var SKILL_NAMES = ['Tenses','Articles','Prepositions','SVA','Conjunctions','Editing','ClozeI','ClozeII','DirectSpeech','Punctuation'];
 
 function recordAttempt(paperNum, type, sectionResults, total, max) {
   const d = loadData();
@@ -1829,8 +1885,8 @@ function getWeakAreas(d) {
 // ══════════════════════════════════════════
 //  WA1 PAPER DATA (condensed — 10 papers)
 // ══════════════════════════════════════════
-const CONJOPTS = ['and','but','or','so','because','although','if','when','while','unless','so that'];
-const WA1 = {
+var CONJOPTS = ['and','but','or','so','because','although','if','when','while','unless','so that'];
+var WA1 = {
 1:{tenses:[
   {q:'She _____ to school every day.',v:'walk',a:'walks',r:'Present simple for routine. She = singular → walks.'},
   {q:'They _____ football when it rained.',v:'play',a:'were playing',r:'Past continuous — in progress when rain happened.'},
@@ -2206,7 +2262,7 @@ editing:[
 // ══════════════════════════════════════════
 //  KNOWLEDGE BASE (for AI generation)
 // ══════════════════════════════════════════
-const KB = `SINGAPORE SEC 1 ENGLISH — COMPLETE KNOWLEDGE BASE
+var KB = `SINGAPORE SEC 1 ENGLISH — COMPLETE KNOWLEDGE BASE
 
 WA1 GRAMMAR:
 TENSES: Present simple (routine/fact), Present continuous (now), Present perfect (since/for/yet/already), Past simple (specific past), Past continuous (was+ing when), Past perfect (had+pp before past), Passive (was/were+pp), Future (will/going to)
@@ -2982,642 +3038,824 @@ function initAI() {
   }
 }
 
+
+// ══════════════════════════════════════════════════════
+//  OLLAMA + PROVIDER MANAGEMENT
+// ══════════════════════════════════════════════════════
+
+// ── Show/hide fields based on selected provider ──
+function onProviderChange() {
+  const provider = document.getElementById('apiProvider').value;
+  const isOllama = provider === 'ollama';
+
+  // Ollama-specific fields
+  const ollamaHost  = document.getElementById('ollamaHost');
+  const ollamaModel = document.getElementById('ollamaModel');
+  const ollamaTest  = document.getElementById('ollamaTestBtn');
+  const ollamaInfo  = document.getElementById('ollamaInfoPanel');
+  const cloudInfo   = document.getElementById('cloudKeyInfo');
+  const apiKeyInp   = document.getElementById('apikeyInp');
+  const customModel = document.getElementById('ollamaCustomModel');
+
+  if (ollamaHost)  ollamaHost.style.display  = isOllama ? 'block' : 'none';
+  if (ollamaModel) ollamaModel.style.display  = isOllama ? 'block' : 'none';
+  if (ollamaTest)  ollamaTest.style.display   = isOllama ? 'inline-flex' : 'none';
+  if (ollamaInfo)  ollamaInfo.style.display   = isOllama ? 'block' : 'none';
+  if (cloudInfo)   cloudInfo.style.display    = isOllama ? 'none' : 'block';
+  if (apiKeyInp)   apiKeyInp.style.display    = isOllama ? 'none' : 'block';
+
+  // Show custom model input only if "custom" selected
+  if (ollamaModel && customModel) {
+    customModel.style.display = (isOllama && ollamaModel.value === 'custom') ? 'block' : 'none';
+    ollamaModel.onchange = function() {
+      customModel.style.display = this.value === 'custom' ? 'block' : 'none';
+    };
+  }
+}
+
+// ── Test Ollama connection ──
+async function testOllamaConnection() {
+  const btn    = document.getElementById('ollamaTestBtn');
+  const status = document.getElementById('apikeyStatus');
+  const host   = (document.getElementById('ollamaHost').value || 'http://localhost:11434').replace(/\/$/, '');
+
+  btn.textContent = '⏳ Testing...';
+  btn.disabled = true;
+  status.textContent = '';
+
+  try {
+    // Hit Ollama's /api/tags endpoint to list installed models
+    const resp = await fetch(host + '/api/tags', { method: 'GET' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const models = (data.models || []).map(m => m.name);
+
+    if (models.length === 0) {
+      status.style.color = 'var(--amber)';
+      status.textContent = '⚠️ Ollama running but no models installed. Run: ollama pull llama3.2';
+    } else {
+      status.style.color = 'var(--green)';
+      status.textContent = '✅ Connected! Models found: ' + models.slice(0,5).join(', ') + (models.length > 5 ? '...' : '');
+      // Populate the model dropdown with actual installed models
+      populateOllamaModels(models);
+    }
+  } catch (e) {
+    status.style.color = 'var(--red)';
+    if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+      status.textContent = '❌ Cannot reach Ollama. Make sure it\'s running: open Terminal → run "ollama serve"';
+    } else {
+      status.textContent = '❌ Error: ' + e.message;
+    }
+  }
+  btn.textContent = '🔌 Test Connection';
+  btn.disabled = false;
+}
+
+// ── Populate model dropdown with installed models ──
+function populateOllamaModels(models) {
+  const sel = document.getElementById('ollamaModel');
+  if (!sel) return;
+  // Keep existing options but add installed ones at top
+  const existing = Array.from(sel.options).map(o => o.value);
+  models.forEach(function(m) {
+    if (!existing.includes(m)) {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m + ' (installed ✓)';
+      sel.insertBefore(opt, sel.firstChild);
+    } else {
+      // Mark as installed
+      Array.from(sel.options).forEach(function(o) {
+        if (o.value === m || m.startsWith(o.value)) {
+          o.textContent = o.value + ' (installed ✓)';
+        }
+      });
+    }
+  });
+  // Select first installed model
+  sel.selectedIndex = 0;
+}
+
+// ── Updated saveKey — handles Ollama (no key needed) ──
 function saveKey() {
   const provider = document.getElementById('apiProvider').value;
-  const val = document.getElementById('apikeyInp').value.trim();
-  const status = document.getElementById('apikeyStatus');
-
-  // New flexible validation logic
-  if (provider === 'anthropic' && !val.startsWith('sk-ant-')) {
-    status.textContent = '❌ Anthropic keys should start with sk-ant-...';
-    return;
-  } 
-  if (provider === 'groq' && !val.startsWith('gsk_')) {
-    status.textContent = '❌ Groq keys usually start with gsk_...';
-    return;
-  }
-  if (val.length < 20) {
-    status.textContent = '❌ Key looks too short. Please check again.';
-    return;
-  }
-
+  const status   = document.getElementById('apikeyStatus');
   const d = loadData();
-  d.apiKey = val;
-  d.apiProvider = provider; // Store the provider choice too!
-  saveData(d);
 
+  if (provider === 'ollama') {
+    const host = (document.getElementById('ollamaHost').value || 'http://localhost:11434').trim().replace(/\/$/, '');
+    const modelSel = document.getElementById('ollamaModel').value;
+    const customM  = document.getElementById('ollamaCustomModel').value.trim();
+    const model = modelSel === 'custom' ? customM : modelSel;
+    if (!model) { status.style.color='var(--red)'; status.textContent='❌ Please select or enter a model name.'; return; }
+
+    d.apiProvider   = 'ollama';
+    d.apiKey        = 'ollama-local'; // placeholder — not used
+    d.ollamaHost    = host;
+    d.ollamaModel   = model;
+    saveData(d);
+    status.style.color = 'var(--green)';
+    status.textContent = '✅ Ollama configured — ' + model + ' @ ' + host + '. Click "Test Connection" to verify.';
+    return;
+  }
+
+  // Cloud providers — validate key
+  const val = document.getElementById('apikeyInp').value.trim();
+  if (provider === 'anthropic' && !val.startsWith('sk-ant-')) {
+    status.style.color='var(--red)'; status.textContent = '❌ Anthropic keys start with sk-ant-...'; return;
+  }
+  if (provider === 'groq' && !val.startsWith('gsk_')) {
+    status.style.color='var(--red)'; status.textContent = '❌ Groq keys start with gsk_...'; return;
+  }
+  if (val.length < 10) {
+    status.style.color='var(--red)'; status.textContent = '❌ Key looks too short. Check again.'; return;
+  }
+  d.apiKey = val;
+  d.apiProvider = provider;
+  saveData(d);
   status.style.color = 'var(--green)';
   status.textContent = '✅ Config saved! Ready to generate using ' + provider;
 }
 
-function buildAdaptivePrompt(type,marks,topic,diff,weakAreas){
-  const topicStr=topic==='any'?'a varied topic suitable for Singapore Sec 1 students':topic;
-  const weakStr=weakAreas.length>0
-    ? `IMPORTANT: The student is weakest at: ${weakAreas.map(w=>`${w.name}(${w.pct}%)`).join(', ')}. Generate MORE questions on these weak areas.`
-    : 'Generate a balanced paper covering all areas.';
+// ── Updated generateAI — adds Ollama support ──
+// This replaces the existing generateAI function
 
-  let secSpec='';
-  if(type==='wa1'||type==='mixed'){
-    const m=parseInt(marks);
-    const t=Math.ceil(m/5),a=Math.floor(m/6),p=Math.floor(m/6),sv=Math.floor(m/6),c=m-t-a-p-sv;
-    secSpec=`Generate these sections:
-- Tenses: ${Math.min(t,5)} questions (fill in correct tense)
-- Articles: ${Math.min(a,4)} questions (a/an/the/–)  
-- Prepositions: ${Math.min(p,4)} questions
-- SVA: ${Math.min(sv,4)} questions (choose correct verb form)
-- Conjunctions: ${Math.min(c,4)} questions (choose correct conjunction)
-- Editing: 3 sentences each with one error to correct`;
-  } else if(type==='cloze'){
-    secSpec=`Generate these sections:
-- Editing passage: 5 underlined errors to correct (like Sec 1 exam)
-- Modified Cloze I: short passage with 5 blanks, word bank of 9 words
-- Modified Cloze II: short passage with 5 blanks, one word each (no bank)`;
-  } else {
-    secSpec=`Focus ONLY on: ${weakAreas.map(w=>w.name).join(', ')||'tenses and SVA'}. Generate ${marks} varied questions targeting these weak areas.`;
+
+function showAISummary() {
+  if (!currentAITest) return;
+  var pct = Math.round((aiScore / Math.max(aiTotal, 1)) * 100);
+  var msg = pct >= 90 ? '🏆 Excellent!' : pct >= 75 ? '👍 Good work!' : pct >= 60 ? '📖 Keep reviewing.' : '💪 Practise more!';
+
+  // Build section breakdown
+  var sectionBreakdown = {};
+  if (currentAITest.sections) {
+    currentAITest.sections.forEach(function(sec, si) {
+      var correct = 0, total = sec.questions.length;
+      sec.questions.forEach(function(q) {
+        var fb = document.getElementById('ai-fb-' + si + '-' + q.num);
+        if (fb && fb.classList.contains('ok')) correct++;
+      });
+      sectionBreakdown[sec.title.replace(/Section [A-Z] — /,'')] = {correct: correct, max: total};
+    });
   }
 
-  return `You are creating a Singapore Secondary 1 English practice paper. Use this knowledge base:
-${KB}
+  // Show score
+  var scoreEl = document.getElementById('aiFinalScore');
+  var msgEl   = document.getElementById('aiMsg');
+  var sumEl   = document.getElementById('aiScoreSummary');
+  if (scoreEl) scoreEl.textContent = aiScore + '/' + aiTotal;
+  if (msgEl)   msgEl.textContent   = msg;
+  if (sumEl) {
+    sumEl.classList.add('show');
+    // Add section breakdown inside summary
+    var breakHtml = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin:.6rem 0">';
+    Object.entries(sectionBreakdown).forEach(function(entry) {
+      var sec = entry[0], v = entry[1];
+      var sp = Math.round((v.correct/v.max)*100);
+      var col = sp>=80?'#4ade80':sp>=60?'#fbbf24':'#f87171';
+      breakHtml += '<div style="background:rgba(255,255,255,.1);border-radius:6px;padding:.4rem;text-align:center">'
+        + '<div style="font-size:.8rem;color:' + col + ';font-weight:700">' + v.correct + '/' + v.max + '</div>'
+        + '<div style="font-size:.68rem;opacity:.7">' + sec + '</div></div>';
+    });
+    breakHtml += '</div>';
 
-${weakStr}
-Topic: ${topicStr}. Difficulty: ${diff}.
-${secSpec}
+    // AI-friendly paper summary
+    var brief = generateAIPaperSummary(currentAITest, aiScore, aiTotal, sectionBreakdown);
+    breakHtml += '<div id="aiPaperSummaryBox" style="background:rgba(255,255,255,.08);border-radius:8px;padding:.7rem;margin-top:.5rem;text-align:left">'
+      + '<div style="font-size:.75rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem">📋 Paper Summary (copy to any AI chatbot)</div>'
+      + '<div style="font-size:.76rem;color:rgba(255,255,255,.85);line-height:1.6;white-space:pre-wrap;font-family:monospace" id="aiPaperBriefText">' + esc(brief) + '</div>'
+      + '<button onclick="copyAISummary()" style="margin-top:.5rem;padding:5px 14px;background:var(--gold);color:var(--ink);border:none;border-radius:5px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer">📋 Copy Summary</button>'
+      + '</div>';
 
-RESPOND WITH ONLY VALID JSON — no markdown, no preamble:
+    var existingBreak = sumEl.querySelector('.score-breakdown');
+    if (!existingBreak) {
+      var breakDiv = document.createElement('div');
+      breakDiv.className = 'score-breakdown';
+      breakDiv.innerHTML = breakHtml;
+      sumEl.appendChild(breakDiv);
+    } else {
+      existingBreak.innerHTML = breakHtml;
+    }
+    sumEl.scrollIntoView({behavior: 'smooth'});
+  }
+
+  // Save attempt with section breakdown
+  recordAttemptFull('AI', 'AI', sectionBreakdown, aiScore, aiTotal, {});
+}
+
+function generateAIPaperSummary(test, score, total, breakdown) {
+  var d = loadData ? loadData() : {};
+  var pct = Math.round((score / Math.max(total, 1)) * 100);
+  var date = new Date().toLocaleDateString('en-SG', {day:'2-digit', month:'short', year:'numeric'});
+
+  var lines = [];
+  lines.push('=== MOKSHITH S1 ENGLISH PRACTICE SUMMARY ===');
+  lines.push('Date: ' + date);
+  lines.push('Paper: ' + (test.title || 'AI Practice'));
+  lines.push('Score: ' + score + '/' + total + ' (' + pct + '%)');
+  lines.push('');
+
+  lines.push('SECTION BREAKDOWN:');
+  Object.entries(breakdown).forEach(function(e) {
+    var sec = e[0], v = e[1];
+    var sp = Math.round((v.correct/v.max)*100);
+    var flag = sp >= 80 ? '✓ STRONG' : sp >= 60 ? '~ REVIEW' : '✗ WEAK';
+    lines.push('  ' + sec + ': ' + v.correct + '/' + v.max + ' (' + sp + '%) ' + flag);
+  });
+  lines.push('');
+
+  // Weak areas from overall history
+  var weakAreas = getWeakAreas ? getWeakAreas(d) : [];
+  if (weakAreas.length) {
+    lines.push('OVERALL WEAK AREAS (from all papers):');
+    weakAreas.slice(0,4).forEach(function(w) {
+      lines.push('  ' + w.name + ': ' + w.pct + '%');
+    });
+    lines.push('');
+  }
+
+  lines.push('TASK FOR AI:');
+  lines.push('Generate a 15-mark Singapore S1 English practice paper.');
+  lines.push('Focus on: ' + (weakAreas.slice(0,2).map(function(w){return w.name;}).join(', ') || 'mixed grammar'));
+  lines.push('Format: fill-in-the-blank for tenses, MCQ for SVA/articles/conjunctions, editing sentences.');
+  lines.push('Difficulty: medium. Student age: 13. Singapore curriculum (MOE).');
+  lines.push('Provide answer key with explanations.');
+
+  return lines.join('\n');
+}
+
+function copyAISummary() {
+  var el = document.getElementById('aiPaperBriefText');
+  if (!el) return;
+  var text = el.textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      var btn = el.nextElementSibling;
+      if (btn) { btn.textContent = '✅ Copied!'; setTimeout(function(){btn.textContent='📋 Copy Summary';}, 2000); }
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    var btn = el.nextElementSibling;
+    if (btn) { btn.textContent = '✅ Copied!'; setTimeout(function(){btn.textContent='📋 Copy Summary';}, 2000); }
+  }
+}
+
+function renderAIPaper(test) {
+  window._aiQ = {};
+  aiTotal = test.totalMarks || 0;
+  test.sections.forEach(function(sec, si) {
+    sec.questions.forEach(function(q) { window._aiQ[si + '-' + q.num] = q; });
+  });
+
+  var html = '<div style="background:var(--ink);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:1rem">'
+    + '<div style="font-family:Libre Baskerville,serif;font-size:1rem;font-weight:700;color:var(--gold)">' + esc(test.title) + '</div>'
+    + '<div style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:.2rem">'
+    + test.totalMarks + ' marks'
+    + (test.weakFocus && test.weakFocus.length ? ' &nbsp;·&nbsp; Focus: ' + test.weakFocus.map(esc).join(', ') : '')
+    + '</div></div>';
+
+  test.sections.forEach(function(sec, si) {
+    html += '<div class="card" style="margin-bottom:.9rem">'
+      + '<div class="card-head"><div class="card-title">' + esc(sec.title) + '</div>'
+      + '<div class="card-marks" id="ai_badge_' + si + '">0/' + sec.questions.length + '</div></div>'
+      + '<div class="card-body">';
+
+    sec.questions.forEach(function(q) {
+      var qid = 'aiq_' + si + '_' + q.num;
+      html += '<div class="qrow" id="qrow_' + si + '_' + q.num + '">'
+        + '<div class="qn">' + q.num + '.</div>'
+        + '<div class="qc">';
+
+      if (sec.type === 'tenses') {
+        // Same style as WA1: text input + verb hint
+        var qtext = esc(q.q || '').replace('_____',
+          '<input type="text" class="ainp" id="' + qid + '"'
+          + ' data-si="' + si + '" data-num="' + q.num + '"'
+          + ' placeholder="_______" autocomplete="off" spellcheck="false"'
+          + ' onchange="chkAIInp_safe_r(this)">');
+        html += qtext;
+        if (q.verb) html += ' <span class="vhint">(' + esc(q.verb) + ')</span>';
+
+      } else if (sec.type === 'articles' || sec.type === 'prepositions') {
+        // Text input style (same as WA1 articles/preps)
+        var qtext2 = esc(q.q || '').replace('_____',
+          '<input type="text" class="ainp" id="' + qid + '"'
+          + ' data-si="' + si + '" data-num="' + q.num + '"'
+          + ' placeholder="_____" autocomplete="off" spellcheck="false"'
+          + ' style="max-width:80px;text-align:center"'
+          + ' onchange="chkAIInp_safe_r(this)">');
+        html += qtext2;
+
+      } else if (sec.type === 'sva') {
+        // MCQ buttons (same as rSVA)
+        html += '<div style="margin-bottom:.2rem">' + esc(q.q || '') + '</div>'
+          + '<div class="mc-opts">';
+        (q.options || []).forEach(function(o) {
+          html += '<button class="mcopt" id="' + qid + '_' + o + '"'
+            + ' data-si="' + si + '" data-num="' + q.num + '" data-chosen="' + esc(o) + '"'
+            + ' onclick="chkAIMC_r(this)">' + esc(o) + '</button>';
+        });
+        html += '</div>';
+
+      } else if (sec.type === 'conjunctions') {
+        // Select dropdown (same as rConj)
+        html += esc(q.q1 || '') + ' ';
+        html += '<select class="csel" id="' + qid + '"'
+          + ' data-si="' + si + '" data-num="' + q.num + '"'
+          + ' onchange="chkAISelect_r(this)"><option value="">—select—</option>';
+        (q.options || []).forEach(function(o) {
+          html += '<option value="' + esc(o) + '">' + esc(o) + '</option>';
+        });
+        html += '</select>';
+        if (q.q2) html += ' ' + esc(q.q2);
+
+      } else if (sec.type === 'editing') {
+        // Two inputs: error word + correction (same as rEditing)
+        html += '<div class="edit-sent" style="font-style:italic;margin-bottom:.4rem">' + esc(q.sentence || '') + '</div>'
+          + '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font-size:.85rem">'
+          + '<span style="color:var(--muted)">Error:</span>'
+          + '<input type="text" class="ainp" id="' + qid + '_err"'
+          + ' data-si="' + si + '" data-num="' + q.num + '" data-field="err"'
+          + ' placeholder="wrong word" style="max-width:110px" autocomplete="off"'
+          + ' onchange="chkAIEdit_r(this)">'
+          + '<span style="color:var(--muted)">→ Correction:</span>'
+          + '<input type="text" class="ainp" id="' + qid + '_corr"'
+          + ' data-si="' + si + '" data-num="' + q.num + '" data-field="corr"'
+          + ' placeholder="correct word" style="max-width:110px" autocomplete="off"'
+          + ' onchange="chkAIEdit_r(this)">'
+          + '</div>';
+      }
+
+      // Reveal panel (Show Answer button — same as WA1)
+      html += '<div class="reveal" id="ai_rev_' + si + '_' + q.num + '">'
+        + '<div class="exp-case"><b>Answer:</b> ' + esc(q.answer || q.correction || '') + '</div>'
+        + '<div class="exp-case"><b>Rule:</b> ' + esc(q.explanation || '') + '</div>'
+        + '</div>'
+                + '<button class="sab" data-sid="' + si + '-' + q.num + '" onclick="var p=this.dataset.sid.split(\'-\');toggleReveal(\'ai_rev_\'+p[0]+\'_\'+p[1],this)">💡 Show Answer</button>';
+
+      html += '<div class="ai-fb" id="ai-fb-' + si + '-' + q.num + '"></div>';
+      html += '</div></div>'; // qc, qrow
+    });
+
+    html += '</div></div>'; // card-body, card
+  });
+
+  // Submit button
+  html += '<button class="csb" style="width:100%;margin-top:.5rem;background:var(--green);color:white;padding:.7rem;font-size:.95rem;font-weight:700;border-radius:8px;border:none;cursor:pointer" onclick="submitAIPaper()">'
+    + '📋 Submit AI Paper & See Score</button>';
+
+  document.getElementById('aiPaperArea').innerHTML = html;
+  aiAnswers = {}; aiScore = 0; aiAnswered = 0;
+}
+
+// Submit all AI paper answers at once (for unanswered questions)
+function submitAIPaper() {
+  if (!currentAITest) return;
+  var total = 0;
+  currentAITest.sections.forEach(function(sec, si) {
+    sec.questions.forEach(function(q) {
+      total++;
+      var fb = document.getElementById('ai-fb-' + si + '-' + q.num);
+      if (fb && fb.classList.contains('show')) return; // already answered
+      // Mark unanswered as wrong
+      if (!fb) return;
+      fb.className = 'ai-fb show bad';
+      fb.innerHTML = '✗ Answer: <strong>' + esc(q.answer || q.correction || '') + '</strong>'
+        + ' — <span style="font-size:.79rem">' + esc(q.explanation || '') + '</span>';
+    });
+  });
+  showAISummary();
+}
+
+
+// ── renderAIPaper safe handlers (use _aiQ, feed showAIFb) ──
+function chkAIInp_safe_r(inp) {
+  var si=parseInt(inp.dataset.si), num=parseInt(inp.dataset.num);
+  var q=window._aiQ[si+'-'+num]; if(!q) return;
+  if(!inp.value.trim()) return;
+  var val=inp.value.trim().toLowerCase();
+  var ac=(q.answer||q.ans||'').toLowerCase().split('/').map(function(a){return a.trim();});
+  var ok=ac.some(function(a){return val===a||val.includes(a);});
+  inp.classList.add(ok?'ok':'bad'); inp.disabled=true;
+  showAIFb(si,num,ok,q.answer||q.ans||'',q.explanation||'');
+}
+function chkAISelect_r(sel) {
+  var si=parseInt(sel.dataset.si), num=parseInt(sel.dataset.num);
+  var q=window._aiQ[si+'-'+num]; if(!q||!sel.value) return;
+  var ok=sel.value.toLowerCase()===(q.answer||q.ans||'').toLowerCase();
+  sel.classList.add(ok?'ok':'bad'); sel.disabled=true;
+  showAIFb(si,num,ok,q.answer||q.ans||'',q.explanation||'');
+}
+function chkAIMC_r(btn) {
+  var si=parseInt(btn.dataset.si), num=parseInt(btn.dataset.num), chosen=btn.dataset.chosen;
+  var q=window._aiQ[si+'-'+num]; if(!q) return;
+  var correct=(q.answer||q.ans||'').toLowerCase();
+  var ok=chosen.toLowerCase()===correct;
+  btn.closest('.mc-opts').querySelectorAll('.mcopt').forEach(function(b){
+    b.disabled=true;
+    if(b.dataset.chosen&&b.dataset.chosen.toLowerCase()===correct) b.classList.add('ok');
+  });
+  if(!ok) btn.classList.add('bad');
+  showAIFb(si,num,ok,q.answer||q.ans||'',q.explanation||'');
+}
+function chkAIEdit_r(inp) {
+  var si = parseInt(inp.dataset.si), num = parseInt(inp.dataset.num), field = inp.dataset.field;
+  var q = window._aiQ[si + '-' + num]; if (!q) return;
+  // Only check when the correction field is filled (the key answer)
+  if (field !== 'corr') return;
+  var val = inp.value.trim().toLowerCase();
+  var correct = (q.correction || q.answer || '').toLowerCase().replace(/^\(delete\)$/,'(delete)');
+  var ok = val === correct || val === correct.replace(/[()]/g,'') || 
+           (correct === '(delete)' && (val === 'delete' || val === '(delete)'));
+  inp.classList.add(ok ? 'ok' : 'bad');
+  inp.disabled = true;
+  // Also disable the error input
+  var errInp = document.getElementById('aiq_' + si + '_' + num + '_err');
+  if (errInp) errInp.disabled = true;
+  showAIFb(si, num, ok, q.correction || q.answer || '', q.explanation || '');
+}
+
+// showAIFb — feedback for AI Practice tab
+function showAIFb(si, num, ok, answer, explanation) {
+  if(ok) aiScore++;
+  aiAnswered++;
+  var fb = document.getElementById('ai-fb-'+si+'-'+num);
+  if(fb) {
+    fb.className = 'ai-fb show ' + (ok?'ok':'bad');
+    fb.innerHTML = (ok ? '✓ Correct! ' : '✗ Answer: <strong>'+esc(answer)+'</strong> — ')
+      + '<span style="font-weight:400;font-size:.79rem">'+esc(explanation)+'</span>';
+  }
+  if(!currentAITest) return;
+  var totalQ = currentAITest.sections.reduce(function(a,s){return a+s.questions.length;},0);
+  if(aiAnswered >= totalQ) showAISummary();
+}
+
+
+// Robust JSON extractor — handles LLM responses with extra text,
+// markdown code fences, trailing commas, and truncated responses
+function extractJSON(text) {
+  if (!text) throw new Error('Empty response from model');
+
+  // Step 1: Strip markdown code fences if present
+  // e.g. ```json { ... } ```
+  text = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '');
+
+  // Step 2: Find the outermost { ... } block
+  const start = text.indexOf('{');
+  if (start === -1) throw new Error("No JSON object found in response");
+
+  // Walk from start to find matching closing brace
+  let depth = 0;
+  let end = -1;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < text.length; i++) {
+    const c = text[i];
+    if (escape) { escape = false; continue; }
+    if (c === '\\' && inString) { escape = true; continue; }
+    if (c === '"' && !escape) { inString = !inString; continue; }
+    if (inString) continue;
+    if (c === '{') depth++;
+    else if (c === '}') {
+      depth--;
+      if (depth === 0) { end = i; break; }
+    }
+  }
+
+  if (end === -1) throw new Error("JSON appears truncated — try a smaller marks value or larger model");
+
+  let jsonStr = text.slice(start, end + 1);
+
+  // Step 3: Fix common LLM JSON mistakes
+  // Remove trailing commas before } or ]
+  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+  // Fix single-quoted strings (some models use these)
+  // jsonStr = jsonStr.replace(/'/g, '"'); // too aggressive, skip
+
+  // Step 4: Parse
+  try {
+    return JSON.parse(jsonStr);
+  } catch(e) {
+    // Step 5: If still failing, try a more aggressive cleanup
+    // Remove any control characters
+    jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
+    try {
+      return JSON.parse(jsonStr);
+    } catch(e2) {
+      throw new Error('JSON parse failed: ' + e2.message + '. Try a different model or fewer marks.');
+    }
+  }
+}
+
+async function generateAI() {
+  const d = loadData();
+  const provider = d.apiProvider || document.getElementById('apiProvider').value;
+  const btn    = document.getElementById('genBtn');
+  const status = document.getElementById('genStatus');
+
+  // Validate config
+  if (provider === 'ollama') {
+    if (!d.ollamaHost || !d.ollamaModel) {
+      status.textContent = '❌ Configure Ollama first — select model and click Save Config.';
+      return;
+    }
+  } else {
+    const apiKey = d.apiKey || (document.getElementById('apikeyInp') && document.getElementById('apikeyInp').value.trim());
+    if (!apiKey || apiKey === 'ollama-local') {
+      status.textContent = '❌ Please enter your API key and click Save Config.';
+      return;
+    }
+  }
+
+  btn.classList.add('loading'); btn.disabled = true;
+  document.getElementById('aiPaperArea').innerHTML = '';
+  document.getElementById('aiScoreSummary').classList.remove('show');
+  aiAnswers = {}; aiScore = 0; aiAnswered = 0; aiTotal = 0;
+  c1Picks = {}; currentAITest = null;
+
+  const weakAreas = getWeakAreas(d);
+  const prompt = buildAdaptivePrompt(
+    document.getElementById('cfgType').value,
+    parseInt(document.getElementById('cfgMarks').value),
+    document.getElementById('cfgTopic').value,
+    document.getElementById('cfgDiff').value,
+    weakAreas
+  );
+
+  let dots = 0;
+  const dotInt = setInterval(function() {
+    dots = (dots + 1) % 4;
+    const modelName = provider === 'ollama' ? d.ollamaModel : provider;
+    status.textContent = '⏳ ' + modelName + ' is thinking' + '.'.repeat(dots + 1);
+  }, 600);
+
+  try {
+    let text = '';
+
+    if (provider === 'ollama') {
+      text = await callOllama(d.ollamaHost, d.ollamaModel, prompt);
+    } else if (provider === 'anthropic') {
+      text = await callAnthropic(d.apiKey, prompt);
+    } else if (provider === 'gemini') {
+      text = await callGemini(d.apiKey, prompt);
+    } else {
+      // Groq / OpenAI-compatible
+      text = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', d.apiKey, 'llama-3.1-8b-instant', prompt);
+    }
+
+    clearInterval(dotInt);
+    currentAITest = extractJSON(text);
+    status.textContent = '✅ Paper ready — ' + (provider === 'ollama' ? d.ollamaModel : provider);
+    renderAIPaper(currentAITest);
+  } catch (e) {
+    clearInterval(dotInt);
+    status.textContent = '❌ ' + e.message;
+    if (provider === 'ollama') {
+      status.textContent += ' — Is Ollama running? Try "ollama serve" in Terminal.';
+    }
+  }
+  btn.classList.remove('loading'); btn.disabled = false;
+}
+
+// ── Provider-specific fetch functions ──
+async function callOllama(host, model, prompt) {
+  const url = host.replace(/\/$/, '') + '/api/chat';
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: model,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a JSON generator. You MUST respond with ONLY a valid JSON object. No explanation, no markdown, no code fences, no text before or after the JSON. Start your response with { and end with }.'
+        },
+        { role: 'user', content: prompt }
+      ],
+      stream: false,
+      format: 'json',
+      options: {
+        temperature: 0.7,
+        num_predict: 4096
+      }
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error('Ollama error ' + resp.status + ': ' + err.slice(0, 200));
+  }
+  const data = await resp.json();
+  if (data.message && data.message.content) return data.message.content;
+  if (data.response) return data.response; // older Ollama API
+  throw new Error('Unexpected Ollama response format');
+}
+
+async function callAnthropic(apiKey, prompt) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!resp.ok) throw new Error('Anthropic error ' + resp.status);
+  const data = await resp.json();
+  return data.content[0].text;
+}
+
+async function callGemini(apiKey, prompt) {
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+  });
+  if (!resp.ok) throw new Error('Gemini error ' + resp.status);
+  const data = await resp.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
+async function callOpenAICompat(url, apiKey, model, prompt) {
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify({
+      model: model,
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const data = await resp.json();
+  if (!resp.ok) {
+    // Surface the real API error message
+    const errMsg = (data.error && data.error.message) ? data.error.message : 'HTTP ' + resp.status;
+    throw new Error('Groq API: ' + errMsg);
+  }
+  if (!data.choices || !data.choices[0]) {
+    throw new Error('Unexpected response format: ' + JSON.stringify(data).slice(0,200));
+  }
+  return data.choices[0].message.content;
+}
+
+// ── Restore saved provider config on page load ──
+function restoreProviderConfig() {
+  const d = loadData();
+  if (!d.apiProvider) return;
+  const sel = document.getElementById('apiProvider');
+  if (sel) sel.value = d.apiProvider;
+
+  if (d.apiProvider === 'ollama') {
+    const hostInp = document.getElementById('ollamaHost');
+    const modelSel = document.getElementById('ollamaModel');
+    if (hostInp && d.ollamaHost) hostInp.value = d.ollamaHost;
+    if (modelSel && d.ollamaModel) {
+      // Try to match existing option
+      const match = Array.from(modelSel.options).find(o => o.value === d.ollamaModel);
+      if (match) modelSel.value = d.ollamaModel;
+      else {
+        // Add it as custom
+        const opt = document.createElement('option');
+        opt.value = d.ollamaModel;
+        opt.textContent = d.ollamaModel + ' (saved)';
+        modelSel.insertBefore(opt, modelSel.firstChild);
+        modelSel.value = d.ollamaModel;
+      }
+    }
+    onProviderChange();
+    const status = document.getElementById('apikeyStatus');
+    if (status) status.textContent = '✅ Ollama: ' + (d.ollamaModel||'') + ' @ ' + (d.ollamaHost||'');
+  } else {
+    const inp = document.getElementById('apikeyInp');
+    if (inp && d.apiKey) inp.value = d.apiKey;
+    onProviderChange();
+  }
+}
+
+
+// (old saveKey replaced above)
+
+
+function buildAdaptivePrompt(type, marks, topic, diffLevel, weakAreas) {
+  const topicStr = topic === 'any' ? 'suitable for Singapore Secondary 1 students (age 13)' : 'about ' + topic;
+  const diff = diffLevel || 'medium';
+
+  // Work out how many questions per section based on marks
+  const m = Math.min(parseInt(marks) || 15, 25);
+  const nTenses = Math.min(5, Math.ceil(m * 0.30));
+  const nArticles = Math.min(5, Math.ceil(m * 0.20));
+  const nPreps   = Math.min(5, Math.ceil(m * 0.20));
+  const nSVA     = Math.min(4, Math.ceil(m * 0.15));
+  const nConj    = Math.min(4, Math.ceil(m * 0.15));
+  const nEdit    = 3;
+
+  // Adaptive focus text
+  let focusTip = '';
+  if (weakAreas && weakAreas.length) {
+    const top3 = weakAreas.slice(0,3).map(w => w.name + ' (' + w.pct + '%)').join(', ');
+    focusTip = 'STUDENT WEAK AREAS (add extra questions on these): ' + top3 + '.';
+  }
+
+  return `You are generating a Singapore Secondary 1 English grammar practice paper.
+Topic: ${topicStr}. Difficulty: ${diff}. Target marks: ${m}.
+${focusTip}
+
+Generate EXACTLY this JSON structure — no deviations, no extra text, no markdown:
+
 {
-  "title": "Adaptive Practice — [topic]",
-  "totalMarks": ${marks},
-  "weakFocus": ["area1","area2"],
+  "title": "AI Practice — [topic] (${m} marks)",
+  "totalMarks": ${m},
+  "weakFocus": [${weakAreas.slice(0,3).map(w=>'"'+w.name+'"').join(',') || '"Mixed"'}],
   "sections": [
     {
       "type": "tenses",
-      "title": "Section A — Tenses",
+      "title": "Section A — Tenses (${nTenses} marks)",
       "questions": [
-        {"num":1,"q":"She _____ to school yesterday.","verb":"walk","answer":"walked","options":["walked","walks","walking","has walked"],"explanation":"Simple past for specific past action."}
+        {"num":1,"q":"She _____ to school yesterday.","verb":"walk","answer":"walked","explanation":"Simple past for completed past action."},
+        {"num":2,"q":"They _____ football when it started raining.","verb":"play","answer":"were playing","explanation":"Past continuous — action in progress when interrupted."},
+        {"num":3,"q":"He _____ his lunch by noon.","verb":"finish","answer":"had finished","explanation":"Past perfect — completed before another past event."},
+        {"num":4,"q":"We _____ the museum next Friday.","verb":"visit","answer":"will visit","explanation":"Future simple for planned actions."},
+        {"num":5,"q":"The letter _____ by her teacher yesterday.","verb":"sign","answer":"was signed","explanation":"Passive voice — subject receives the action."}
       ]
     },
     {
-      "type": "articles", 
-      "title": "Section B — Articles",
+      "type": "articles",
+      "title": "Section B — Articles (${nArticles} marks)",
       "questions": [
-        {"num":1,"q":"He is _____ honest man.","answer":"an","options":["a","an","the","-"],"explanation":"Honest starts with vowel sound /ɒ/ → an."}
+        {"num":1,"q":"She saw _____ elephant at the zoo.","answer":"an","options":["a","an","the","-"],"explanation":"Elephant starts with vowel sound → an."},
+        {"num":2,"q":"He plays _____ violin every evening.","answer":"the","options":["a","an","the","-"],"explanation":"Musical instruments take 'the'."},
+        {"num":3,"q":"We need _____ umbrella today.","answer":"an","options":["a","an","the","-"],"explanation":"Umbrella starts with vowel sound /ʌ/ → an."},
+        {"num":4,"q":"_____ sun rises in the east every day.","answer":"The","options":["A","An","The","-"],"explanation":"'The' for unique nouns."},
+        {"num":5,"q":"She is _____ honest person.","answer":"an","options":["a","an","the","-"],"explanation":"Honest — H is silent, vowel sound → an."}
       ]
     },
     {
       "type": "prepositions",
-      "title": "Section C — Prepositions", 
+      "title": "Section C — Prepositions (${nPreps} marks)",
       "questions": [
-        {"num":1,"q":"She is afraid _____ spiders.","answer":"of","options":["of","at","in","for"],"explanation":"Afraid of — fixed collocation."}
+        {"num":1,"q":"The cat is hiding _____ the sofa.","answer":"under","options":["under","above","beside","through"],"explanation":"Under = directly below."},
+        {"num":2,"q":"She arrived _____ the airport on time.","answer":"at","options":["at","in","on","to"],"explanation":"'At' for specific locations/points."},
+        {"num":3,"q":"He has lived here _____ 2019.","answer":"since","options":["since","for","from","during"],"explanation":"'Since' for a specific start point in time."},
+        {"num":4,"q":"She apologised _____ being late.","answer":"for","options":["for","of","to","with"],"explanation":"'Apologise for' is a fixed collocation."},
+        {"num":5,"q":"The book is _____ the table.","answer":"on","options":["on","at","in","over"],"explanation":"'On' for surfaces."}
       ]
     },
     {
       "type": "sva",
-      "title": "Section D — Subject-Verb Agreement",
+      "title": "Section D — Subject-Verb Agreement (${nSVA} marks)",
       "questions": [
-        {"num":1,"q":"The team _____ hard every day.","answer":"trains","options":["trains","train"],"explanation":"Team is collective noun, singular → trains."}
+        {"num":1,"q":"The team _____ hard every day.","answer":"trains","options":["train","trains"],"explanation":"'Team' is collective noun, singular → trains."},
+        {"num":2,"q":"Neither the boys nor the girl _____ ready.","answer":"is","options":["is","are"],"explanation":"Neither...nor: verb agrees with closest subject 'girl' (singular) → is."},
+        {"num":3,"q":"A number of students _____ absent today.","answer":"were","options":["was","were"],"explanation":"'A number of' = several → plural verb."},
+        {"num":4,"q":"Each boy and girl _____ a book.","answer":"has","options":["have","has"],"explanation":"'Each' always takes singular verb."}
       ]
     },
     {
       "type": "conjunctions",
-      "title": "Section E — Conjunctions",
+      "title": "Section E — Conjunctions (${nConj} marks)",
       "questions": [
-        {"num":1,"q1":"He was tired,","q2":"he kept working.","answer":"but","options":["but","and","so","because"],"explanation":"Contrast — tired but kept working."}
+        {"num":1,"q1":"She was tired,","q2":"she kept studying.","answer":"but","options":["but","so","and","because"],"explanation":"'But' shows contrast."},
+        {"num":2,"q1":"He will pass","q2":"he works hard.","answer":"if","options":["if","unless","although","since"],"explanation":"'If' introduces a condition."},
+        {"num":3,"q1":"She practised daily","q2":"she improved quickly.","answer":"so","options":["but","so","although","unless"],"explanation":"'So' shows result/consequence."},
+        {"num":4,"q1":"He failed","q2":"he studied hard.","answer":"although","options":["because","although","so","if"],"explanation":"'Although' shows unexpected contrast."}
       ]
     },
     {
       "type": "editing",
-      "title": "Section H — Editing",
+      "title": "Section H — Editing (${nEdit} marks)",
       "questions": [
-        {"num":1,"sentence":"She have finished her work.","error":"have","correction":"has","explanation":"She is 3rd person singular → has.","errorType":"SVA"}
-      ]
-    },
-    {
-      "type": "cloze1",
-      "title": "Modified Cloze I",
-      "wordBank": ["word1","word2","word3","word4","word5","word6","word7","word8","word9"],
-      "passage": "Passage with (1) _____ style blanks.",
-      "questions": [
-        {"num":1,"answer":"word1","explanation":"Why this word fits grammar and meaning."}
-      ]
-    },
-    {
-      "type": "cloze2",
-      "title": "Modified Cloze II",
-      "passage": "Passage with (6) _____ blanks.",
-      "questions": [
-        {"num":6,"answer":"however","acceptableAnswers":["however","but"],"explanation":"Contrast connector."}
+        {"num":1,"sentence":"She have finished her homework already.","error":"have","correction":"has","errorType":"SVA","explanation":"She = 3rd person singular → has."},
+        {"num":2,"sentence":"He enjoy swimming in the pool every weekend.","error":"enjoy","correction":"enjoys","errorType":"SVA","explanation":"He = 3rd person singular, present simple → enjoys."},
+        {"num":3,"sentence":"They discussed about the plan for an hour.","error":"about","correction":"(delete)","errorType":"Word Choice","explanation":"'Discuss' is transitive — never use 'discuss about'."}
       ]
     }
   ]
 }
 
-RULES: Original passages only. 4 options for each question. Cloze word bank has ~4 extra words. All answers must be unambiguous. Passages for 13-year-olds. Return ONLY the JSON.`;
-}
-
-async function generateAI() {
-  const d = loadData();
-  const provider = document.getElementById('apiProvider').value;
-  const apiKey = d.apiKey || document.getElementById('apikeyInp').value.trim();
-  
-  if (!apiKey) { alert('Please enter an API key.'); return; }
-
-  const btn = document.getElementById('genBtn');
-  const status = document.getElementById('genStatus');
-  btn.classList.add('loading'); btn.disabled = true;
-
-  // Configuration mapping for different providers
-  const config = {
-    anthropic: {
-      url: 'https://api.anthropic.com/v1/messages',
-      headers: { 
-        'x-api-key': apiKey, 
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json' 
-      },
-      body: { model: 'claude-3-sonnet-20240229', max_tokens: 4000 }
-    },
-    groq: {
-      url: 'https://api.groq.com/openai/v1/chat/completions',
-      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
-      body: { model: 'llama3-8b-8192' }
-    },
-    gemini: {
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
-      headers: { 'Content-Type': 'application/json' },
-      body: {} // Gemini structure is slightly different, handled below
-    }
-  };
-
-  const current = config[provider];
-  const prompt = buildAdaptivePrompt(document.getElementById('cfgType').value, 
-                                     document.getElementById('cfgMarks').value, 
-                                     document.getElementById('cfgTopic').value, 
-                                     document.getElementById('cfgDiff').value, 
-                                     getWeakAreas(d));
-
-  try {
-    let response;
-    
-    // Handle the specific request format for each provider
-    if (provider === 'anthropic') {
-      response = await fetch(current.url, {
-        method: 'POST', headers: current.headers,
-        body: JSON.stringify({ ...current.body, messages: [{ role: 'user', content: prompt }] })
-      });
-    } else if (provider === 'gemini') {
-      response = await fetch(current.url, {
-        method: 'POST', headers: current.headers,
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-      });
-    } else { // Groq / OpenAI Format
-      response = await fetch(current.url, {
-        method: 'POST', headers: current.headers,
-        body: JSON.stringify({ ...current.body, messages: [{ role: 'user', content: prompt }] })
-      });
-    }
-
-    const data = await response.json();
-    // ... inside your try block, after the 'data' is fetched ...
-
-let text = "";
-try {
-  if (provider === 'anthropic' && data.content && data.content[0]) {
-    text = data.content[0].text;
-  } else if (provider === 'gemini' && data.candidates && data.candidates[0]) {
-    text = data.candidates[0].content.parts[0].text;
-  } else if (data.choices && data.choices[0] && data.choices[0].message) {
-    // This handles Groq and OpenAI-style providers
-    text = data.choices[0].message.content;
-  } else {
-    // If the API returned an error message instead of a result
-    throw new Error(data.error ? data.error.message : "Invalid API response structure");
-  }
-} catch (extractErr) {
-  console.error("Data extraction failed:", data); // Helpful for debugging in F12
-  throw new Error("Could not read the AI response. Please check your API key or limits.");
-}
-
-// Now the JSON matching logic continues safely...
-const match = text.match(/\{[\s\S]*\}/);
-if (!match) throw new Error("The AI didn't return a valid paper format. Try again!");
-currentAITest = JSON.parse(match[0]);
-renderAIPaper(currentAITest);
-    status.textContent = '✅ Paper generated using ' + provider;
-  } catch (e) {
-    status.textContent = '❌ Error: ' + e.message;
-  } finally {
-    btn.classList.remove('loading'); btn.disabled = false;
-  }
+STRICT RULES:
+1. Replace ALL example questions above with NEW original questions on the topic: ${topicStr}
+2. Keep EXACTLY the same JSON structure and field names
+3. Tenses questions: use "q" with _____, "verb" hint, "answer" (no options array)
+4. Articles/Prepositions/SVA/Conjunctions: include "options" array with 2-4 choices
+5. Editing: include "sentence", "error", "correction", "errorType", "explanation"
+6. Difficulty ${diff}: ${diff==='easy'?'simple present/past tenses, common words':diff==='hard'?'passive voice, perfect tenses, tricky collocations':'mix of tenses including past continuous and present perfect'}
+7. All passages and sentences must be about: ${topicStr}
+8. Return ONLY the JSON object. No markdown. No explanation. Start with { end with }`;
 }
 
 
-function renderC1Passage(sec, si) {
-  if (!sec || !sec.passage) return '';
-  var p = sec.passage;
-  (sec.questions || []).forEach(function(q) {
-    p = p.split('(' + q.num + ') _____').join('(' + q.num + ') <span id="c1span_' + si + '_' + q.num + '" style="display:inline-block;min-width:70px;border-bottom:2px solid var(--blue);padding:0 4px;color:var(--blue);font-weight:600">_____</span>');
-  });
-  return p;
-}
-function renderC2Passage(sec, si) {
-  if (!sec || !sec.passage) return '';
-  var p = sec.passage;
-  (sec.questions || []).forEach(function(q) {
-    p = p.split('(' + q.num + ') _____').join('(' + q.num + ') <span id="c2span_' + si + '_' + q.num + '" style="display:inline-block;min-width:70px;border-bottom:2px solid var(--green);padding:0 4px;color:var(--green);font-weight:600">_____</span>');
-  });
-  return p;
-}
+// generateAI is defined above in the Ollama provider section
 
-function renderAIPaper(test) {
-  const area=document.getElementById('aiPaperArea');
-  aiTotal=test.totalMarks;
-  // Store questions for lookup (avoids unsafe onclick string escaping)
-  window._aiQ = {};
-  test.sections.forEach(function(sec,si){
-    sec.questions.forEach(function(q){
-      window._aiQ[si+'-'+q.num] = q;
-    });
-  });
-
-  var html='<div class="ai-paper-header">'
-    +'<div class="ai-paper-title">'+esc(test.title)+'</div>'
-    +'<div class="ai-paper-meta"><span>Total: '+test.totalMarks+' marks</span>'
-    +(test.weakFocus&&test.weakFocus.length?'<span>Focus: '+test.weakFocus.map(esc).join(', ')+'</span>':'')
-    +'</div></div>';
-
-  test.sections.forEach(function(sec,si){
-    html+='<div class="sec-label">'+esc(sec.title)+'</div>';
-
-    if(sec.type==='cloze1'){
-      html+='<div style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem">Word Bank</div>'
-        +'<div class="wb-box" id="wb_'+si+'">';
-      sec.wordBank.forEach(function(w,wi){
-        html+='<button class="wb-pill" id="wbp_'+si+'_'+wi+'" data-word="'+esc(w)+'" data-si="'+si+'" onclick="pickWordByIdx('+si+','+wi+',this)">'+esc(w)+'</button>';
-      });
-      html+='</div><div class="ai-pass" id="c1pass_'+si+'">'+renderC1Passage(sec,si)+'</div>';
-      sec.questions.forEach(function(q){
-        html+='<div class="ai-q"><div class="ai-q-head">'
-          +'<div class="ai-qn">Blank ('+q.num+')</div>'
-          +'<button class="ai-chk" id="c1chk_'+si+'_'+q.num+'" data-si="'+si+'" data-num="'+q.num+'" onclick="submitC1AI_safe(this)" disabled>Check ('+q.num+')</button>'
-          +'<div class="ai-fb" id="ai-fb-'+si+'-'+q.num+'"></div>'
-          +'</div></div>';
-      });
-    } else if(sec.type==='cloze2'){
-      html+='<div class="ai-pass">'+renderC2Passage(sec,si)+'</div>';
-      sec.questions.forEach(function(q){
-        html+='<div class="ai-q"><div class="ai-q-head">'
-          +'<div class="ai-qn">Blank ('+q.num+')</div>'
-          +'<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-top:.3rem">'
-          +'<input type="text" class="ainp" id="c2i_'+si+'_'+q.num+'" placeholder="one word" data-si="'+si+'" data-num="'+q.num+'" style="min-width:100px;border:1px solid var(--border);border-radius:6px;padding:4px 8px">'
-          +'<button class="ai-chk" data-si="'+si+'" data-num="'+q.num+'" onclick="submitC2AI_safe(this)">Check</button>'
-          +'</div>'
-          +'<div class="ai-fb" id="ai-fb-'+si+'-'+q.num+'"></div>'
-          +'</div></div>';
-      });
-    } else if(sec.type==='editing'){
-      sec.questions.forEach(function(q){
-        var opts = (q.options||[q.correction,'delete']);
-        html+='<div class="ai-q"><div class="ai-q-head">'
-          +'<div class="ai-qn">Q'+q.num+' &middot; '+esc(q.errorType||'error')+'</div>'
-          +'<div class="ai-pass" style="margin:.35rem 0">'+esc(q.sentence)+'</div>'
-          +'<div class="mc-opts">';
-        opts.forEach(function(o){
-          html+='<button class="mcopt" data-si="'+si+'" data-num="'+q.num+'" data-chosen="'+esc(o)+'" onclick="chkAIEdit_safe(this)">'+esc(o)+'</button>';
-        });
-        html+='</div><div class="ai-fb" id="ai-fb-'+si+'-'+q.num+'"></div></div></div>';
-      });
-    } else {
-      // tenses, articles, prepositions, sva, conjunctions
-      sec.questions.forEach(function(q){
-        var ans = q.answer||q.ans||'';
-        if(sec.type==='sva'){
-          var optsHtml='<div class="mc-opts">';
-          (q.options||[]).forEach(function(o){
-            optsHtml+='<button class="mcopt" data-si="'+si+'" data-num="'+q.num+'" data-chosen="'+esc(o)+'" onclick="chkAIMC_safe(this)">'+esc(o)+'</button>';
-          });
-          optsHtml+='</div>';
-          html+='<div class="ai-q"><div class="ai-q-head"><div class="ai-qn">Q'+q.num+'</div>'
-            +'<div class="qc" style="font-size:.88rem;line-height:1.75">'+esc(q.q||'')+optsHtml+'</div>'
-            +'<div class="ai-fb" id="ai-fb-'+si+'-'+q.num+'"></div></div></div>';
-        } else if(sec.type==='conjunctions'){
-          var selHtml='<select class="csel" id="ai_'+si+'_'+q.num+'" data-si="'+si+'" data-num="'+q.num+'" onchange="chkAISelect_safe(this)"><option value="">--</option>';
-          (q.options||[]).forEach(function(o){ selHtml+='<option value="'+esc(o)+'">'+esc(o)+'</option>'; });
-          selHtml+='</select>';
-          html+='<div class="ai-q"><div class="ai-q-head"><div class="ai-qn">Q'+q.num+'</div>'
-            +'<div class="qc" style="font-size:.88rem;line-height:1.75">'+(q.q1?esc(q.q1)+' ':'')+selHtml+' '+esc(q.q2||'')+'</div>'
-            +'<div class="ai-fb" id="ai-fb-'+si+'-'+q.num+'"></div></div></div>';
-        } else {
-          // tenses, articles, prepositions
-          var qtext = esc(q.q||'').replace('_____','<input class="ainp" id="ai_'+si+'_'+q.num+'" data-si="'+si+'" data-num="'+q.num+'" data-ans="'+esc(ans)+'" placeholder="___________ " onchange="chkAIInp_safe(this)" style="min-width:110px">');
-          html+='<div class="ai-q"><div class="ai-q-head"><div class="ai-qn">Q'+q.num+'</div>'
-            +'<div class="qc" style="font-size:.88rem;line-height:1.75">'+qtext+(q.verb?' <span class="vhint">('+esc(q.verb)+')</span>':'')+'</div>'
-            +'<div class="ai-fb" id="ai-fb-'+si+'-'+q.num+'"></div></div></div>';
-        }
-      });
-    }
-  });
-  area.innerHTML=html;
-}
-
-// Safe AI check functions using data-* attributes instead of onclick strings
-function submitC1AI_safe(btn){
-  var si=parseInt(btn.dataset.si), num=parseInt(btn.dataset.num);
-  var q=window._aiQ[si+'-'+num]; if(!q) return;
-  submitC1AI(si,num,q.answer,q.explanation);
-}
-function submitC2AI_safe(btn){
-  var si=parseInt(btn.dataset.si), num=parseInt(btn.dataset.num);
-  var q=window._aiQ[si+'-'+num]; if(!q) return;
-  submitC2AI(si,num,q.answer,q.explanation,(q.acceptableAnswers||[]).join('/'));
-}
-function chkAIEdit_safe(btn){
-  var si=parseInt(btn.dataset.si), num=parseInt(btn.dataset.num), chosen=btn.dataset.chosen;
-  var q=window._aiQ[si+'-'+num]; if(!q) return;
-  chkAIEdit(si,num,chosen,q.correction,q.explanation,btn);
-}
-function chkAIMC_safe(btn){
-  var si=parseInt(btn.dataset.si), num=parseInt(btn.dataset.num), chosen=btn.dataset.chosen;
-  var q=window._aiQ[si+'-'+num]; if(!q) return;
-  chkAIMC(si,num,chosen,q.answer||q.ans||'',q.explanation,btn);
-}
-function chkAISelect_safe(sel){
-  var si=parseInt(sel.dataset.si), num=parseInt(sel.dataset.num);
-  var q=window._aiQ[si+'-'+num]; if(!q) return;
-  chkAISelect(si,num,q.answer||q.ans||'',q.explanation,sel);
-}
-function chkAIInp_safe(inp){
-  var si=parseInt(inp.dataset.si), num=parseInt(inp.dataset.num);
-  var q=window._aiQ[si+'-'+num]; if(!q) return;
-  chkAIInp(si,num,q.explanation,inp);
-}
-function pickWordByIdx(si,wi,btn){
-  var wbBox=document.getElementById('wb_'+si);
-  if(!wbBox) return;
-  var pills=wbBox.querySelectorAll('.wb-pill');
-  if(wi>=pills.length) return;
-  var word=pills[wi].dataset.word;
-  pickWord(si,word,btn);
-}
-
-
-function pickWord(si, word, btn) {
-  if(!currentAITest) return;
-  const sec=currentAITest.sections[si];
-  const nextBlank=sec.questions.find(q=>!aiAnswers[`${si}-${q.num}`]&&!(c1Picks[`${si}-${q.num}`]===word));
-  if(!nextBlank) return;
-  const k=`${si}-${nextBlank.num}`;
-  if(c1Picks[k]){
-    const prevBtn=document.getElementById(`wbp_${si}_${c1Picks[k].replace(/\s/g,'_')}`);
-    if(prevBtn) prevBtn.classList.remove('sel');
-  }
-  c1Picks[k]=word;
-  btn.classList.add('sel');
-  const span=document.getElementById(`c1span_${si}_${nextBlank.num}`);
-  if(span) span.textContent=word;
-  const chkBtn=document.getElementById(`c1chk_${si}_${nextBlank.num}`);
-  if(chkBtn) chkBtn.disabled=false;
-}
-
-function submitC1AI(si,num,correct,explanation){
-  const k=`${si}-${num}`;
-  if(aiAnswers[k]) return;
-  const val=(c1Picks[k]||'').toLowerCase().trim();
-  const ok=val===correct.toLowerCase().trim();
-  aiAnswers[k]=val;
-  const span=document.getElementById(`c1span_${si}_${num}`);
-  if(span){span.textContent=val||'?';span.style.color=ok?'var(--green)':'var(--red)';span.style.fontWeight='600';}
-  document.getElementById(`c1chk_${si}_${num}`).disabled=true;
-  showAIFb(si,num,ok,correct,explanation);
-}
-function submitC2AI(si,num,correct,explanation,acceptable){
-  const k=`${si}-${num}`;
-  if(aiAnswers[k]) return;
-  const inp=document.getElementById(`c2i_${si}_${num}`);
-  const val=(inp?inp.value:'').trim().toLowerCase();
-  const ac=[correct,...(acceptable?acceptable.split('/'):[])]
-    .map(a=>a.toLowerCase().trim()).filter(Boolean);
-  const ok=ac.includes(val);
-  aiAnswers[k]=val;
-  if(inp){inp.disabled=true;inp.classList.add(ok?'ok':'bad');}
-  const span=document.getElementById(`c2span_${si}_${num}`);
-  if(span){span.textContent=val||'?';span.style.color=ok?'var(--green)':'var(--red)';span.style.fontWeight='600';}
-  showAIFb(si,num,ok,correct,explanation);
-}
-function chkAIEdit(si,num,chosen,correct,explanation,btn){
-  const k=`${si}-${num}`;
-  if(aiAnswers[k]) return;
-  const ok=chosen.toLowerCase()===correct.toLowerCase();
-  aiAnswers[k]=chosen;
-  btn.closest('.mc-opts').querySelectorAll('.mcopt').forEach(b=>{
-    b.disabled=true;
-    if(b.textContent.toLowerCase()===correct.toLowerCase()) b.classList.add('ok');
-  });
-  if(!ok) btn.classList.add('bad');
-  showAIFb(si,num,ok,correct,explanation);
-}
-function chkAIInp(si,num,explanation,inp){
-  const k=`${si}-${num}`;
-  if(aiAnswers[k]) return;
-  const val=inp.value.trim().toLowerCase();
-  const ac=(inp.dataset.ans||'').toLowerCase().split('/').map(a=>a.trim());
-  const ok=ac.some(a=>val===a||val.includes(a));
-  aiAnswers[k]=val;
-  inp.classList.add(ok?'ok':'bad');
-  showAIFb(si,num,ok,inp.dataset.ans,explanation);
-}
-function chkAISelect(si,num,correct,explanation,sel){
-  const k=`${si}-${num}`;
-  if(aiAnswers[k]) return;
-  const ok=sel.value.toLowerCase()===correct.toLowerCase();
-  aiAnswers[k]=sel.value;
-  sel.classList.add(ok?'ok':'bad');
-  showAIFb(si,num,ok,correct,explanation);
-}
-function chkAIMC(si,num,chosen,correct,explanation,btn){
-  const k=`${si}-${num}`;
-  if(aiAnswers[k]) return;
-  const ok=chosen.toLowerCase()===correct.toLowerCase();
-  aiAnswers[k]=chosen;
-  btn.closest('.mc-opts').querySelectorAll('.mcopt').forEach(b=>{
-    b.disabled=true;
-    if(b.textContent.toLowerCase()===correct.toLowerCase()) b.classList.add('ok');
-  });
-  if(!ok) btn.classList.add('bad');
-  showAIFb(si,num,ok,correct,explanation);
-}
-
-function showAIFb(si,num,ok,answer,explanation){
-  if(ok) aiScore++;
-  aiAnswered++;
-  const fb=document.getElementById(`ai-fb-${si}-${num}`);
-  if(fb){
-    fb.className=`ai-fb show ${ok?'ok':'bad'}`;
-    fb.innerHTML=ok?`✓ Correct! <span style="font-weight:400;font-size:.79rem">${esc(explanation)}</span>`:`✗ Answer: <strong>${esc(answer)}</strong> — <span style="font-weight:400;font-size:.79rem">${esc(explanation)}</span>`;
-  }
-  // Check if all done
-  if(!currentAITest) return;
-  const totalQ=currentAITest.sections.reduce((a,s)=>a+s.questions.length,0);
-  if(aiAnswered>=totalQ) showAISummary();
-}
-
-function showAISummary(){
-  if(!currentAITest) return;
-  const pct=Math.round((aiScore/aiTotal)*100);
-  document.getElementById('aiFinalScore').textContent=`${aiScore}/${aiTotal}`;
-  document.getElementById('aiMsg').textContent=pct>=90?'🏆 Excellent mastery!':pct>=75?'👍 Good work — review the ones you missed.':pct>=60?'📖 Fair — re-read the study notes for your weak areas.':'💪 Keep going — the AI will focus more on your weak areas next time.';
-
-  // Build section results for tracking
-  const secResults={};
-  currentAITest.sections.forEach((sec,si)=>{
-    const nm=sec.type.charAt(0).toUpperCase()+sec.type.slice(1);
-    if(!secResults[nm]) secResults[nm]={correct:0,max:0};
-    sec.questions.forEach(q=>{
-      secResults[nm].max++;
-      if(aiAnswers[`${si}-${q.num}`]){
-        const ans=currentAITest.sections[si].questions.find(x=>x.num===q.num);
-        const correct=(ans?.answer||'').toLowerCase();
-        const given=(aiAnswers[`${si}-${q.num}`]||'').toLowerCase();
-        if(given===correct||given.includes(correct)) secResults[nm].correct++;
-      }
-    });
-  });
-
-  let chips='';
-  Object.entries(secResults).forEach(([nm,v])=>{
-    const ok=v.correct===v.max;
-    chips+=`<div class="schip${ok?' full':''}">${nm}: ${v.correct}/${v.max}</div>`;
-  });
-  document.getElementById('aiChips').innerHTML=chips;
-  document.getElementById('aiScoreSummary').classList.add('show');
-  document.getElementById('aiScoreSummary').scrollIntoView({behavior:'smooth'});
-  recordAttempt('AI','AI',secResults,aiScore,aiTotal);
-}
-
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-
-// ══════════════════════════════════════════
-//  PASSWORD-PROTECTED ANSWER KEY
-// ══════════════════════════════════════════
-function getStoredPwd() {
-  return localStorage.getItem('sec1_parent_pwd') || 'parent123';
-}
-
-function openKeyModal() {
-  if(ansKeyMode){ lockKey(); return; }
-  document.getElementById('keyPwdInp').value = '';
-  document.getElementById('keyErr').textContent = '';
-  const inp = document.getElementById('keyPwdInp');
-  if(inp){ inp.classList.remove('error','shake'); }
-  document.getElementById('keyModal').classList.add('show');
-  setTimeout(()=>{ const i=document.getElementById('keyPwdInp'); if(i)i.focus(); }, 120);
-}
-
-function closeKeyModal() {
-  document.getElementById('keyModal').classList.remove('show');
-}
-
-function closeOnBackdrop(e) {
-  if(e.target.id==='keyModal') closeKeyModal();
-}
-
-function submitKeyPwd() {
-  const inp = document.getElementById('keyPwdInp');
-  const val = inp ? inp.value : '';
-  if(val === getStoredPwd()) {
-    closeKeyModal();
-    unlockKey();
-  } else {
-    if(inp){ inp.classList.add('error','shake'); }
-    document.getElementById('keyErr').textContent = '❌ Incorrect password. Try again.';
-    if(inp){ inp.value=''; setTimeout(()=>inp.classList.remove('shake'),400); }
-  }
-}
-
-function unlockKey() {
-  ansKeyMode = true;
-  const pn = currentPaper;
-  const p = WA1[pn];
-  if(!p) return;
-  p.tenses.forEach((q,i)=>{ const el=document.getElementById('T'+pn+'_'+i); if(el){el.value=q.a;el.classList.add('ok');el.disabled=true;} });
-  p.articles.forEach((q,i)=>{ const el=document.getElementById('AR'+pn+'_'+i); if(el){el.value=q.a;el.classList.add('ok');el.disabled=true;} });
-  p.preps.forEach((q,i)=>{ const el=document.getElementById('PR'+pn+'_'+i); if(el){el.value=q.a;el.classList.add('ok');el.disabled=true;} });
-  p.conj.forEach((q,i)=>{ const el=document.getElementById('CJ'+pn+'_'+i); if(el){el.value=q.a.split('/')[0].trim();el.classList.add('ok');el.disabled=true;} });
-  p.editing.forEach((q,i)=>{
-    const ee=document.getElementById('EE'+pn+'_'+i); if(ee){ee.value=q.e;ee.classList.add('ok');ee.disabled=true;}
-    const ec=document.getElementById('EC'+pn+'_'+i); if(ec){ec.value=q.c;ec.classList.add('ok');ec.disabled=true;}
-  });
-  document.querySelectorAll('.reveal').forEach(r=>r.classList.add('show'));
-  document.querySelectorAll('.sab').forEach(b=>b.classList.add('attempted'));
-  const kb=document.querySelector('[onclick="openKeyModal()"]');
-  if(kb){ kb.textContent='🔒 Lock Key'; kb.classList.remove('tbtn-outline'); kb.classList.add('tbtn-danger'); }
-  const banner=document.getElementById('keyBanner');
-  if(banner) banner.classList.add('show');
-}
-
-function lockKey() {
-  ansKeyMode = false;
-  document.querySelectorAll('.ainp,.csel').forEach(el=>{ el.value=''; el.classList.remove('ok','bad'); el.disabled=false; });
-  document.querySelectorAll('.reveal').forEach(r=>r.classList.remove('show'));
-  document.querySelectorAll('.sab').forEach(b=>b.classList.remove('attempted'));
-  document.querySelectorAll('.q-chip').forEach(c=>c.remove());
-  const kb=document.querySelector('[onclick="openKeyModal()"]');
-  if(kb){ kb.textContent='🔐 Answer Key'; kb.classList.remove('tbtn-danger'); kb.classList.add('tbtn-outline'); }
-  const banner=document.getElementById('keyBanner');
-  if(banner) banner.classList.remove('show');
-  updateLiveScore();
-  updateSectionReadiness();
-}
-
-// Set password modal
-function openSetPwdModal() {
-  closeKeyModal();
-  const p1=document.getElementById('newPwd1'); if(p1) p1.value='';
-  const p2=document.getElementById('newPwd2'); if(p2) p2.value='';
-  const pe=document.getElementById('setPwdErr'); if(pe) pe.textContent='';
-  document.getElementById('setPwdModal').classList.add('show');
-  setTimeout(()=>{ const i=document.getElementById('newPwd1'); if(i)i.focus(); }, 120);
-}
-
-function closePwdModal() {
-  document.getElementById('setPwdModal').classList.remove('show');
-}
-
-function closeOnBackdrop2(e) {
-  if(e.target.id==='setPwdModal') closePwdModal();
-}
-
-function savePwd() {
-  var p1 = document.getElementById('newPwd1').value;
-  var p2 = document.getElementById('newPwd2').value;
-  var pe = document.getElementById('setPwdErr');
-  if (p1.length < 4) { if (pe) pe.textContent = 'Password must be at least 4 characters.'; return; }
-  if (p1 !== p2) { if (pe) pe.textContent = 'Passwords do not match. Try again.'; return; }
-  localStorage.setItem('sec1_parent_pwd', p1);
-  closePwdModal();
-  showPwdSuccess();
-}
-function showPwdSuccess() {
-  var box = document.getElementById('setPwdBox');
-  if (box) {
-    var btn = document.createElement('button');
-    btn.className = 'modal-btn modal-btn-primary';
-    btn.style.marginTop = '.8rem';
-    btn.style.width = '100%';
-    btn.textContent = 'Done';
-    btn.onclick = function() { document.getElementById('setPwdModal').classList.remove('show'); };
-    box.innerHTML = '<div class="modal-icon">✅</div><div class="modal-title">Password Saved!</div><div class="modal-sub">Your new password is set. Keep it safe.</div>';
-    box.appendChild(btn);
-  }
-  document.getElementById('setPwdModal').classList.add('show');
-}
-
-
-
-// ══════════════════════════════════════════
-//  DASHBOARD AI GENERATOR
-// ══════════════════════════════════════════
-var dashAiAnswers={}, dashAiScore=0, dashAiAnswered=0, dashAiTotal=0, dashAiTest=null, dashC1Picks={};
 
 function dashGenerate() {
   const d = loadData();
@@ -3663,9 +3901,7 @@ function dashGenerate() {
   .then(data=>{
     clearInterval(dotInterval);
     const text = data.content.map(c=>c.text||'').join('');
-    const match = text.match(/\{[\s\S]*\}/);
-    if(!match) throw new Error('No JSON returned');
-    dashAiTest = JSON.parse(match[0]);
+    dashAiTest = extractJSON(text);
     dashAiTotal = dashAiTest.totalMarks;
     status.textContent='✅ Paper ready — answer all questions below!';
     renderDashAIPaper(dashAiTest);
@@ -3795,7 +4031,7 @@ function dashChkEdit(btn){
 
 // Pre-built warm-up passages for Papers 1-10 (no API needed)
 // Each passage embeds the exact grammar topics from that paper
-const WARMUP_PASSAGES = {
+var WARMUP_PASSAGES = {
 1: {
   title: "Maya's Morning Walk",
   topics: ['Tenses','Articles','Prepositions','SVA','Conjunctions','Direct Speech'],
@@ -4811,7 +5047,203 @@ function saveAsHTML() {
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
+
+// ── Password modal functions (re-added) ──
+function openKeyModal() {
+  if (typeof ansKeyMode !== 'undefined' && ansKeyMode) { lockKey(); return; }
+  var inp = document.getElementById('keyPwdInp');
+  var err = document.getElementById('keyErr');
+  if (inp) inp.value = '';
+  if (err) err.textContent = '';
+  var icon = document.getElementById('keyModalIcon');
+  var title = document.getElementById('keyModalTitle');
+  var sub = document.getElementById('keyModalSub');
+  if (icon) icon.textContent = '🔐';
+  if (title) title.textContent = 'Answer Key — Parent Access';
+  if (sub) sub.textContent = 'Enter the parent password to reveal all answers and explanations.';
+  var modal = document.getElementById('keyModal');
+  if (modal) modal.classList.add('show');
+  window._reviewMode = false;
+  setTimeout(function() { var i = document.getElementById('keyPwdInp'); if(i) i.focus(); }, 120);
+}
+function closeKeyModal() {
+  var modal = document.getElementById('keyModal');
+  if (modal) modal.classList.remove('show');
+}
+function closeOnBackdrop(e) {
+  if (e && e.target && e.target.id === 'keyModal') closeKeyModal();
+}
+function closeOnBackdrop2(e) {
+  if (e && e.target && e.target.id === 'setPwdModal') closePwdModal();
+}
+function lockKey() {
+  if (typeof ansKeyMode !== 'undefined') ansKeyMode = false;
+  document.querySelectorAll('.ainp,.csel').forEach(function(el) {
+    el.value = ''; el.classList.remove('ok','bad'); el.disabled = false;
+  });
+  document.querySelectorAll('.reveal').forEach(function(r) { r.classList.remove('show'); });
+  var kb = document.querySelector('[onclick="openKeyModal()"]');
+  if (kb) { kb.textContent = '🔐 Answer Key'; kb.classList.remove('tbtn-danger'); kb.classList.add('tbtn-outline'); }
+  var banner = document.getElementById('keyBanner');
+  if (banner) banner.classList.remove('show');
+}
+function openSetPwdModal() {
+  closeKeyModal();
+  var p1 = document.getElementById('newPwd1'); if (p1) p1.value = '';
+  var p2 = document.getElementById('newPwd2'); if (p2) p2.value = '';
+  var pe = document.getElementById('setPwdErr'); if (pe) pe.textContent = '';
+  var modal = document.getElementById('setPwdModal');
+  if (modal) modal.classList.add('show');
+  setTimeout(function() { var i = document.getElementById('newPwd1'); if(i) i.focus(); }, 120);
+}
+function closePwdModal() {
+  var modal = document.getElementById('setPwdModal');
+  if (modal) modal.classList.remove('show');
+}
+function savePwd() {
+  var p1 = document.getElementById('newPwd1') ? document.getElementById('newPwd1').value : '';
+  var p2 = document.getElementById('newPwd2') ? document.getElementById('newPwd2').value : '';
+  var pe = document.getElementById('setPwdErr');
+  if (p1.length < 4) { if (pe) pe.textContent = 'Password must be at least 4 characters.'; return; }
+  if (p1 !== p2) { if (pe) pe.textContent = 'Passwords do not match.'; return; }
+  localStorage.setItem('sec1_parent_pwd', p1);
+  closePwdModal();
+  showPwdSuccess();
+}
+function showPwdSuccess() {
+  var box = document.getElementById('setPwdBox');
+  if (box) {
+    var btn = document.createElement('button');
+    btn.className = 'modal-btn modal-btn-primary';
+    btn.style.marginTop = '.8rem'; btn.style.width = '100%';
+    btn.textContent = 'Done';
+    btn.onclick = function() { document.getElementById('setPwdModal').classList.remove('show'); };
+    box.innerHTML = '<div class="modal-icon">✅</div><div class="modal-title">Password Saved!</div><div class="modal-sub">New parent password is set.</div>';
+    box.appendChild(btn);
+  }
+  var modal = document.getElementById('setPwdModal');
+  if (modal) modal.classList.add('show');
+}
+
+
+
+// ── Test API Key with a minimal request ──
+async function testAPIKey() {
+  const d = loadData();
+  const provider = document.getElementById('apiProvider').value;
+  const status = document.getElementById('apikeyStatus');
+  const apiKey = provider === 'ollama' ? null :
+    (document.getElementById('apikeyInp').value.trim() || d.apiKey);
+
+  if (provider === 'ollama') {
+    return testOllamaConnection();
+  }
+
+  if (!apiKey) {
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ No API key entered. Type your key first.';
+    return;
+  }
+
+  status.style.color = 'var(--muted)';
+  status.textContent = '⏳ Testing ' + provider + ' key...';
+
+  try {
+    let testText = '';
+
+    if (provider === 'groq') {
+      // Test with smallest possible request
+      const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          max_tokens: 5,
+          messages: [{ role: 'user', content: 'Say OK' }]
+        })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        const err = (data.error && data.error.message) ? data.error.message : 'HTTP ' + resp.status;
+        throw new Error(err);
+      }
+      testText = data.choices[0].message.content;
+
+    } else if (provider === 'anthropic') {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 5,
+          messages: [{ role: 'user', content: 'Say OK' }]
+        })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        const err = (data.error && data.error.message) ? data.error.message : 'HTTP ' + resp.status;
+        throw new Error(err);
+      }
+      testText = data.content[0].text;
+
+    } else if (provider === 'gemini') {
+      const resp = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: 'Say OK' }] }], generationConfig: { maxOutputTokens: 5 } })
+        }
+      );
+      const data = await resp.json();
+      if (!resp.ok || data.error) {
+        throw new Error((data.error && data.error.message) || 'HTTP ' + resp.status);
+      }
+      testText = data.candidates[0].content.parts[0].text;
+    }
+
+    status.style.color = 'var(--green)';
+    status.textContent = '✅ ' + provider + ' key works! Response: "' + testText.trim() + '"';
+
+    // Auto-save the working key
+    d.apiKey = apiKey;
+    d.apiProvider = provider;
+    saveData(d);
+    status.textContent += ' — Key saved ✓';
+
+  } catch(e) {
+    status.style.color = 'var(--red)';
+
+    // Decode common errors into plain English
+    let msg = e.message;
+    if (msg.includes('401') || msg.toLowerCase().includes('invalid api key') || msg.toLowerCase().includes('authentication')) {
+      msg = 'Invalid API key. Double-check you copied the full key correctly.';
+    } else if (msg.includes('429') || msg.toLowerCase().includes('rate limit')) {
+      msg = 'Rate limit hit. Wait 1 minute and try again, or check your Groq plan limits.';
+    } else if (msg.includes('403')) {
+      msg = 'Access denied. Your key may not have permission for this model.';
+    } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+      msg = 'Network error. Check your internet connection.';
+    } else if (msg.toLowerCase().includes('model') && msg.toLowerCase().includes('not found')) {
+      msg = 'Model not found. The model name may have changed — try selecting a different provider.';
+    }
+
+    status.textContent = '❌ ' + msg;
+  }
+}
+
+
 renderDashboard();
+restoreProviderConfig();
+onProviderChange();
+
 
 window.addEventListener('input', function(e) {
   const el = e.target;
