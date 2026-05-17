@@ -1028,11 +1028,47 @@ button, input, select, textarea, a, label,
 .hm-cell[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#f5f0e8;font-size:.63rem;padding:2px 5px;border-radius:3px;white-space:nowrap;z-index:99;pointer-events:none}
 .streak-badge{display:inline-flex;align-items:center;gap:3px;background:#fef3c7;color:#92400e;border-radius:20px;padding:2px 8px;font-size:.72rem;font-weight:700}
 
+
+/* ══ AUTH OVERLAY ══ */
+.auth-overlay{position:fixed;inset:0;background:rgba(28,28,30,.97);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:'Source Sans 3',sans-serif}
+.auth-box{background:white;border-radius:16px;padding:2rem 1.5rem;max-width:400px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.5);animation:modalIn .25s ease}
+.auth-logo{font-family:'Libre Baskerville',serif;font-size:1.3rem;font-weight:700;text-align:center;margin-bottom:.3rem}
+.auth-logo span{color:var(--gold)}
+.auth-sub{font-size:.8rem;color:var(--muted);text-align:center;margin-bottom:1.5rem}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.2rem}
+.auth-tab{flex:1;padding:.55rem;background:none;border:none;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s}
+.auth-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.auth-field{margin-bottom:.85rem}
+.auth-field label{display:block;font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.auth-inp{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:15px;outline:none;transition:border-color .2s}
+.auth-inp:focus{border-color:var(--green)}
+.auth-inp.err{border-color:var(--red);background:var(--redl)}
+.auth-role-btns{display:flex;gap:.4rem;margin-bottom:1rem}
+.auth-role-btn{flex:1;padding:8px 6px;border:1.5px solid var(--border);border-radius:8px;background:white;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;text-align:center}
+.auth-role-btn:hover{border-color:var(--green);color:var(--green)}
+.auth-role-btn.sel{background:var(--green);color:white;border-color:var(--green)}
+.auth-btn{width:100%;padding:11px;background:var(--green);color:white;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .15s;min-height:44px}
+.auth-btn:hover{background:#145530}
+.auth-btn:disabled{background:#aaa;cursor:not-allowed}
+.auth-err{font-size:.78rem;color:var(--red);text-align:center;margin-top:.5rem;min-height:1rem}
+.auth-switch{font-size:.78rem;color:var(--muted);text-align:center;margin-top:.8rem}
+.auth-switch a{color:var(--green);cursor:pointer;font-weight:600}
+/* Role badges */
+.role-badge{display:inline-flex;align-items:center;gap:.3rem;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;margin-left:.5rem}
+.role-student{background:#dbeafe;color:#1e40af}
+.role-parent{background:#fef3c7;color:#92400e}
+.role-teacher{background:#d1fae5;color:#065f46}
+/* Change password modal */
+.pwd-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;align-items:center;justify-content:center;padding:1rem}
+.pwd-modal-overlay.show{display:flex}
+.pwd-modal{background:white;border-radius:14px;padding:1.5rem;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.pwd-modal h3{font-size:1rem;font-weight:700;margin-bottom:1rem}
 </style>
 
-<!-- Firebase SDK (v8 compat) — must load before inline script uses firebase.* -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<!-- Firebase SDK v10 compat — app + auth + firestore -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -1119,16 +1155,73 @@ button, input, select, textarea, a, label,
 </div>
 </div>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="logo">S1 English <span>Mastery</span></div>
-  <div class="top-btns">
-    <button class="tbtn tbtn-outline" onclick="openKeyModal()">🔐 Answer Key</button>
-    <span id="fsSyncBadge" style="font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--border);color:var(--muted);cursor:pointer" onclick="pullFromFirestore()" title="Click to force sync">☁ Connecting...</span>
-    <button class="tbtn tbtn-gold" onclick="window.print()">🖨 Print</button>
-    <button class="tbtn tbtn-primary" onclick="checkAllWA1()">✓ Check All</button>
+<!-- ══ AUTH OVERLAY ══ -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">S1 English <span>Mastery</span></div>
+    <div class="auth-sub">Sign in to track progress across devices</div>
+    <div id="authForm">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="authSwitchTab('login',this)">Sign In</button>
+        <button class="auth-tab" onclick="authSwitchTab('signup',this)">Register</button>
+      </div>
+      <div id="signupRoleRow" style="display:none">
+        <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Select Role</div>
+        <div class="auth-role-btns">
+          <button class="auth-role-btn sel" onclick="selectRole('student',this)">🎓 Student</button>
+          <button class="auth-role-btn" onclick="selectRole('parent',this)">👨‍👩‍👦 Parent</button>
+          <button class="auth-role-btn" onclick="selectRole('teacher',this)">📋 Teacher</button>
+        </div>
+      </div>
+      <div class="auth-field"><label>Email</label><input class="auth-inp" id="authEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="auth-field"><label>Password</label><input class="auth-inp" id="authPwd" type="password" placeholder="Password (min 6 chars)" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"></div>
+      <div id="signupNameRow" class="auth-field" style="display:none"><label>Display Name</label><input class="auth-inp" id="authName" type="text" placeholder="e.g. Mokshith"></div>
+      <button class="auth-btn" id="authSubmitBtn" onclick="doAuth()">Sign In</button>
+      <div class="auth-err" id="authErr"></div>
+      <div class="auth-switch" id="authSwitch">Don't have an account? <a onclick="authSwitchTab('signup',null)">Register</a></div>
+      <div style="text-align:center;margin-top:.8rem;font-size:.74rem;color:var(--muted)">
+        Accounts: mokshith@eng.sg / parent@eng.sg / teacher@eng.sg · Password: <strong>Abcd1234</strong>
+      </div>
+      <div style="margin-top:.6rem;padding-top:.6rem;border-top:1px solid #e5e7eb">
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:.4rem">Quick sign-in:</div>
+        <div style="display:flex;gap:.35rem;justify-content:center">
+          <button onclick="quickLogin('mokshith@eng.sg','Abcd1234')" style="flex:1;padding:7px 4px;border:1.5px solid #1e4d8c;border-radius:8px;background:#dbeafe;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;color:#1e4d8c;min-height:38px">🎓 Student</button>
+          <button onclick="quickLogin('parent@eng.sg','Abcd1234')" style="flex:1;padding:7px 4px;border:1.5px solid #92400e;border-radius:8px;background:#fef3c7;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;color:#92400e;min-height:38px">👨‍👩‍👦 Parent</button>
+          <button onclick="quickLogin('teacher@eng.sg','Abcd1234')" style="flex:1;padding:7px 4px;border:1.5px solid #065f46;border-radius:8px;background:#d1fae5;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;color:#065f46;min-height:38px">📋 Teacher</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- ══ CHANGE PASSWORD MODAL ══ -->
+<div class="pwd-modal-overlay" id="pwdModal">
+  <div class="pwd-modal">
+    <h3>🔑 Change Password</h3>
+    <div class="auth-field"><label>New Password</label><input class="auth-inp" id="newPwd1" type="password" placeholder="Min 6 characters"></div>
+    <div class="auth-field"><label>Confirm Password</label><input class="auth-inp" id="newPwd2" type="password" placeholder="Repeat password"></div>
+    <div class="auth-err" id="pwdErr"></div>
+    <div style="display:flex;gap:.5rem;margin-top:.5rem">
+      <button class="auth-btn" style="background:var(--muted)" onclick="document.getElementById('pwdModal').classList.remove('show')">Cancel</button>
+      <button class="auth-btn" onclick="doChangePwd()">Update Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">S1 English <span>Mastery</span> <span id="roleBadge" class="role-badge role-student" style="display:none">Student</span></div>
+  <div class="top-btns">
+    <span id="userDisplayName" style="color:rgba(255,255,255,.5);font-size:.75rem;display:none"></span>
+    <button class="tbtn tbtn-outline" onclick="openKeyModal()">🔐 Answer Key</button>
+    <span id="fsSyncBadge" style="font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--border);color:var(--muted);cursor:pointer" onclick="pullFromFirestore()" title="Click to force sync">☁ Connecting...</span>
+    <button class="tbtn tbtn-outline" onclick="document.getElementById('pwdModal').classList.add('show')">🔑 Change Pwd</button>
+    <button class="tbtn tbtn-gold" onclick="window.print()">🖨 Print</button>
+    <button class="tbtn tbtn-primary" onclick="checkAllWA1()">✓ Check All</button>
+    <button class="tbtn tbtn-danger" onclick="signOutUser()">Sign Out</button>
+  </div>
+</div>
+
 
 <!-- MAIN TABS -->
 <div class="main-tabs">
@@ -1713,9 +1806,9 @@ button, input, select, textarea, a, label,
 
 <script>
 // ══════════════════════════════════════════════════════
-//  FIREBASE CONFIG & INIT
+//  FIREBASE CONFIG & AUTH INIT
 // ══════════════════════════════════════════════════════
-const firebaseConfig = {
+var FIREBASE_CONFIG = {
   apiKey: "AIzaSyCVcIGRF6Za3rk4MU2ebHNcqw-ACZi7oCA",
   authDomain: "sec-english-a2f99.firebaseapp.com",
   projectId: "sec-english-a2f99",
@@ -1724,141 +1817,278 @@ const firebaseConfig = {
   appId: "1:887992660297:web:e25b1fe35e6ec6c9acaa98"
 };
 
-// Initialise Firebase (guard against double-init)
-if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-var db = firebase.firestore();
+var USE_FIREBASE = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+var db = null, auth = null, currentUser = null, currentRole = null;
 
-// Firestore document path — one doc per student
-var FS_DOC = 'students/mokshith';
+if (USE_FIREBASE) {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+  auth = firebase.auth();
+}
+
+// ── Demo accounts (used when Firebase is unavailable) ──
+var DEMO_ACCOUNTS = {
+  "mokshith@eng.sg": { password: "Abcd1234", role: "student", name: "Mokshith" },
+  "parent@eng.sg":   { password: "Abcd1234", role: "parent",  name: "Parent"   },
+  "teacher@eng.sg":  { password: "Abcd1234", role: "teacher", name: "Teacher"  }
+};
+
+// ══════════════════════════════════════════════════════
+//  AUTH FUNCTIONS
+// ══════════════════════════════════════════════════════
+var authMode = 'login', selectedRole = 'student';
+
+function authSwitchTab(mode, btn) {
+  authMode = mode;
+  var isSignup = mode === 'signup';
+  document.querySelectorAll('.auth-tab').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  else document.querySelectorAll('.auth-tab')[isSignup?1:0].classList.add('active');
+  document.getElementById('signupRoleRow').style.display  = isSignup ? 'block' : 'none';
+  document.getElementById('signupNameRow').style.display  = isSignup ? 'block' : 'none';
+  document.getElementById('authSubmitBtn').textContent    = isSignup ? 'Create Account' : 'Sign In';
+  document.getElementById('authSwitch').innerHTML = isSignup
+    ? 'Already have an account? <a onclick="authSwitchTab(\'login\',null)">Sign In</a>'
+    : "Don't have an account? <a onclick=\"authSwitchTab('signup',null)\">Register</a>";
+  document.getElementById('authErr').textContent = '';
+}
+
+function selectRole(role, btn) {
+  selectedRole = role;
+  document.querySelectorAll('.auth-role-btn').forEach(function(b){ b.classList.remove('sel'); });
+  btn.classList.add('sel');
+}
+
+function doAuth() {
+  var email = document.getElementById('authEmail').value.trim().toLowerCase();
+  var pwd   = document.getElementById('authPwd').value;
+  var errEl = document.getElementById('authErr');
+  errEl.textContent = '';
+  if (!email || !pwd) { errEl.textContent = 'Please enter email and password.'; return; }
+
+  document.getElementById('authSubmitBtn').disabled = true;
+  document.getElementById('authSubmitBtn').textContent = 'Please wait...';
+
+  if (USE_FIREBASE) {
+    if (authMode === 'login') {
+      auth.signInWithEmailAndPassword(email, pwd)
+        .then(function(uc) {
+          currentUser = uc.user;
+          setTimeout(function() {
+            if (document.getElementById('authOverlay').style.display !== 'none') {
+              currentRole = 'student';
+              onAuthSuccess();
+            }
+          }, 5000);
+        })
+        .catch(function(e) {
+          var msg = e.message;
+          if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')
+            msg = 'Email or password incorrect. Check and try again.';
+          if (e.code === 'auth/wrong-password')  msg = 'Incorrect password.';
+          if (e.code === 'auth/too-many-requests') msg = 'Too many failed attempts — wait a few minutes and try again.';
+          errEl.textContent = msg;
+          document.getElementById('authSubmitBtn').disabled = false;
+          document.getElementById('authSubmitBtn').textContent = 'Sign In';
+        });
+    } else {
+      var name = document.getElementById('authName').value.trim() || 'User';
+      auth.createUserWithEmailAndPassword(email, pwd)
+        .then(function(uc) {
+          return Promise.all([
+            uc.user.updateProfile({ displayName: name }),
+            db.collection('users').doc(uc.user.uid).set({ role: selectedRole, name: name, email: email, createdAt: firebase.firestore.FieldValue.serverTimestamp() })
+          ]);
+        })
+        .catch(function(e) {
+          errEl.textContent = e.message;
+          document.getElementById('authSubmitBtn').disabled = false;
+          document.getElementById('authSubmitBtn').textContent = 'Create Account';
+        });
+    }
+  } else {
+    var acct = DEMO_ACCOUNTS[email];
+    if (!acct) { errEl.textContent = 'Email not found. Use demo accounts shown below.'; document.getElementById('authSubmitBtn').disabled=false; document.getElementById('authSubmitBtn').textContent=authMode==='login'?'Sign In':'Create Account'; return; }
+    if (acct.password !== pwd) { errEl.textContent = 'Incorrect password.'; document.getElementById('authSubmitBtn').disabled=false; document.getElementById('authSubmitBtn').textContent='Sign In'; return; }
+    currentUser = { uid: email, email: email, displayName: acct.name };
+    currentRole = acct.role;
+    onAuthSuccess();
+  }
+}
+
+function onAuthSuccess() {
+  document.getElementById('authOverlay').style.display = 'none';
+  var role = currentRole || 'student';
+  var name = currentUser.displayName || currentUser.email;
+  var badge = document.getElementById('roleBadge');
+  if (badge) { badge.textContent = role.charAt(0).toUpperCase() + role.slice(1); badge.className = 'role-badge role-' + role; badge.style.display = 'inline-flex'; }
+  var nameEl = document.getElementById('userDisplayName');
+  if (nameEl) { nameEl.textContent = 'Hi, ' + name; nameEl.style.display = 'inline'; }
+  // Show parent-only elements for parent/teacher
+  if (role === 'parent' || role === 'teacher') {
+    document.querySelectorAll('.parent-only').forEach(function(el){ el.style.display = 'block'; });
+  }
+  if (role === 'teacher') {
+    document.querySelectorAll('.teacher-only').forEach(function(el){ el.style.display = 'block'; });
+  }
+  if (USE_FIREBASE) loadDataFromFirebase();
+  else { renderDashboard(); initWA1(); }
+}
+
+if (USE_FIREBASE) {
+  auth.onAuthStateChanged(function(user) {
+    if (user) {
+      currentUser = user;
+      db.collection('users').doc(user.uid).get()
+        .then(function(doc) {
+          currentRole = doc.exists ? (doc.data().role || 'student') : 'student';
+          onAuthSuccess();
+        })
+        .catch(function(e) {
+          console.warn('Firestore user read failed:', e.message);
+          currentRole = 'student';
+          onAuthSuccess();
+        });
+    }
+  });
+}
+
+function signOutUser() {
+  if (USE_FIREBASE) {
+    auth.signOut().then(function() { location.reload(); });
+  } else {
+    currentUser = null; currentRole = null;
+    document.getElementById('authOverlay').style.display = 'flex';
+    document.getElementById('authEmail').value = '';
+    document.getElementById('authPwd').value = '';
+    document.getElementById('authSubmitBtn').disabled = false;
+    document.getElementById('authSubmitBtn').textContent = 'Sign In';
+  }
+}
+
+function quickLogin(email, pwd) {
+  document.getElementById('authEmail').value = email;
+  document.getElementById('authPwd').value = pwd;
+  doAuth();
+}
+
+function doChangePwd() {
+  var p1 = document.getElementById('newPwd1').value;
+  var p2 = document.getElementById('newPwd2').value;
+  var errEl = document.getElementById('pwdErr');
+  errEl.textContent = '';
+  if (p1.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  if (p1 !== p2) { errEl.textContent = 'Passwords do not match.'; return; }
+  if (USE_FIREBASE && auth.currentUser) {
+    auth.currentUser.updatePassword(p1)
+      .then(function() {
+        document.getElementById('pwdModal').classList.remove('show');
+        document.getElementById('newPwd1').value = '';
+        document.getElementById('newPwd2').value = '';
+        alert('Password updated successfully!');
+      })
+      .catch(function(e) { errEl.textContent = e.message; });
+  } else {
+    if (currentUser) { var acct = DEMO_ACCOUNTS[currentUser.email]; if (acct) acct.password = p1; }
+    document.getElementById('pwdModal').classList.remove('show');
+    alert('Password updated (local session only).');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  DATA LAYER — per-user Firebase + localStorage fallback
+// ══════════════════════════════════════════════════════
+function getUID() { return currentUser ? (currentUser.uid || currentUser.email) : 'anon'; }
 
 // Sync state
 var _fsSyncing = false;
 var _fsPendingSync = false;
 var _fsOnline = true;
 
-// ── saveData: write to localStorage immediately, then Firestore async ──
 function saveData(d) {
   localStorage.setItem(STORE_KEY, JSON.stringify(d));
-  _syncToFirestore(d);
+  if (USE_FIREBASE && currentUser) _syncToFirestore(d);
 }
 
-// ── loadData: localStorage first (instant), then pull Firestore if newer ──
 function loadData() {
-  try {
-    return JSON.parse(localStorage.getItem(STORE_KEY)) || initData();
-  } catch(e) {
-    return initData();
-  }
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || initData(); }
+  catch(e) { return initData(); }
 }
 
-// ── Push to Firestore (debounced — max 1 write per 3 seconds) ──
+function saveDataToFirebase(d) {
+  if (!db || !currentUser) return;
+  var fsData = JSON.parse(JSON.stringify(d));
+  // Strip large base64 uploads
+  if (fsData.standaloneUploads) {
+    fsData.standaloneUploads = fsData.standaloneUploads.map(function(u) {
+      return { id:u.id, paperTag:u.paperTag, name:u.name, type:u.type, addedAt:u.addedAt, dateDisplay:u.dateDisplay,
+               data: u.type==='pdf' ? '(stored locally)' : (u.data||'').slice(0,50)+'...' };
+    });
+  }
+  if (fsData.history) {
+    fsData.history = fsData.history.map(function(h){ var s=Object.assign({},h); delete s.uploads; return s; });
+  }
+  fsData._updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+  db.collection('progress').doc(getUID()).set(fsData, { merge: true })
+    .catch(function(e) { console.error('Firebase save error:', e); });
+}
+
+function loadDataFromFirebase() {
+  if (!db || !currentUser) return;
+  _updateSyncBadge('syncing');
+  db.collection('progress').doc(getUID()).get()
+    .then(function(doc) {
+      if (doc.exists) {
+        var fsData = doc.data();
+        var localData = loadData();
+        var merged = (fsData.history||[]).length >= (localData.history||[]).length ? fsData : localData;
+        merged.standaloneUploads = localData.standaloneUploads || [];
+        localStorage.setItem(STORE_KEY, JSON.stringify(merged));
+      }
+      _updateSyncBadge('ok');
+      renderDashboard();
+      initWA1();
+    })
+    .catch(function(e) {
+      console.warn('Firebase load error:', e);
+      _updateSyncBadge('error');
+      renderDashboard();
+      initWA1();
+    });
+}
+
+// ── Push to Firestore (debounced) ──
 var _syncTimer = null;
 function _syncToFirestore(d) {
   if (!_fsOnline) return;
   clearTimeout(_syncTimer);
-  _syncTimer = setTimeout(function() {
-    _doFirestoreWrite(d);
-  }, 3000);
+  _syncTimer = setTimeout(function() { _doFirestoreWrite(d); }, 3000);
 }
 
 function _doFirestoreWrite(d) {
   if (_fsSyncing) { _fsPendingSync = true; return; }
   _fsSyncing = true;
   _updateSyncBadge('syncing');
-
-  // Strip base64 uploads from Firestore (too large — keep in localStorage only)
-  var fsData = JSON.parse(JSON.stringify(d));
-  if (fsData.standaloneUploads) {
-    fsData.standaloneUploads = fsData.standaloneUploads.map(function(u) {
-      return { id: u.id, paperTag: u.paperTag, name: u.name,
-               type: u.type, addedAt: u.addedAt, dateDisplay: u.dateDisplay,
-               data: u.type === 'pdf' ? '(stored locally)' : u.data.slice(0,50) + '...' };
-    });
-  }
-  // Strip large answer snapshots from history to save Firestore quota
-  if (fsData.history) {
-    fsData.history = fsData.history.map(function(h) {
-      var slim = Object.assign({}, h);
-      delete slim.uploads; // large base64 images stay local
-      return slim;
-    });
-  }
-  fsData._updatedAt = new Date().toISOString();
-
-  db.doc(FS_DOC).set(fsData, { merge: true })
-    .then(function() {
-      _fsSyncing = false;
-      _updateSyncBadge('ok');
-      if (_fsPendingSync) {
-        _fsPendingSync = false;
-        _doFirestoreWrite(loadData());
-      }
-    })
-    .catch(function(err) {
-      _fsSyncing = false;
-      _updateSyncBadge('error');
-      console.warn('Firestore write failed:', err.message);
-    });
+  saveDataToFirebase(d);
+  // Mark done after a short delay (saveDataToFirebase is async)
+  setTimeout(function() {
+    _fsSyncing = false;
+    _updateSyncBadge('ok');
+    if (_fsPendingSync) { _fsPendingSync = false; _doFirestoreWrite(loadData()); }
+  }, 2000);
 }
 
-// ── Pull from Firestore on load — merge with localStorage ──
-function pullFromFirestore() {
-  _updateSyncBadge('syncing');
-  db.doc(FS_DOC).get()
-    .then(function(doc) {
-      if (!doc.exists) {
-        _updateSyncBadge('ok');
-        return;
-      }
-      var fsData = doc.data();
-      var localData = loadData();
-      var fsHistory = (fsData.history || []).length;
-      var localHistory = (localData.history || []).length;
+function pullFromFirestore() { loadDataFromFirebase(); }
 
-      // Merge: keep whichever has more history
-      // But always keep local uploads (they're stripped from Firestore)
-      var merged;
-      if (fsHistory >= localHistory) {
-        merged = fsData;
-        merged.standaloneUploads = localData.standaloneUploads || [];
-        // Restore answer snapshots from local if Firestore has same entries
-        merged.history = merged.history.map(function(fh) {
-          var local = localData.history.find(function(lh) { return lh.id === fh.id; });
-          if (local && local.answers) fh.answers = local.answers;
-          return fh;
-        });
-      } else {
-        merged = localData;
-      }
-
-      localStorage.setItem(STORE_KEY, JSON.stringify(merged));
-      _updateSyncBadge('ok');
-      renderDashboard();
-    })
-    .catch(function(err) {
-      _updateSyncBadge('error');
-      console.warn('Firestore pull failed:', err.message);
-    });
-}
-
-// ── Sync badge in the UI ──
 function _updateSyncBadge(state) {
   var badge = document.getElementById('fsSyncBadge');
   if (!badge) return;
-  var states = {
-    syncing: { text: '☁ Syncing...', bg: 'var(--amber)', color: 'white' },
-    ok:      { text: '☁ Synced',    bg: 'var(--green)', color: 'white' },
-    error:   { text: '☁ Offline',   bg: '#9ca3af',      color: 'white' },
-    local:   { text: '💾 Local',    bg: 'var(--border)', color: 'var(--muted)' }
-  };
+  var states = { syncing:{text:'☁ Syncing...',bg:'var(--amber)',color:'white'}, ok:{text:'☁ Synced',bg:'var(--green)',color:'white'}, error:{text:'☁ Offline',bg:'#9ca3af',color:'white'}, local:{text:'💾 Local',bg:'var(--border)',color:'var(--muted)'} };
   var s = states[state] || states.local;
-  badge.textContent = s.text;
-  badge.style.background = s.bg;
-  badge.style.color = s.color;
+  badge.textContent = s.text; badge.style.background = s.bg; badge.style.color = s.color;
 }
 
-// ── Online/offline detection ──
-window.addEventListener('online',  function() { _fsOnline = true;  pullFromFirestore(); });
+window.addEventListener('online',  function() { _fsOnline = true;  if(currentUser) pullFromFirestore(); });
 window.addEventListener('offline', function() { _fsOnline = false; _updateSyncBadge('error'); });
 
 
