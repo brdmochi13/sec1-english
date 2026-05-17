@@ -259,6 +259,11 @@ p.body{font-size:.84rem;margin-bottom:.35rem}
 .strat-c p{font-size:.76rem;color:var(--muted)}
 
 @media(max-width:520px){.qc{font-size:.84rem}.ainp{min-width:80px}}
+/* QF Split layout — stack on mobile */
+@media(max-width:640px){
+  #qfSplitGrid{grid-template-columns:1fr!important;}
+  #qfVisualPanel{border-right:none!important;border-top:1px solid var(--border);}
+}
 
 /* ══ TOUCH / MOBILE OPTIMISATION ══ */
 @media (max-width: 768px) {
@@ -1741,26 +1746,31 @@ button, input, select, textarea, a, label,
   </div>
   <!-- Active QF session -->
   <div id="qfSession" style="display:none">
-    <div class="card">
-      <div class="card-head" style="justify-content:space-between">
-        <div style="display:flex;gap:.8rem;align-items:center">
-          <div style="font-size:.85rem">Q <strong id="qfQNum">1</strong></div>
-          <div style="font-size:.85rem">Score: <strong id="qfScore">0</strong></div>
-          <div class="streak-badge" id="qfStreakDisplay">🔥 0</div>
-        </div>
-        <div style="display:flex;gap:.8rem;align-items:center">
-          <!-- Timer arc -->
-          <svg width="44" height="44" viewBox="0 0 44 44">
-            <circle cx="22" cy="22" r="18" fill="none" stroke="#e8e2d8" stroke-width="4"/>
-            <circle id="qfTimerArc" cx="22" cy="22" r="18" fill="none" stroke="var(--green)" stroke-width="4"
-              stroke-dasharray="113" stroke-dashoffset="0" stroke-linecap="round"
-              transform="rotate(-90 22 22)" style="transition:stroke-dashoffset .9s linear,stroke .3s"/>
-            <text x="22" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)" id="qfTimerText">20</text>
-          </svg>
-          <button class="tbtn tbtn-outline" onclick="endQuickFire()" style="font-size:.75rem;padding:4px 10px;color:var(--red);border-color:var(--red)">End</button>
-        </div>
+    <!-- Status bar -->
+    <div style="background:var(--ink);border-radius:10px 10px 0 0;padding:.6rem .95rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem">
+      <div style="display:flex;gap:.9rem;align-items:center">
+        <div style="font-size:.85rem;color:white">Q <strong id="qfQNum">1</strong></div>
+        <div style="font-size:.85rem;color:white">Score: <strong id="qfScore">0</strong></div>
+        <div class="streak-badge" id="qfStreakDisplay" style="color:white">&#x1F525; 0</div>
       </div>
-      <div class="card-body" id="qfQuestionArea" style="min-height:140px"></div>
+      <div style="display:flex;gap:.8rem;align-items:center">
+        <svg width="44" height="44" viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="4"/>
+          <circle id="qfTimerArc" cx="22" cy="22" r="18" fill="none" stroke="var(--green)" stroke-width="4"
+            stroke-dasharray="113" stroke-dashoffset="0" stroke-linecap="round"
+            transform="rotate(-90 22 22)" style="transition:stroke-dashoffset .9s linear,stroke .3s"/>
+          <text x="22" y="27" text-anchor="middle" font-size="11" font-weight="700" fill="white" id="qfTimerText">20</text>
+        </svg>
+        <button class="tbtn tbtn-outline" onclick="endQuickFire()" style="font-size:.75rem;padding:4px 10px;color:var(--red);border-color:var(--red)">End</button>
+      </div>
+    </div>
+    <!-- Split layout: question LEFT, visual RIGHT -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;background:var(--card);overflow:hidden;min-height:200px" id="qfSplitGrid">
+      <div style="padding:.85rem .95rem;border-right:1px solid var(--border)" id="qfQuestionArea"></div>
+      <div style="padding:.85rem .95rem;background:#f9f7f2" id="qfVisualPanel">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:.55rem">&#x1F4DA; Grammar Visual</div>
+        <div id="qfVisualContent" style="font-size:.82rem;color:var(--muted);font-style:italic">Visual hint will appear here once the question loads.</div>
+      </div>
     </div>
   </div>
   <!-- QF Result -->
@@ -6788,6 +6798,132 @@ function buildQFQuestions(topic, count) {
   return pool.slice(0, count);
 }
 
+// ── Build dynamic editing visual (highlights actual error word) ──
+function buildEditingVisualSVG(q) {
+  var sentence = q.sentence || '';
+  var errorWord = (q.error || '').toLowerCase();
+  var correction = q.correction || '';
+  var reason = q.reason || '';
+
+  // Build highlighted sentence: wrap error word in red
+  function highlightSentence(s, word, color, strike) {
+    // Case-insensitive word boundary replacement
+    var re = new RegExp('\\b(' + word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')\\b', 'i');
+    return s.replace(re, function(m) {
+      if (strike) return '<tspan fill="' + color + '" font-weight="700" text-decoration="line-through">' + m + '</tspan>';
+      return '<tspan fill="' + color + '" font-weight="700">' + m + '</tspan>';
+    });
+  }
+
+  // Escape for SVG text
+  function svgEsc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Word-wrap for SVG (max ~32 chars per line)
+  function svgWrap(s, maxLen) {
+    var words = s.split(' ');
+    var lines = [], cur = '';
+    words.forEach(function(w) {
+      if ((cur + ' ' + w).trim().length > maxLen) { lines.push(cur.trim()); cur = w; }
+      else cur = (cur + ' ' + w).trim();
+    });
+    if (cur) lines.push(cur.trim());
+    return lines;
+  }
+
+  // Build corrected sentence
+  var corrected = sentence.replace(new RegExp('\\b' + errorWord.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b', 'i'), correction);
+
+  // Derive error type label from reason
+  var label = 'Editing Error';
+  var r = reason.toLowerCase();
+  if (r.includes('plural') || r.includes('singular') || r.includes('are') || r.includes('sva')) label = 'SVA Error';
+  else if (r.includes('tense') || r.includes('past') || r.includes('present')) label = 'Tense Error';
+  else if (r.includes('extra') || r.includes('remove') || r.includes('delete')) label = 'Extra Word';
+  else if (r.includes('preposition') || r.includes('about') || r.includes('into')) label = 'Wrong Preposition';
+  else if (r.includes('comparative') || r.includes('more') || r.includes('superlative')) label = 'Comparative Error';
+
+  // Simple SVG: show ❌ wrong line and ✅ correct line
+  var svgLines = [
+    '<svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px">',
+    '<rect width="300" height="130" rx="8" fill="#fff8f8"/>',
+    '<!-- Title -->',
+    '<rect x="0" y="0" width="300" height="22" rx="8" fill="#c2410c" opacity=".12"/>',
+    '<text x="150" y="15" text-anchor="middle" font-size="10" font-weight="700" fill="#c2410c">Editing: ' + svgEsc(label) + '</text>',
+    '<!-- Wrong row -->',
+    '<rect x="10" y="26" width="280" height="32" rx="5" fill="#dc2626" opacity=".10"/>',
+    '<text x="20" y="42" font-size="9" fill="#7f1d1d">&#x274C;</text>',
+  ];
+
+  // Wrong sentence with strikethrough error word — render as plain text in SVG (no tspan markup in simplified version)
+  var wrongWords = sentence.split(' ');
+  var xPos = 34, wrongY = 42;
+  wrongWords.forEach(function(w) {
+    var isError = w.toLowerCase().replace(/[.,!?;:]/g,'') === errorWord.replace(/[.,!?;:]/g,'');
+    var fill = isError ? '#dc2626' : '#7f1d1d';
+    var fw = isError ? '700' : '400';
+    svgLines.push('<text x="' + xPos + '" y="' + wrongY + '" font-size="10" fill="' + fill + '" font-weight="' + fw + '" ' + (isError ? 'text-decoration="line-through"' : '') + '>' + svgEsc(w) + '</text>');
+    xPos += w.length * 5.8 + 4;
+    if (xPos > 270) { xPos = 34; wrongY += 14; }
+  });
+
+  // Correct sentence 
+  svgLines.push('<rect x="10" y="64" width="280" height="32" rx="5" fill="#16a34a" opacity=".10"/>');
+  svgLines.push('<text x="20" y="80" font-size="9" fill="#14532d">&#x2705;</text>');
+
+  var corrWords = corrected.split(' ');
+  var xPos2 = 34, corrY = 80;
+  corrWords.forEach(function(w) {
+    var isFixed = w.toLowerCase().replace(/[.,!?;:]/g,'') === correction.toLowerCase().replace(/[.,!?;:]/g,'');
+    var fill = isFixed ? '#16a34a' : '#14532d';
+    var fw = isFixed ? '700' : '400';
+    svgLines.push('<text x="' + xPos2 + '" y="' + corrY + '" font-size="10" fill="' + fill + '" font-weight="' + fw + '">' + svgEsc(w) + '</text>');
+    xPos2 += w.length * 5.8 + 4;
+    if (xPos2 > 270) { xPos2 = 34; corrY += 14; }
+  });
+
+  // Reason line
+  svgLines.push('<text x="150" y="118" text-anchor="middle" font-size="8.5" fill="#6b7280">' + svgEsc(reason.slice(0,55)) + '</text>');
+  svgLines.push('</svg>');
+  return svgLines.join('\n');
+}
+
+// ── Render the right-panel visual for a question ──
+function renderQFVisualPanel(q) {
+  var panel = document.getElementById('qfVisualContent');
+  if (!panel) return;
+
+  var html = '';
+
+  // For editing questions: generate a DYNAMIC visual using the actual sentence
+  if (q.type === 'editing') {
+    var svg = buildEditingVisualSVG(q);
+    html += '<div style="margin-bottom:.55rem">' + svg + '</div>';
+    // Also show generic visual if available
+    var key = getQFVisualKey(q);
+    var vis = key ? QF_VISUALS[key] : null;
+    if (vis) {
+      html += '<div style="font-size:.79rem;line-height:1.6;margin-bottom:.3rem">' + vis.rule + '</div>';
+      html += '<div style="font-size:.75rem;color:var(--muted);background:#f0ece4;border-radius:5px;padding:.3rem .5rem">&#x1F4A1; ' + vis.tip + '</div>';
+    } else {
+      html += '<div style="font-size:.79rem;color:var(--muted)">' + (q.reason||'') + '</div>';
+    }
+  } else {
+    var key2 = getQFVisualKey(q);
+    var vis2 = key2 ? QF_VISUALS[key2] : null;
+    if (vis2) {
+      html += '<div style="margin-bottom:.5rem">' + vis2.svg + '</div>';
+      html += '<div style="font-size:.79rem;line-height:1.6;margin-bottom:.3rem">' + vis2.rule + '</div>';
+      html += '<div style="font-size:.75rem;color:var(--muted);background:#f0ece4;border-radius:5px;padding:.3rem .5rem">&#x1F4A1; ' + vis2.tip + '</div>';
+    } else {
+      html = '<div style="font-size:.82rem;color:var(--muted);font-style:italic">No visual available for this question type.</div>';
+    }
+  }
+
+  panel.innerHTML = html;
+}
+
 function showQFQuestion() {
   if (qfState.current >= qfState.questions.length) { endQuickFire(); return; }
   var q = qfState.questions[qfState.current];
@@ -6830,7 +6966,10 @@ function showQFQuestion() {
     html += '<button class="tbtn tbtn-primary" onclick="answerQFInput()" style="font-size:.82rem;margin-top:.5rem">Submit</button>';
   }
 
-  area.innerHTML = html + buildQFVisualHint(q);
+  area.innerHTML = html;
+
+  // Render visual in right panel
+  renderQFVisualPanel(q);
 
   // Start countdown
   clearInterval(qfState.timer);
@@ -6866,8 +7005,11 @@ function answerQF(given, btn) {
   qfState.answered = true;
   clearInterval(qfState.timer);
   var q = qfState.questions[qfState.current];
-  var correct = (q.answer||'').toLowerCase().split('/')[0].trim();
-  var ok = given.toLowerCase().trim() === correct;
+  // Editing questions store the error word in q.error; other types use q.answer
+  var correctRaw = (q.type === 'editing') ? (q.error || q.answer || '') : (q.answer || '');
+  // Support multiple accepted answers separated by /
+  var accepted = correctRaw.toLowerCase().split('/').map(function(a){return a.trim();});
+  var ok = accepted.indexOf(given.toLowerCase().trim()) !== -1;
   processQFAnswer(ok, given, q, btn ? btn.closest('.mc-opts') : null);
 }
 
@@ -6903,7 +7045,7 @@ function processQFAnswer(ok, given, q, mcArea) {
     + (ok ? 'var(--greenl)' : 'var(--redl)')
     + ';border:1.5px solid ' + (ok ? '#86efac' : '#fca5a5') + ';position:relative">'
     + '<div style="font-weight:700;font-size:.92rem;color:' + (ok ? 'var(--green)' : 'var(--red)') + ';margin-bottom:.2rem">'
-    + (ok ? '✓ Correct! +1' : '✗ Wrong — Answer: <strong>' + esc(q.answer || q.correction || '') + '</strong>')
+    + (ok ? '✓ Correct! +1' : '✗ Wrong — Answer: <strong>' + esc((q.type==='editing' ? q.error : q.answer) || q.correction || '') + '</strong>')
     + '</div>'
     + '<div style="font-size:.82rem;color:var(--ink);margin-bottom:.3rem">' + esc(q.reason || q.r || '') + '</div>'
     + (ok ? '' : '<div style="font-size:.78rem;color:var(--muted)">Remember this rule for next time!</div>')
@@ -6913,15 +7055,7 @@ function processQFAnswer(ok, given, q, mcArea) {
     + '</div>'
     + '</div>';
   area.innerHTML += feedbackHtml;
-  // Refresh the visual hint to highlight the relevant rule
-  var hintEl = document.getElementById('qfVisualHint');
-  if (hintEl) {
-    // Ensure hint is visible after answer
-    var hintContent = document.getElementById('qfHintContent');
-    var hintBtn = document.getElementById('qfHintToggleBtn');
-    if (hintContent) hintContent.style.display = 'block';
-    if (hintBtn) hintBtn.innerHTML = '📚 Hide Grammar Hint &nbsp;<span style="font-size:.7rem;opacity:.7">(tap to collapse)</span>';
-  }
+  // Visual panel is always visible in right column — no toggle needed
 
   // Countdown display
   var remaining = SHOW_SECS;
