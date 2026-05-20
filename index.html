@@ -4362,7 +4362,10 @@ async function callGemini(apiKey, prompt) {
   return data.candidates[0].content.parts[0].text;
 }
 
-async function callOpenAICompat(url, apiKey, model, prompt) {
+async function callOpenAICompat(url, apiKey, model, prompt, maxTokens, systemMsg) {
+  const messages = [];
+  if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+  messages.push({ role: 'user', content: prompt });
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
@@ -4371,8 +4374,8 @@ async function callOpenAICompat(url, apiKey, model, prompt) {
     },
     body: JSON.stringify({
       model: model,
-      max_tokens: 4000,
-      messages: [{ role: 'user', content: prompt }]
+      max_tokens: maxTokens || 4000,
+      messages: messages
     })
   });
   const data = await resp.json();
@@ -6037,7 +6040,16 @@ async function submitEssayForMarking() {
     } else if (provider === 'gemini') {
       response = await callGemini(apiKey, prompt);
     } else {
-      response = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', apiKey, 'llama-3.1-8b-instant', prompt);
+      // Essay marking needs a larger model — use llama-3.3-70b-versatile
+      // which handles long structured JSON reliably
+      response = await callOpenAICompat(
+        'https://api.groq.com/openai/v1/chat/completions',
+        apiKey,
+        'llama-3.3-70b-versatile',
+        prompt,
+        2000,
+        'You are a JSON-only responder. Output ONLY valid JSON. No explanation, no markdown, no preamble. Start with { and end with }.'
+      );
     }
 
     var result = extractJSON(response);
@@ -6073,11 +6085,12 @@ function buildEssayMarkingPrompt(prompt, essay, rubric) {
     + '    {"name":"Language & Style","score":<n>,"max":' + rubric.criteria[1].max + ',"feedback":"<2-3 specific sentences>","strengths":["<point>"],"improvements":["<point>","<point>"]},\n'
     + '    {"name":"Organisation","score":<n>,"max":' + rubric.criteria[2].max + ',"feedback":"<2-3 specific sentences>","strengths":["<point>"],"improvements":["<point>"]}\n'
     + '  ],\n'
-    + '  "overallFeedback": "<3-4 sentences of overall feedback>",\n'
-    + '  "topTips": ["<most important improvement tip 1>","<tip 2>","<tip 3>"],\n'
-    + '  "modelOpening": "<Write a better opening sentence or paragraph for this essay>",\n'
-    + '  "vocabularyFeedback": "<Comment on 2-3 specific word choices — praise good ones, suggest better alternatives for weak ones>"\n'
-    + '}';
+    + '  "overallFeedback": "<2-3 sentences of overall feedback>",\n'
+    + '  "topTips": ["<tip 1>","<tip 2>","<tip 3>"],\n'
+    + '  "modelOpening": "<One improved opening sentence>",\n'
+    + '  "vocabularyFeedback": "<One sentence on vocabulary>"\n'
+    + '}\n'
+    + 'IMPORTANT: Keep all feedback SHORT. Each feedback field max 1-2 sentences. Arrays max 2 items each. Total response must be under 800 tokens.';
 }
 
 function displayEssayResult(result, essayText) {
