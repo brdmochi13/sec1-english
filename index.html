@@ -1884,12 +1884,16 @@ function doAuth() {
       auth.signInWithEmailAndPassword(email, pwd)
         .then(function(uc) {
           currentUser = uc.user;
-          setTimeout(function() {
-            if (document.getElementById('authOverlay').style.display !== 'none') {
+          // Load role from Firestore, then proceed
+          db.collection('users').doc(uc.user.uid).get()
+            .then(function(doc) {
+              currentRole = doc.exists ? (doc.data().role || 'student') : 'student';
+              onAuthSuccess();
+            })
+            .catch(function() {
               currentRole = 'student';
               onAuthSuccess();
-            }
-          }, 5000);
+            });
         })
         .catch(function(e) {
           var msg = e.message;
@@ -1947,7 +1951,9 @@ function onAuthSuccess() {
 
 if (USE_FIREBASE) {
   auth.onAuthStateChanged(function(user) {
-    if (user) {
+    // Only handle auto-login on page load (when overlay is still showing)
+    var overlay = document.getElementById('authOverlay');
+    if (user && overlay && overlay.style.display !== 'none') {
       currentUser = user;
       db.collection('users').doc(user.uid).get()
         .then(function(doc) {
