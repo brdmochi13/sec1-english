@@ -2527,6 +2527,10 @@ function renderDashRecentAttempts(d) {
 
 function renderDashboard() {
   const d = loadData();
+  if (!d.history) d.history = [];
+  if (!d.essayHistory) d.essayHistory = [];
+  if (!d.emailHistory) d.emailHistory = [];
+  if (!d.qfHistory) d.qfHistory = [];
   const hasData = d.history.length > 0;
   const wa1History = d.history.filter(h => h.type === 'WA');
   const aiHistory  = d.history.filter(h => h.type === 'AI');
