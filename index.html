@@ -1981,7 +1981,7 @@ var FIREBASE_CONFIG = {
   appId: "1:887992660297:web:e25b1fe35e6ec6c9acaa98"
 };
 
-var USE_FIREBASE = false; // Login uses local accounts - Firebase sync disabled until stable
+var USE_FIREBASE = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
 var db = null, auth = null, currentUser = null, currentRole = null;
 
 if (USE_FIREBASE) {
