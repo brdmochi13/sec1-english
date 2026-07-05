@@ -2545,17 +2545,17 @@ function renderDashboard() {
   const avgScore = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
   const bestScore = scores.length ? Math.max(...scores) : 0;
 
-  document.getElementById('dashStats').innerHTML =
+  (document.getElementById('dashStats')||{}).innerHTML =
     statCard('Papers Done', totalAttempts, `WA1: ${wa1History.length} · AI: ${aiHistory.length}`) +
     statCard('Average Score', avgScore+'%', 'Across all attempts') +
     statCard('Best Score', bestScore+'%', 'Personal best') +
     statCard('Streak', d.streak + (d.streak>=3?' 🔥':d.streak>=1?' ⭐':''), 'Consecutive days');
 
   if (!hasData) {
-    document.getElementById('swSummary').innerHTML = '<div class="empty-state"><div class="es-icon">📊</div><p>Complete a paper to see your strengths and weaknesses</p></div>';
-    document.getElementById('skillBars').innerHTML = '<div class="empty-state"><div class="es-icon">📈</div><p>Complete a paper first</p></div>';
-    document.getElementById('historyList').innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><p>No attempts yet</p></div>';
-    document.getElementById('dashWeakFocus').style.display='none';
+    (document.getElementById('swSummary')||{}).innerHTML = '<div class="empty-state"><div class="es-icon">📊</div><p>Complete a paper to see your strengths and weaknesses</p></div>';
+    (document.getElementById('skillBars')||{}).innerHTML = '<div class="empty-state"><div class="es-icon">📈</div><p>Complete a paper first</p></div>';
+    (document.getElementById('historyList')||{}).innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><p>No attempts yet</p></div>';
+    (document.getElementById('dashWeakFocus')||{style:{}}).style.display='none';
     return;
   }
 
@@ -2604,7 +2604,7 @@ function renderDashboard() {
       Go to <strong>Study Notes → ${topWeak.name==='Tenses'||topWeak.name==='Articles'||topWeak.name==='SVA'||topWeak.name==='Conjunctions'?'Grammar Rules':'Editing/Cloze notes'}</strong> to review, then use the generator below to practise.
     </div>`;
   }
-  document.getElementById('swSummary').innerHTML = swHtml;
+  (document.getElementById('swSummary')||{}).innerHTML = swHtml;
 
   // ── Skill bars ──
   let skillHtml = '';
@@ -2622,7 +2622,7 @@ function renderDashboard() {
       <div class="skill-track"><div class="skill-fill" style="width:${pct}%;background:${col}"></div></div>
     </div>`;
   });
-  document.getElementById('skillBars').innerHTML = skillHtml ||
+  (document.getElementById('skillBars')||{}).innerHTML = skillHtml ||
     '<p style="font-size:.83rem;color:var(--muted)">Attempt more papers to build skill data.</p>';
 
   // ── All 10 paper scores ──
@@ -2671,13 +2671,13 @@ function renderDashboard() {
       </div>`;
     });
   }
-  document.getElementById('historyList').innerHTML = histHtml;
+  (document.getElementById('historyList')||{}).innerHTML = histHtml;
 
   // ── Adaptive focus bar ──
   const weakAreas = getWeakAreas(d);
   if(weakAreas.length) {
-    document.getElementById('dashWeakFocus').style.display='block';
-    document.getElementById('dashWeakText').textContent = weakAreas.slice(0,3).map(w=>w.name+' ('+w.pct+'%)').join(', ');
+    (document.getElementById('dashWeakFocus')||{style:{}}).style.display='block';
+    (document.getElementById('dashWeakText')||{}).textContent = weakAreas.slice(0,3).map(w=>w.name+' ('+w.pct+'%)').join(', ');
   }
   // Render attempts log
   renderAttemptsLog();
