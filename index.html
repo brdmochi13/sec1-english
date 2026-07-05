@@ -2033,23 +2033,29 @@ function doAuth() {
   document.getElementById('authSubmitBtn').disabled = true;
   document.getElementById('authSubmitBtn').textContent = 'Please wait...';
 
-  // Check DEMO accounts first — always works regardless of Firebase
-  if (authMode === 'login') {
-    var demoAcct = DEMO_ACCOUNTS[email];
-    if (demoAcct && demoAcct.password === pwd) {
+  // ── DEMO accounts: always work, no Firebase needed ──
+  var demoAcct = DEMO_ACCOUNTS[email];
+  if (demoAcct) {
+    if (authMode === 'login') {
+      if (demoAcct.password !== pwd) {
+        errEl.textContent = 'Incorrect password.';
+        document.getElementById('authSubmitBtn').disabled = false;
+        document.getElementById('authSubmitBtn').textContent = 'Sign In';
+        return;
+      }
+      currentUser = { uid: 'demo_' + email, email: email, displayName: demoAcct.name };
       currentRole = demoAcct.role;
-      currentUser = { email: email, displayName: demoAcct.name, uid: 'demo_' + email };
       onAuthSuccess();
       return;
     }
   }
 
+  // ── Real Firebase accounts ──
   if (USE_FIREBASE) {
     if (authMode === 'login') {
       auth.signInWithEmailAndPassword(email, pwd)
         .then(function(uc) {
           currentUser = uc.user;
-          // Load role from Firestore, then proceed
           db.collection('users').doc(uc.user.uid).get()
             .then(function(doc) {
               currentRole = doc.exists ? (doc.data().role || 'student') : 'student';
@@ -2061,11 +2067,8 @@ function doAuth() {
             });
         })
         .catch(function(e) {
-          var msg = e.message;
-          if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')
-            msg = 'Email or password incorrect. Check and try again.';
-          if (e.code === 'auth/wrong-password')  msg = 'Incorrect password.';
-          if (e.code === 'auth/too-many-requests') msg = 'Too many failed attempts — wait a few minutes and try again.';
+          var msg = 'Email or password incorrect. Check and try again.';
+          if (e.code === 'auth/too-many-requests') msg = 'Too many failed attempts — wait a few minutes.';
           errEl.textContent = msg;
           document.getElementById('authSubmitBtn').disabled = false;
           document.getElementById('authSubmitBtn').textContent = 'Sign In';
@@ -2086,32 +2089,29 @@ function doAuth() {
         });
     }
   } else {
-    var acct = DEMO_ACCOUNTS[email];
-    if (!acct) { errEl.textContent = 'Email not found. Use demo accounts shown below.'; document.getElementById('authSubmitBtn').disabled=false; document.getElementById('authSubmitBtn').textContent=authMode==='login'?'Sign In':'Create Account'; return; }
-    if (acct.password !== pwd) { errEl.textContent = 'Incorrect password.'; document.getElementById('authSubmitBtn').disabled=false; document.getElementById('authSubmitBtn').textContent='Sign In'; return; }
-    currentUser = { uid: email, email: email, displayName: acct.name };
-    currentRole = acct.role;
-    onAuthSuccess();
+    errEl.textContent = 'Email not found. Use the demo accounts shown below.';
+    document.getElementById('authSubmitBtn').disabled = false;
+    document.getElementById('authSubmitBtn').textContent = 'Sign In';
   }
 }
 
 function onAuthSuccess() {
   document.getElementById('authOverlay').style.display = 'none';
   var role = currentRole || 'student';
-  var name = currentUser.displayName || currentUser.email;
+  var name = (currentUser && (currentUser.displayName || currentUser.email)) || 'Student';
   var badge = document.getElementById('roleBadge');
   if (badge) { badge.textContent = role.charAt(0).toUpperCase() + role.slice(1); badge.className = 'role-badge role-' + role; badge.style.display = 'inline-flex'; }
   var nameEl = document.getElementById('userDisplayName');
   if (nameEl) { nameEl.textContent = 'Hi, ' + name; nameEl.style.display = 'inline'; }
-  // Show parent-only elements for parent/teacher
   if (role === 'parent' || role === 'teacher') {
     document.querySelectorAll('.parent-only').forEach(function(el){ el.style.display = 'block'; });
   }
   if (role === 'teacher') {
     document.querySelectorAll('.teacher-only').forEach(function(el){ el.style.display = 'block'; });
   }
-  // Demo users skip Firebase — go straight to render
-  if (USE_FIREBASE && currentUser && !currentUser.uid.startsWith('demo_')) {
+  // Demo users skip Firestore — go straight to render
+  var isDemo = currentUser && currentUser.uid && currentUser.uid.startsWith('demo_');
+  if (USE_FIREBASE && !isDemo) {
     loadDataFromFirebase();
   } else {
     renderDashboard();
@@ -2121,17 +2121,18 @@ function onAuthSuccess() {
 
 if (USE_FIREBASE) {
   auth.onAuthStateChanged(function(user) {
-    // Only handle auto-login on page load (when overlay is still showing)
     var overlay = document.getElementById('authOverlay');
     if (user && overlay && overlay.style.display !== 'none') {
+      // Only auto-login real Firebase users on page load
+      var isDemoUid = user.uid && user.uid.startsWith('demo_');
+      if (isDemoUid) return;
       currentUser = user;
       db.collection('users').doc(user.uid).get()
         .then(function(doc) {
           currentRole = doc.exists ? (doc.data().role || 'student') : 'student';
           onAuthSuccess();
         })
-        .catch(function(e) {
-          console.warn('Firestore user read failed:', e.message);
+        .catch(function() {
           currentRole = 'student';
           onAuthSuccess();
         });
@@ -2140,13 +2141,14 @@ if (USE_FIREBASE) {
 }
 
 function signOutUser() {
-  if (USE_FIREBASE) {
+  if (USE_FIREBASE && currentUser && !currentUser.uid.startsWith('demo_')) {
     auth.signOut().then(function() { location.reload(); });
   } else {
     currentUser = null; currentRole = null;
     document.getElementById('authOverlay').style.display = 'flex';
     document.getElementById('authEmail').value = '';
     document.getElementById('authPwd').value = '';
+    document.getElementById('authErr').textContent = '';
     document.getElementById('authSubmitBtn').disabled = false;
     document.getElementById('authSubmitBtn').textContent = 'Sign In';
   }
