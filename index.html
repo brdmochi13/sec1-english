@@ -2110,8 +2110,13 @@ function onAuthSuccess() {
   if (role === 'teacher') {
     document.querySelectorAll('.teacher-only').forEach(function(el){ el.style.display = 'block'; });
   }
-  if (USE_FIREBASE) loadDataFromFirebase();
-  else { renderDashboard(); initWA1(); }
+  // Demo users skip Firebase — go straight to render
+  if (USE_FIREBASE && currentUser && !currentUser.uid.startsWith('demo_')) {
+    loadDataFromFirebase();
+  } else {
+    renderDashboard();
+    initWA1();
+  }
 }
 
 if (USE_FIREBASE) {
