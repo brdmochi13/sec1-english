@@ -1815,7 +1815,7 @@ button, input, select, textarea, a, label,
       </select>
       <button onclick="randomEmailPrompt()" style="padding:.4rem .8rem;border-radius:6px;background:var(--ink);color:var(--gold);border:none;cursor:pointer;font-size:.82rem;font-weight:700">🎲 Random</button>
       <button onclick="checkEmailFormat()" style="padding:.4rem .8rem;border-radius:6px;background:#2563eb;color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:700">🔍 Format Check</button>
-      <button onclick="markEmail()" id="emailMarkBtn" style="padding:.4rem .8rem;border-radius:6px;background:var(--green);color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:700">🤖 AI Mark</button>
+      <button onclick="markEmail()" id="emailMarkBtn" style="padding:.4rem 1rem;border-radius:6px;background:var(--green);color:#fff;border:none;cursor:pointer;font-size:.85rem;font-weight:700;letter-spacing:.02em">✅ Submit &amp; Get AI Feedback</button>
     </div>
 
     <!-- PROMPT CARD -->
@@ -6551,7 +6551,7 @@ var emailTimerInterval = null;
 var emailTimerSeconds = 1800;
 
 function initEmailTab() {
-  loadEmailPrompt();
+  loadEmailPrompt(0);
   renderEmailHistory();
   startEmailLiveCheck();
 }
@@ -6592,6 +6592,8 @@ function showEmailPrompt(p) {
 
   card.style.display = 'block';
   editor.style.display = 'block';
+  // Scroll to top of email tab
+  card.scrollIntoView({behavior:'smooth', block:'start'});
 
   // Clear fields
   ['emailTo','emailSubject','emailSalutation','emailOpening','emailBody','emailClosing','emailSignoff'].forEach(function(id) {
