@@ -2033,6 +2033,17 @@ function doAuth() {
   document.getElementById('authSubmitBtn').disabled = true;
   document.getElementById('authSubmitBtn').textContent = 'Please wait...';
 
+  // Check DEMO accounts first — always works regardless of Firebase
+  if (authMode === 'login') {
+    var demoAcct = DEMO_ACCOUNTS[email];
+    if (demoAcct && demoAcct.password === pwd) {
+      currentRole = demoAcct.role;
+      currentUser = { email: email, displayName: demoAcct.name, uid: 'demo_' + email };
+      onAuthSuccess();
+      return;
+    }
+  }
+
   if (USE_FIREBASE) {
     if (authMode === 'login') {
       auth.signInWithEmailAndPassword(email, pwd)
