@@ -6788,7 +6788,13 @@ async function markEmail() {
   var apiKey = d.apiKey || '';
   var provider = d.apiProvider || 'groq';
   if (!apiKey && provider !== 'ollama') {
-    alert('Please set your Groq API key in the AI Practice tab first.');
+    var status = document.getElementById('emailMarkStatus');
+    if (status) {
+      status.style.color = 'var(--red)';
+      status.innerHTML = '❌ No API key set. Go to <strong>AI Practice tab</strong> → API Configuration → select Groq → paste your key (free at console.groq.com)';
+    }
+    var btn = document.getElementById('emailMarkBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit & Get AI Feedback'; }
     return;
   }
 
@@ -6831,7 +6837,11 @@ async function markEmail() {
     saveEmailAttempt(result, fullText);
     if (status) status.textContent = '';
   } catch(e) {
-    if (status) status.textContent = 'Error: ' + e.message;
+    var msg = e.message || 'Unknown error';
+    if (msg.includes('401') || msg.includes('auth')) msg = 'Invalid API key. Check your Groq key in AI Practice tab.';
+    else if (msg.includes('429')) msg = 'Rate limit reached. Wait 1 minute and try again (Groq free tier).';
+    else if (msg.includes('network') || msg.includes('fetch')) msg = 'Network error. Check your internet connection.';
+    if (status) { status.style.color = 'var(--red)'; status.textContent = '❌ ' + msg; }
   }
   if (btn) { btn.disabled = false; btn.textContent = 'Submit & Get AI Feedback'; }
 }
