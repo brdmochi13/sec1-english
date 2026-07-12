@@ -1916,7 +1916,10 @@ button, input, select, textarea, a, label,
 <div class="card" style="margin-top:.8rem">
   <div class="card-head">
     <div class="card-title">📬 Email History</div>
-    <span id="emailHistCount" style="font-size:.75rem;color:var(--muted)"></span>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <span id="emailHistCount" style="font-size:.75rem;color:var(--muted)"></span>
+      <button onclick="openManualEntry()" style="padding:.25rem .7rem;border-radius:6px;background:#7c3aed;color:#fff;border:none;cursor:pointer;font-size:.76rem;font-weight:700">+ Add Past Attempt</button>
+    </div>
   </div>
   <div class="card-body" id="emailHistoryList">
     <div class="empty-state"><div class="es-icon">✉️</div><p>No emails practised yet. Write your first email above!</p></div>
@@ -6960,13 +6963,17 @@ function renderEmailHistory() {
       + (e.errors||[]).map(function(er){ return '<div style="font-size:.73rem">• '+esc(er)+'</div>'; }).join('')
       + '</div>' : '';
 
-    var textHtml = e.text ? '<div style="margin:.3rem 0"><strong style="font-size:.74rem">My Email:</strong>'
+    var photoHtml = e.photoData ? '<div style="margin:.3rem 0"><strong style="font-size:.74rem">📷 Paper Photo:</strong>'
+      + '<div style="margin:.3rem 0"><img src="' + e.photoData + '" style="max-width:100%;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.15)" onclick="this.style.maxWidth=this.style.maxWidth===\'100%\'?\'none\':\'100%\'"></div>'
+      + '<div style="font-size:.7rem;color:var(--muted)">Tap image to expand</div></div>' : '';
+    var textHtml = e.text ? '<div style="margin:.3rem 0"><strong style="font-size:.74rem">✍️ ' + (e.isManual ? 'Handwritten' : 'Typed') + ' Email:</strong>'
       + '<div style="margin:.2rem 0;padding:.4rem .6rem;background:#f0f8ff;border-radius:6px;font-size:.73rem;white-space:pre-wrap;max-height:160px;overflow-y:auto">'
       + esc(e.text) + '</div></div>' : '';
 
     return '<div style="border:1px solid var(--border);border-radius:10px;margin-bottom:.5rem;overflow:hidden">'
       + '<div onclick="toggleEssayCard(\\x27" + uid + "\\x27)" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.5rem .8rem;cursor:pointer">'
       + '<span style="font-weight:700;font-size:.83rem;flex:1">'+esc(e.promptTitle)+'</span>'
+      + (e.isManual ? '<span style="font-size:.68rem;background:#7c3aed;color:#fff;border-radius:10px;padding:1px 6px">✍️ handwritten</span>' : '')
       + '<span style="color:'+col+';font-weight:700">'+e.totalScore+'/'+e.totalMax+' ('+pct+'%)</span>'
       + '<span style="font-size:.7rem;color:var(--muted)">'+esc(e.dateDisplay||'')+(e.wordCount?' · '+e.wordCount+'w':'')+'</span>'
       + '<span id="'+uid+'_arrow" style="font-size:.8rem;color:var(--muted)">▼</span>'
@@ -6999,6 +7006,111 @@ function resetEmailTimer() {
   emailTimerSeconds = 1800;
   var el = document.getElementById('emailTimer');
   if (el) { el.textContent = '30:00'; el.style.color = 'var(--gold)'; }
+}
+
+
+
+// ══════════════════════════════════════════════════════════════════════════
+//  MANUAL EMAIL ENTRY (for handwritten past attempts)
+// ══════════════════════════════════════════════════════════════════════════
+
+function openManualEntry() {
+  // Set today as default date
+  var today = new Date().toISOString().split('T')[0];
+  document.getElementById('meDate').value = today;
+  document.getElementById('meTotalDisplay').textContent = '22/30 (73%)';
+  document.getElementById('mePhotoPreview').innerHTML = 'Click to upload photo of handwritten email';
+  document.getElementById('mePhotoInput').value = '';
+  // Add live total calculator
+  ['meFormat','meRegister','meContent','meLanguage'].forEach(function(id) {
+    document.getElementById(id).oninput = updateManualTotal;
+  });
+  document.getElementById('manualEntryModal').style.display = 'flex';
+}
+
+function closeManualEntry() {
+  document.getElementById('manualEntryModal').style.display = 'none';
+}
+
+function updateManualTotal() {
+  var f = parseInt(document.getElementById('meFormat').value) || 0;
+  var r = parseInt(document.getElementById('meRegister').value) || 0;
+  var c = parseInt(document.getElementById('meContent').value) || 0;
+  var l = parseInt(document.getElementById('meLanguage').value) || 0;
+  var total = f + r + c + l;
+  var pct = Math.round((total / 30) * 100);
+  var col = pct >= 80 ? 'var(--green)' : pct >= 65 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('meTotalDisplay').innerHTML = '<span style="color:' + col + ';font-weight:700">' + total + '/30 (' + pct + '%)</span>';
+}
+
+function previewManualPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var preview = document.getElementById('mePhotoPreview');
+    preview.innerHTML = '<img src="' + e.target.result + '" style="max-width:100%;max-height:200px;border-radius:6px;margin-top:.3rem">'
+      + '<div style="font-size:.72rem;color:var(--green);margin-top:.3rem">✅ Photo ready to save</div>';
+    preview.dataset.photoData = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveManualEntry() {
+  var title = document.getElementById('mePromptTitle').value.trim();
+  if (!title) { alert('Please enter a prompt title.'); return; }
+
+  var f = parseInt(document.getElementById('meFormat').value) || 0;
+  var r = parseInt(document.getElementById('meRegister').value) || 0;
+  var c = parseInt(document.getElementById('meContent').value) || 0;
+  var l = parseInt(document.getElementById('meLanguage').value) || 0;
+  var total = f + r + c + l;
+  var pct = Math.round((total / 30) * 100);
+  var grade = pct >= 85 ? 'A' : pct >= 70 ? 'B' : pct >= 55 ? 'C' : 'D';
+
+  var dateVal = document.getElementById('meDate').value;
+  var dateDisplay = dateVal ? new Date(dateVal).toLocaleDateString('en-SG', {day:'numeric', month:'short', year:'numeric'}) : '';
+
+  var photoData = document.getElementById('mePhotoPreview').dataset.photoData || '';
+
+  var entry = {
+    promptId: 'manual_' + Date.now(),
+    promptTitle: title,
+    difficulty: 'handwritten',
+    totalScore: total,
+    totalMax: 30,
+    grade: grade,
+    criteria: [
+      {name:'Format',   score:f, max:5},
+      {name:'Register', score:r, max:5},
+      {name:'Content',  score:c, max:10},
+      {name:'Language', score:l, max:10}
+    ],
+    overallFeedback: document.getElementById('meFeedback').value.trim(),
+    topImprovements: [],
+    errors: [],
+    text: document.getElementById('meText').value.trim(),
+    photoData: photoData,
+    wordCount: 0,
+    isManual: true,
+    dateDisplay: dateDisplay,
+    date: dateVal ? new Date(dateVal).toISOString() : new Date().toISOString()
+  };
+
+  var d = loadData();
+  if (!d.emailHistory) d.emailHistory = [];
+  // Add at correct chronological position
+  d.emailHistory.push(entry);
+  d.emailHistory.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  if (d.emailHistory.length > 50) d.emailHistory.pop();
+  saveData(d);
+  if (USE_FIREBASE && currentUser && !currentUser.uid.startsWith('demo_')) _syncToFirestore(d);
+
+  closeManualEntry();
+  renderEmailHistory();
+  // Switch to email tab and scroll to history
+  document.getElementById('emailHistoryList').scrollIntoView({behavior:'smooth'});
+  alert('Saved! "' + title + '" added to email history.');
 }
 
 
@@ -8534,5 +8646,80 @@ function addRemoteLink() {
 </script>
 
 <div class="autosave-bar" id="autosaveBar"><div class="as-dot"></div><span id="autosaveMsg">Auto-save active</span></div>
+
+<!-- ═══════════════ MANUAL EMAIL ENTRY MODAL ═══════════════ -->
+<div id="manualEntryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:1rem">
+  <div style="background:var(--bg,#fff);border-radius:16px;padding:1.5rem;max-width:600px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.4);margin:auto">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div>
+        <div style="font-size:1rem;font-weight:800">📝 Add Past Attempt</div>
+        <div style="font-size:.75rem;color:var(--muted)">Record a handwritten email attempt with photo</div>
+      </div>
+      <button onclick="closeManualEntry()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+
+    <!-- Prompt title -->
+    <div style="margin-bottom:.7rem">
+      <label style="font-size:.78rem;font-weight:700;display:block;margin-bottom:.25rem">📌 Topic / Prompt Title</label>
+      <input id="mePromptTitle" placeholder="e.g. Sentosa Visit" style="width:100%;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);font-size:.85rem;box-sizing:border-box">
+    </div>
+
+    <!-- Date -->
+    <div style="margin-bottom:.7rem">
+      <label style="font-size:.78rem;font-weight:700;display:block;margin-bottom:.25rem">📅 Date Written</label>
+      <input id="meDate" type="date" style="width:100%;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);font-size:.85rem;box-sizing:border-box">
+    </div>
+
+    <!-- Scores -->
+    <div style="margin-bottom:.7rem">
+      <label style="font-size:.78rem;font-weight:700;display:block;margin-bottom:.4rem">📊 Scores (out of 30)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.4rem">
+        <div style="text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:.2rem">Format /5</div>
+          <input id="meFormat" type="number" min="0" max="5" value="4" style="width:100%;padding:.35rem;border-radius:6px;border:1px solid var(--border);font-size:.9rem;text-align:center;box-sizing:border-box">
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:.2rem">Register /5</div>
+          <input id="meRegister" type="number" min="0" max="5" value="4" style="width:100%;padding:.35rem;border-radius:6px;border:1px solid var(--border);font-size:.9rem;text-align:center;box-sizing:border-box">
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:.2rem">Content /10</div>
+          <input id="meContent" type="number" min="0" max="10" value="7" style="width:100%;padding:.35rem;border-radius:6px;border:1px solid var(--border);font-size:.9rem;text-align:center;box-sizing:border-box">
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:.2rem">Language /10</div>
+          <input id="meLanguage" type="number" min="0" max="10" value="7" style="width:100%;padding:.35rem;border-radius:6px;border:1px solid var(--border);font-size:.9rem;text-align:center;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:.4rem;font-size:.8rem;color:var(--muted)">Total: <strong id="meTotalDisplay">22/30 (73%)</strong></div>
+    </div>
+
+    <!-- Email text -->
+    <div style="margin-bottom:.7rem">
+      <label style="font-size:.78rem;font-weight:700;display:block;margin-bottom:.25rem">✍️ Email Text (transcribe from paper)</label>
+      <textarea id="meText" rows="6" placeholder="Type out Mokshith's handwritten email here..." style="width:100%;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);font-size:.82rem;resize:vertical;box-sizing:border-box;font-family:monospace"></textarea>
+    </div>
+
+    <!-- Feedback -->
+    <div style="margin-bottom:.7rem">
+      <label style="font-size:.78rem;font-weight:700;display:block;margin-bottom:.25rem">💬 Feedback / Comments</label>
+      <textarea id="meFeedback" rows="3" placeholder="e.g. Good content but SVA errors. Family is/are. Going to Bali..." style="width:100%;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);font-size:.82rem;resize:vertical;box-sizing:border-box"></textarea>
+    </div>
+
+    <!-- Photo upload -->
+    <div style="margin-bottom:1rem">
+      <label style="font-size:.78rem;font-weight:700;display:block;margin-bottom:.25rem">📷 Paper Photo</label>
+      <div style="border:2px dashed var(--border);border-radius:8px;padding:.8rem;text-align:center;cursor:pointer" onclick="document.getElementById('mePhotoInput').click()">
+        <div id="mePhotoPreview" style="font-size:.82rem;color:var(--muted)">Click to upload photo of handwritten email</div>
+        <input type="file" id="mePhotoInput" accept="image/*" style="display:none" onchange="previewManualPhoto(this)">
+      </div>
+    </div>
+
+    <!-- Save button -->
+    <button onclick="saveManualEntry()" style="width:100%;padding:.6rem;border-radius:8px;background:var(--green);color:#fff;border:none;cursor:pointer;font-weight:700;font-size:.9rem">💾 Save to History</button>
+  </div>
+</div>
+
 </body>
 </html>
