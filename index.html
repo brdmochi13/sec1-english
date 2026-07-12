@@ -1792,11 +1792,11 @@ button, input, select, textarea, a, label,
   <div class="card-head" style="flex-wrap:wrap;gap:.5rem">
     <div class="card-title">✉️ Informal Email Practice</div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-      <select id="emailDifficulty" onchange="loadEmailPrompt(0)" style="font-size:.82rem;padding:.35rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg)">
+      <select id="emailDifficulty" onchange="populatePromptDropdown();loadEmailPrompt(0)" style="font-size:.82rem;padding:.35rem .6rem;border-radius:6px;border:1px solid var(--border);background:#fff;color:#111;min-width:140px">
         <option value="basic">🟢 Basic (5 prompts)</option>
         <option value="standard">🟡 Standard (5 prompts)</option>
       </select>
-      <select id="emailPromptSelect" onchange="loadEmailPrompt(this.value)" style="font-size:.82rem;padding:.35rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);max-width:200px"></select>
+      <select id="emailPromptSelect" onchange="loadEmailPrompt(this.value)" style="font-size:.82rem;padding:.35rem .6rem;border-radius:6px;border:1px solid var(--border);background:#fff;color:#111;min-width:180px"></select>
       <button onclick="openGrammarDrill()" style="padding:.35rem .7rem;border-radius:6px;background:#7c3aed;color:#fff;border:none;cursor:pointer;font-size:.8rem;font-weight:700">⚡ Grammar Drill</button>
     </div>
   </div>
