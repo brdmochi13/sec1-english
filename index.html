@@ -1786,142 +1786,131 @@ button, input, select, textarea, a, label,
 
 <!-- ═══════════════════════════════ EMAIL WRITING TAB ═══════════════════════════════ -->
 <div id="emailTab" class="tab-content">
+
+<!-- TOP BAR -->
 <div class="card">
-  <div class="card-head"><div class="card-title">✉️ Informal Email Practice</div></div>
-  <div class="card-body">
-
-    <!-- FORMAT CHEATSHEET -->
-    <div id="emailCheatsheet" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;color:#fff">
-      <div style="font-weight:700;font-size:.85rem;color:var(--gold);margin-bottom:.5rem">📋 Informal Email — Format Checklist (memorise this!)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .8rem;font-size:.78rem">
-        <div>✅ <strong>To:</strong> recipient@email.com</div>
-        <div>✅ <strong>Subject:</strong> Clear &amp; relevant</div>
-        <div>✅ <strong>Salutation:</strong> Dear [First name],</div>
-        <div>✅ <strong>Opening:</strong> Friendly sentence</div>
-        <div>✅ <strong>Body:</strong> 1 para per content point</div>
-        <div>✅ <strong>Closing line:</strong> Invite a reply</div>
-        <div>✅ <strong>Sign-off:</strong> Your friend, / Take care,</div>
-        <div>✅ <strong>Name:</strong> Mokshith</div>
-      </div>
-      <div style="margin-top:.6rem;font-size:.75rem;color:#aaa">⚠️ Register: friendly &amp; personal — NOT formal, NOT text-speak ("u","r","lol")</div>
-    </div>
-
-    <!-- PROMPT SELECTOR -->
-    <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem">
-      <select id="emailDifficulty" onchange="loadEmailPrompt()" style="font-size:.85rem;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg)">
-        <option value="basic">🟢 Basic (Week 1–2)</option>
-        <option value="standard">🟡 Standard (Week 3)</option>
-        <option value="challenge">🔴 Challenge (Week 4)</option>
+  <div class="card-head" style="flex-wrap:wrap;gap:.5rem">
+    <div class="card-title">✉️ Informal Email Practice</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+      <select id="emailDifficulty" onchange="loadEmailPrompt(0)" style="font-size:.82rem;padding:.35rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg)">
+        <option value="basic">🟢 Basic (5 prompts)</option>
+        <option value="standard">🟡 Standard (5 prompts)</option>
       </select>
-      <button onclick="randomEmailPrompt()" style="padding:.4rem .8rem;border-radius:6px;background:var(--ink);color:var(--gold);border:none;cursor:pointer;font-size:.82rem;font-weight:700">🎲 Random</button>
-      <button onclick="checkEmailFormat()" style="padding:.4rem .8rem;border-radius:6px;background:#2563eb;color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:700">🔍 Format Check</button>
-      <button onclick="markEmail()" id="emailMarkBtn" style="padding:.4rem 1rem;border-radius:6px;background:var(--green);color:#fff;border:none;cursor:pointer;font-size:.85rem;font-weight:700;letter-spacing:.02em">✅ Submit &amp; Get AI Feedback</button>
+      <select id="emailPromptSelect" onchange="loadEmailPrompt(this.value)" style="font-size:.82rem;padding:.35rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);max-width:200px"></select>
+      <button onclick="openGrammarDrill()" style="padding:.35rem .7rem;border-radius:6px;background:#7c3aed;color:#fff;border:none;cursor:pointer;font-size:.8rem;font-weight:700">⚡ Grammar Drill</button>
     </div>
-
-    <!-- PROMPT CARD -->
-    <div id="emailPromptCard" style="background:var(--bg2,#f8f8f8);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:.8rem;display:none">
-      <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem" id="emailPromptMeta"></div>
-      <div style="font-size:.88rem;font-weight:700;margin-bottom:.5rem" id="emailPromptTitle"></div>
-      <div style="font-size:.82rem;line-height:1.6;margin-bottom:.6rem" id="emailPromptSituation"></div>
-      <!-- Content points checklist -->
-      <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem">
-        <div style="font-size:.75rem;font-weight:700;color:var(--amber);margin-bottom:.4rem">📌 Cover ALL these points (one paragraph each):</div>
-        <div id="emailContentPoints"></div>
-      </div>
-    </div>
-
-    <!-- SPLIT LAYOUT: email editor left, live checklist right -->
-    <div id="emailEditorArea" style="display:none">
-      <div style="display:grid;grid-template-columns:1fr 300px;gap:.8rem">
-
-        <!-- LEFT: email editor with skeleton -->
-        <div>
-          <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:.3rem">✍️ Write your email below:</div>
-          <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:.83rem;font-family:monospace">
-            <div style="background:var(--ink);color:var(--gold);padding:.35rem .7rem;font-size:.75rem;font-weight:700">📧 Email Composer</div>
-            <div style="padding:.6rem .8rem;border-bottom:1px solid var(--border)">
-              <span style="color:var(--muted);font-size:.77rem">To: </span>
-              <input id="emailTo" placeholder="friend@email.com" style="border:none;background:transparent;font-size:.82rem;width:80%;outline:none;color:var(--ink)">
-            </div>
-            <div style="padding:.6rem .8rem;border-bottom:1px solid var(--border)">
-              <span style="color:var(--muted);font-size:.77rem">Subject: </span>
-              <input id="emailSubject" placeholder="Write a clear subject here..." style="border:none;background:transparent;font-size:.82rem;width:75%;outline:none;color:var(--ink)">
-            </div>
-            <div style="padding:.6rem .8rem;border-bottom:1px solid var(--border)">
-              <textarea id="emailSalutation" rows="1" placeholder="Dear [Name]," style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:none;font-family:monospace;color:var(--ink)"></textarea>
-            </div>
-            <div style="padding:.6rem .8rem;border-bottom:1px solid var(--border)">
-              <textarea id="emailOpening" rows="2" placeholder="Opening line — e.g. How are you? I hope you are doing well!" style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:none;font-family:monospace;color:var(--ink)"></textarea>
-            </div>
-            <div style="padding:.6rem .8rem;border-bottom:1px solid var(--border)">
-              <textarea id="emailBody" rows="10" placeholder="Write your body paragraphs here. Start a new paragraph for EACH content point listed on the right ➜" style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:vertical;font-family:monospace;color:var(--ink)"></textarea>
-            </div>
-            <div style="padding:.6rem .8rem;border-bottom:1px solid var(--border)">
-              <textarea id="emailClosing" rows="2" placeholder="Closing line — e.g. I hope to hear from you soon. Take care!" style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:none;font-family:monospace;color:var(--ink)"></textarea>
-            </div>
-            <div style="padding:.6rem .8rem;border-bottom:1px solid var(--border)">
-              <textarea id="emailSignoff" rows="1" placeholder="Your friend, / Take care, / Best wishes," style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:none;font-family:monospace;color:var(--ink)"></textarea>
-            </div>
-            <div style="padding:.6rem .8rem">
-              <input id="emailName" placeholder="Mokshith" value="Mokshith" style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;color:var(--ink)">
-            </div>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-top:.4rem;font-size:.72rem;color:var(--muted)">
-            <span id="emailWordCount">Words: 0</span>
-            <span>Target: 150–180 words</span>
-          </div>
-        </div>
-
-        <!-- RIGHT: live checklist -->
-        <div>
-          <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:.3rem">📋 Live Checklist</div>
-          <div id="emailLiveCheck" style="background:var(--bg2,#f8f8f8);border:1px solid var(--border);border-radius:10px;padding:.7rem .8rem;font-size:.78rem;line-height:1.9">
-            <div id="lc_to">⬜ To: field filled</div>
-            <div id="lc_sub">⬜ Subject line written</div>
-            <div id="lc_sal">⬜ Dear [Name], present</div>
-            <div id="lc_open">⬜ Opening line present</div>
-            <div id="lc_body">⬜ Body paragraphs written</div>
-            <div id="lc_close">⬜ Closing line present</div>
-            <div id="lc_sign">⬜ Sign-off present</div>
-            <div id="lc_wc">⬜ Word count 130–200</div>
-            <div style="margin-top:.6rem;border-top:1px solid var(--border);padding-top:.5rem;font-weight:700" id="lc_score">Format Score: 0/8</div>
-          </div>
-
-          <div style="margin-top:.7rem">
-            <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:.3rem">📝 Register Tips</div>
-            <div style="background:#fffdf0;border:1px solid #e8d84a33;border-radius:8px;padding:.6rem .8rem;font-size:.74rem;line-height:1.7">
-              <div style="color:var(--green)">✅ Use: "I think", "By the way", "You won't believe..."</div>
-              <div style="color:var(--green)">✅ Use: "Hope to hear from you!"</div>
-              <div style="color:var(--red)">❌ Avoid: "I am writing to inform you"</div>
-              <div style="color:var(--red)">❌ Avoid: "u", "r", "lol", "gonna"</div>
-              <div style="color:var(--red)">❌ Avoid: "Yours sincerely/faithfully"</div>
-            </div>
-          </div>
-
-          <div style="margin-top:.7rem">
-            <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:.3rem">⏱️ Timer</div>
-            <div style="background:var(--ink);border-radius:8px;padding:.5rem .8rem;text-align:center">
-              <div id="emailTimer" style="font-size:1.4rem;font-weight:700;color:var(--gold);font-family:monospace">30:00</div>
-              <div style="display:flex;gap:.4rem;justify-content:center;margin-top:.3rem">
-                <button onclick="startEmailTimer()" style="font-size:.7rem;padding:.25rem .5rem;border-radius:4px;background:var(--green);color:#fff;border:none;cursor:pointer">▶ Start</button>
-                <button onclick="resetEmailTimer()" style="font-size:.7rem;padding:.25rem .5rem;border-radius:4px;background:var(--red);color:#fff;border:none;cursor:pointer">↺ Reset</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- end grid -->
-
-      <!-- FORMAT CHECK RESULT -->
-      <div id="emailFormatResult" style="display:none;margin-top:.8rem;border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem"></div>
-
-      <!-- AI MARKING RESULT -->
-      <div id="emailMarkResult" style="display:none;margin-top:.8rem;border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem"></div>
-      <div id="emailMarkStatus" style="margin-top:.4rem;font-size:.8rem;color:var(--muted);text-align:center"></div>
-    </div>
-
   </div>
 </div>
+
+<!-- MAIN LAYOUT: brochure left, email right -->
+<div id="emailMainArea" style="display:none">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.8rem">
+
+  <!-- LEFT: Question paper style -->
+  <div>
+    <!-- Situation box -->
+    <div class="card" style="margin-bottom:.8rem">
+      <div class="card-head"><div class="card-title" id="emailPromptTitle" style="font-size:.9rem"></div></div>
+      <div class="card-body">
+        <div id="emailSituationText" style="font-size:.82rem;line-height:1.7;margin-bottom:.8rem;padding:.6rem .8rem;background:var(--bg2,#f8f8f8);border-radius:8px;border-left:3px solid var(--gold)"></div>
+
+        <!-- Brochure -->
+        <div id="emailBrochure" style="margin-bottom:.8rem"></div>
+
+        <!-- Content points -->
+        <div style="background:#1a1a2e;border-radius:8px;padding:.7rem .9rem">
+          <div style="font-size:.75rem;font-weight:700;color:var(--gold);margin-bottom:.5rem">📌 In your email, give details of:</div>
+          <div id="emailContentPoints"></div>
+          <div style="font-size:.72rem;color:#aaa;margin-top:.5rem">Write <strong style="color:var(--gold)" id="emailWordTarget"></strong> in complete sentences and in paragraphs.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Format cheatsheet -->
+    <div class="card">
+      <div class="card-head"><div class="card-title" style="font-size:.82rem">📋 Format Checklist</div></div>
+      <div class="card-body" style="font-size:.78rem">
+        <div id="emailLiveCheck" style="line-height:2">
+          <div id="lc_to">⬜ To: field filled</div>
+          <div id="lc_sub">⬜ Subject line written</div>
+          <div id="lc_sal">⬜ Dear [Name], present</div>
+          <div id="lc_open">⬜ Opening line present</div>
+          <div id="lc_body">⬜ Body paragraphs written</div>
+          <div id="lc_close">⬜ Closing line present</div>
+          <div id="lc_sign">⬜ Sign-off present</div>
+          <div id="lc_wc">⬜ Word count 180+</div>
+          <div style="margin-top:.4rem;border-top:1px solid var(--border);padding-top:.4rem;font-weight:700" id="lc_score">Format: 0/8</div>
+        </div>
+        <div style="margin-top:.6rem;padding:.5rem .6rem;background:#fffdf0;border-radius:6px;font-size:.74rem;line-height:1.8">
+          <div style="color:var(--green)">✅ "How are you? I hope your family is doing well."</div>
+          <div style="color:var(--green)">✅ "You will not regret it! Trust me!"</div>
+          <div style="color:var(--red)">❌ "I am writing to inform you" (too formal)</div>
+          <div style="color:var(--red)">❌ "u", "r", "gonna", "lol" (text-speak)</div>
+          <div style="color:var(--red)">❌ "Yours sincerely/faithfully" (formal letters only)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Email composer -->
+  <div>
+    <div class="card">
+      <div class="card-head" style="background:var(--ink)">
+        <div class="card-title" style="color:var(--gold)">📧 Write Your Email</div>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span id="emailWordCount" style="font-size:.75rem;color:#aaa">0 words</span>
+          <!-- Timer -->
+          <span id="emailTimer" style="font-size:.85rem;font-weight:700;color:var(--gold);font-family:monospace;min-width:45px">30:00</span>
+          <button onclick="startEmailTimer()" style="font-size:.68rem;padding:.2rem .4rem;border-radius:4px;background:var(--green);color:#fff;border:none;cursor:pointer">▶</button>
+          <button onclick="resetEmailTimer()" style="font-size:.68rem;padding:.2rem .4rem;border-radius:4px;background:var(--red);color:#fff;border:none;cursor:pointer">↺</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:.5rem">
+        <!-- Email fields -->
+        <div style="font-family:monospace;font-size:.82rem">
+          <div style="display:flex;align-items:center;padding:.4rem .5rem;border-bottom:1px solid var(--border)">
+            <span style="color:var(--muted);min-width:60px">To:</span>
+            <input id="emailTo" placeholder="friend@email.com" style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;font-family:monospace">
+          </div>
+          <div style="display:flex;align-items:center;padding:.4rem .5rem;border-bottom:1px solid var(--border)">
+            <span style="color:var(--muted);min-width:60px">Subject:</span>
+            <input id="emailSubject" placeholder="Write a clear, interesting subject line..." style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;font-family:monospace">
+          </div>
+          <div style="padding:.4rem .5rem;border-bottom:1px solid var(--border)">
+            <textarea id="emailSalutation" rows="1" placeholder="Dear [Name]," style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:none;font-family:monospace"></textarea>
+          </div>
+          <div style="padding:.4rem .5rem;border-bottom:1px solid var(--border)">
+            <textarea id="emailOpening" rows="2" placeholder="Opening — e.g. How are you? I hope you and your family are doing well." style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:none;font-family:monospace"></textarea>
+          </div>
+          <div style="padding:.4rem .5rem;border-bottom:1px solid var(--border)">
+            <textarea id="emailBody" rows="14" placeholder="Write your body paragraphs here.&#10;&#10;New paragraph for EACH bullet point on the left.&#10;&#10;Aim for 3-4 sentences per paragraph." style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:vertical;font-family:monospace"></textarea>
+          </div>
+          <div style="padding:.4rem .5rem;border-bottom:1px solid var(--border)">
+            <textarea id="emailClosing" rows="2" placeholder="Closing — e.g. I hope you will visit Sentosa soon. You will not regret it!" style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:none;font-family:monospace"></textarea>
+          </div>
+          <div style="padding:.4rem .5rem;border-bottom:1px solid var(--border)">
+            <textarea id="emailSignoff" rows="1" placeholder="Your friend, / Take care, / Best wishes," style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;resize:none;font-family:monospace"></textarea>
+          </div>
+          <div style="padding:.4rem .5rem">
+            <input id="emailName" value="Mokshith" style="border:none;background:transparent;font-size:.82rem;width:100%;outline:none;font-family:monospace">
+          </div>
+        </div>
+      </div>
+      <div style="padding:.6rem .8rem;border-top:1px solid var(--border);display:flex;gap:.5rem;flex-wrap:wrap">
+        <button onclick="checkEmailFormat()" style="padding:.4rem .8rem;border-radius:6px;background:#2563eb;color:#fff;border:none;cursor:pointer;font-size:.82rem;font-weight:700">🔍 Format Check</button>
+        <button onclick="markEmail()" id="emailMarkBtn" style="padding:.4rem 1.2rem;border-radius:6px;background:var(--green);color:#fff;border:none;cursor:pointer;font-size:.85rem;font-weight:700;flex:1">✅ Submit &amp; Get AI Feedback</button>
+      </div>
+    </div>
+
+    <!-- Format check result -->
+    <div id="emailFormatResult" style="display:none;margin-top:.6rem;border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem"></div>
+    <!-- AI marking result -->
+    <div id="emailMarkResult" style="display:none;margin-top:.6rem;border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem"></div>
+    <div id="emailMarkStatus" style="margin-top:.3rem;font-size:.8rem;color:var(--muted);text-align:center"></div>
+  </div>
+
+</div><!-- end grid -->
+</div><!-- end emailMainArea -->
 
 <!-- EMAIL HISTORY -->
 <div class="card" style="margin-top:.8rem">
@@ -1930,7 +1919,7 @@ button, input, select, textarea, a, label,
     <span id="emailHistCount" style="font-size:.75rem;color:var(--muted)"></span>
   </div>
   <div class="card-body" id="emailHistoryList">
-    <div class="empty-state"><div class="es-icon">✉️</div><p>No emails practised yet.</p></div>
+    <div class="empty-state"><div class="es-icon">✉️</div><p>No emails practised yet. Write your first email above!</p></div>
   </div>
 </div>
 
@@ -6494,152 +6483,115 @@ function renderEssayHistory() {
 
 
 // ══════════════════════════════════════════════════════════════════════════
-//  EMAIL WRITING TAB
+//  EMAIL WRITING TAB — School exam format
 // ══════════════════════════════════════════════════════════════════════════
-
-var EMAIL_PROMPTS = {
-  basic: [
-    { id:'eb1', title:'Holiday Plans', situation:'Your friend Amir has emailed to ask about your upcoming June holidays. Write an email to Amir telling him about your holiday plans.',
-      points:['Where you are going or what you plan to do during the holidays','One activity you are looking forward to and why','Ask Amir about his holiday plans'], words:'150–180' },
-    { id:'eb2', title:'New School', situation:'You have just started at a new school. Write an email to your old friend Priya telling her about your new school.',
-      points:['Describe what your new school looks like','Tell her about one new friend you have made','Tell her one thing you miss about your old school'], words:'150–180' },
-    { id:'eb3', title:'Favourite Game or Show', situation:'Your cousin Raj has asked for a recommendation. Write an email recommending a game or TV show you enjoy.',
-      points:['Name the game or show and describe what it is about','Explain why you enjoy it so much','Suggest how Raj can start playing or watching it'], words:'150–180' },
-    { id:'eb4', title:'Thank You Email', situation:'Your aunt Meena gave you a gift for your birthday. Write an email thanking her.',
-      points:['Thank her specifically for the gift she gave you','Tell her how you have used or plan to use the gift','Share something nice about your birthday celebration'], words:'150–180' },
-    { id:'eb5', title:'Missed School Event', situation:'You missed your class outing because you were sick. Write an email to your classmate Jun Wei asking him what happened.',
-      points:['Explain why you could not attend','Ask what activities they did during the outing','Ask if you missed out on anything important'], words:'150–180' },
-    { id:'eb6', title:'Inviting a Friend', situation:'Your school is holding an Open House next Saturday. Write an email inviting your friend Siti to attend.',
-      points:['Explain what the Open House is and when it is','Describe one or two things Siti can look forward to','Suggest a time and place to meet before the event'], words:'150–180' },
-    { id:'eb7', title:'Exciting News', situation:'You have just won a prize in a school competition. Write an email to your friend telling him or her the good news.',
-      points:['Describe the competition you entered and what the prize is','Explain how you felt when you found out you had won','Tell your friend how you plan to celebrate'], words:'150–180' },
-  ],
-  standard: [
-    { id:'es1', title:'Describing a Family Trip', situation:'You recently went on a short family trip. Write an email to your pen pal in Malaysia, Farah, telling her about the trip.',
-      points:['Describe where you went and how you got there','Share the most memorable moment from the trip','Tell her one thing that went wrong and how you dealt with it'], words:'150–180' },
-    { id:'es2', title:'Asking for Advice', situation:'You are thinking of joining one of two CCAs — Drama Club or Basketball. Write an email to your older friend Daniel asking for his advice.',
-      points:['Explain the two choices and why you are finding it hard to decide','Describe what you enjoy doing in your free time (to help him advise you)','Ask him at least two specific questions about his experience'], words:'150–180' },
-    { id:'es3', title:'Describing Your Neighbourhood', situation:'Your pen pal from overseas is visiting Singapore next month and wants to know more about your neighbourhood. Write an email to her.',
-      points:['Describe two or three interesting places in your neighbourhood','Recommend one local food she must try and explain why','Give her one tip to help her enjoy the visit'], words:'150–180' },
-    { id:'es4', title:'Telling a Funny Story', situation:'Something funny happened to you last week. Write an email to your best friend telling her the whole story.',
-      points:['Set the scene — where were you and what were you doing?','Describe exactly what happened that was funny or embarrassing','Tell her how others around you reacted'], words:'150–180' },
-    { id:'es5', title:'Updating a Sick Friend', situation:'Your classmate Hafiz has been absent for two weeks. Write an email updating him on what he has missed.',
-      points:['Tell him about two important things that happened in school','Mention any homework or tests he needs to catch up on','Cheer him up with something positive or funny from class'], words:'150–180' },
-    { id:'es6', title:'Responding to an Invitation', situation:'Your friend Lily has invited you to her birthday party, but you cannot attend. Write an email to her.',
-      points:['Thank her for the invitation and explain clearly why you cannot come','Apologise sincerely and tell her how you feel about missing it','Suggest another time you could celebrate with her'], words:'150–180' },
-    { id:'es7', title:'Book or Movie Recommendation', situation:'Your friend tells you she is bored during the holidays. Write an email recommending a book or movie she should try.',
-      points:['Name the book or movie and give a brief description without spoilers','Explain specifically why you think she would enjoy it','Tell her where she can find or watch it'], words:'150–180' },
-  ],
-  challenge: [
-    { id:'ec1', title:'Resolving a Misunderstanding', situation:'You and your close friend had an argument last week and have not spoken since. You want to make things right. Write an email to your friend.',
-      points:['Acknowledge the argument and take responsibility for your part in it','Explain how you have been feeling since the argument','Suggest a way to meet up and sort things out'], words:'160–200' },
-    { id:'ec2', title:'Describing a Challenge You Overcame', situation:'Your cousin is nervous about starting secondary school. Write an email sharing your experience and giving advice.',
-      points:['Describe one challenge you faced when you first started secondary school','Explain what you did to overcome it','Give your cousin two practical pieces of advice'], words:'160–200' },
-    { id:'ec3', title:'Planning a Surprise', situation:'You want to plan a surprise birthday outing for your mutual friend Kai. Write an email to your friend Sam asking for help.',
-      points:['Explain the plan — what the surprise is and when it will happen','Assign Sam a specific role in helping to organise it','Ask Sam to keep it secret and explain how to avoid spoiling the surprise'], words:'160–200' },
-    { id:'ec4', title:'Sharing an Opinion', situation:'Your school recently introduced a no-phone policy during recess. Your friend Ethan wants to know what you think. Write an email sharing your honest opinion.',
-      points:['State clearly whether you agree or disagree with the policy','Give two specific reasons to support your view','Ask Ethan for his opinion and why he feels that way'], words:'160–200' },
-    { id:'ec5', title:'Reflecting on an Achievement', situation:'You have just received your exam results and did better than expected. Write an email to your parent who is working overseas, sharing the good news.',
-      points:['Share your results and describe your initial reaction','Tell them what you think helped you do better this time','Ask about when they will be coming home and share something you are looking forward to doing together'], words:'160–200' },
-    { id:'ec6', title:'Describing Someone Inspiring', situation:'You recently met someone who inspired you. Write an email to your pen pal telling her about this person.',
-      points:['Describe who this person is and how you met them','Explain what they said or did that inspired you','Tell your pen pal how this experience has affected how you think or act'], words:'160–200' },
-  ]
-};
 
 var currentEmailPrompt = null;
 var emailTimerInterval = null;
 var emailTimerSeconds = 1800;
 
 function initEmailTab() {
+  populatePromptDropdown();
   loadEmailPrompt(0);
   renderEmailHistory();
   startEmailLiveCheck();
 }
 
+function populatePromptDropdown() {
+  var diff = document.getElementById('emailDifficulty').value;
+  var prompts = EMAIL_PROMPTS[diff] || [];
+  var sel = document.getElementById('emailPromptSelect');
+  if (!sel) return;
+  sel.innerHTML = prompts.map(function(p, i) {
+    return '<option value="' + i + '">' + (i+1) + '. ' + esc(p.title) + '</option>';
+  }).join('');
+}
+
 function loadEmailPrompt(idx) {
   var diff = document.getElementById('emailDifficulty').value;
-  var prompts = EMAIL_PROMPTS[diff] || EMAIL_PROMPTS.basic;
-  if (idx === undefined) idx = 0;
+  var prompts = EMAIL_PROMPTS[diff] || [];
+  idx = parseInt(idx) || 0;
+  if (idx >= prompts.length) idx = 0;
   var p = prompts[idx];
+  if (!p) return;
   currentEmailPrompt = p;
-  showEmailPrompt(p);
-}
 
-function randomEmailPrompt() {
-  var diff = document.getElementById('emailDifficulty').value;
-  var prompts = EMAIL_PROMPTS[diff] || EMAIL_PROMPTS.basic;
-  var p = prompts[Math.floor(Math.random() * prompts.length)];
-  currentEmailPrompt = p;
-  showEmailPrompt(p);
-}
+  // Update dropdown
+  var sel = document.getElementById('emailPromptSelect');
+  if (sel) sel.value = idx;
 
-function showEmailPrompt(p) {
-  var card = document.getElementById('emailPromptCard');
-  var editor = document.getElementById('emailEditorArea');
-  var diff = document.getElementById('emailDifficulty').value;
-  var diffLabel = {basic:'🟢 Basic',standard:'🟡 Standard',challenge:'🔴 Challenge'}[diff] || diff;
+  // Show situation
+  var titleEl = document.getElementById('emailPromptTitle');
+  if (titleEl) titleEl.textContent = p.title;
 
-  document.getElementById('emailPromptMeta').textContent = diffLabel + ' · ' + (p.words || '150–180') + ' words · Informal Email';
-  document.getElementById('emailPromptTitle').textContent = p.title;
-  document.getElementById('emailPromptSituation').textContent = p.situation;
+  var sitEl = document.getElementById('emailSituationText');
+  if (sitEl) sitEl.textContent = p.situation;
 
-  var pts = document.getElementById('emailContentPoints');
-  pts.innerHTML = p.points.map(function(pt, i) {
-    return '<div style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.25rem">'
-      + '<span style="background:var(--amber);color:#000;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0">' + (i+1) + '</span>'
-      + '<span style="font-size:.8rem">' + esc(pt) + '</span></div>';
-  }).join('');
+  // Show brochure
+  var brEl = document.getElementById('emailBrochure');
+  if (brEl && p.brochure && p.brochure.length) {
+    brEl.innerHTML = '<div style="font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase">READ THIS FIRST:</div>'
+      + p.brochure.map(function(b) {
+          return '<div style="border:1px solid var(--border);border-radius:6px;padding:.5rem .7rem;margin-bottom:.4rem;background:var(--bg)">'
+            + '<div style="font-weight:700;font-size:.8rem;margin-bottom:.2rem">' + esc(b.name) + '</div>'
+            + '<div style="font-size:.76rem;color:var(--muted);line-height:1.5">' + esc(b.desc) + '</div>'
+            + '</div>';
+        }).join('');
+  } else if (brEl) {
+    brEl.innerHTML = '';
+  }
 
-  card.style.display = 'block';
-  editor.style.display = 'block';
-  // Scroll to top of email tab
-  card.scrollIntoView({behavior:'smooth', block:'start'});
+  // Show content points
+  var ptEl = document.getElementById('emailContentPoints');
+  if (ptEl) {
+    ptEl.innerHTML = p.points.map(function(pt, i) {
+      return '<div style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.3rem">'
+        + '<span style="background:var(--gold);color:#000;border-radius:50%;width:18px;height:18px;min-width:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700">' + (i+1) + '</span>'
+        + '<span style="font-size:.79rem;color:#eee;line-height:1.5">' + esc(pt) + '</span></div>';
+    }).join('');
+  }
 
-  // Clear fields
+  var wtEl = document.getElementById('emailWordTarget');
+  if (wtEl) wtEl.textContent = p.words || 'at least 180 words';
+
+  // Show main area, clear fields
+  var mainArea = document.getElementById('emailMainArea');
+  if (mainArea) mainArea.style.display = 'block';
+
   ['emailTo','emailSubject','emailSalutation','emailOpening','emailBody','emailClosing','emailSignoff'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
   });
-  document.getElementById('emailMarkResult').style.display = 'none';
-  document.getElementById('emailFormatResult').style.display = 'none';
-  document.getElementById('emailMarkStatus').textContent = '';
+  var nameEl = document.getElementById('emailName');
+  if (nameEl) nameEl.value = 'Mokshith';
+
+  var res1 = document.getElementById('emailMarkResult');
+  var res2 = document.getElementById('emailFormatResult');
+  var stat = document.getElementById('emailMarkStatus');
+  if (res1) res1.style.display = 'none';
+  if (res2) res2.style.display = 'none';
+  if (stat) stat.textContent = '';
+
   updateEmailLiveCheck();
 }
 
 function getEmailFullText() {
+  var fields = ['emailSalutation','emailOpening','emailBody','emailClosing','emailSignoff','emailName'];
   var to = (document.getElementById('emailTo').value || '').trim();
   var sub = (document.getElementById('emailSubject').value || '').trim();
-  var sal = (document.getElementById('emailSalutation').value || '').trim();
-  var open = (document.getElementById('emailOpening').value || '').trim();
-  var body = (document.getElementById('emailBody').value || '').trim();
-  var close = (document.getElementById('emailClosing').value || '').trim();
-  var signoff = (document.getElementById('emailSignoff').value || '').trim();
-  var name = (document.getElementById('emailName').value || 'Mokshith').trim();
-  return [
-    'To: ' + to,
-    'Subject: ' + sub,
-    '',
-    sal,
-    '',
-    open,
-    '',
-    body,
-    '',
-    close,
-    '',
-    signoff,
-    name
-  ].join('\n');
+  var body = fields.map(function(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }).filter(Boolean).join('\n\n');
+  return 'To: ' + to + '\nSubject: ' + sub + '\n\n' + body;
 }
 
 function getEmailBodyWordCount() {
-  var parts = [
-    document.getElementById('emailSalutation'),
-    document.getElementById('emailOpening'),
-    document.getElementById('emailBody'),
-    document.getElementById('emailClosing')
-  ].map(function(el){ return el ? el.value : ''; }).join(' ');
-  return parts.trim().split(/\s+/).filter(Boolean).length;
+  var text = ['emailSalutation','emailOpening','emailBody','emailClosing'].map(function(id) {
+    var el = document.getElementById(id);
+    return el ? el.value : '';
+  }).join(' ');
+  return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
 function startEmailLiveCheck() {
@@ -6650,185 +6602,204 @@ function startEmailLiveCheck() {
 }
 
 function updateEmailLiveCheck() {
-  var to = (document.getElementById('emailTo').value || '').trim();
-  var sub = (document.getElementById('emailSubject').value || '').trim();
-  var sal = (document.getElementById('emailSalutation').value || '').trim();
-  var open = (document.getElementById('emailOpening').value || '').trim();
-  var body = (document.getElementById('emailBody').value || '').trim();
-  var close = (document.getElementById('emailClosing').value || '').trim();
-  var sign = (document.getElementById('emailSignoff').value || '').trim();
-  var wc = getEmailBodyWordCount();
+  var to    = (document.getElementById('emailTo') || {}).value || '';
+  var sub   = (document.getElementById('emailSubject') || {}).value || '';
+  var sal   = (document.getElementById('emailSalutation') || {}).value || '';
+  var open  = (document.getElementById('emailOpening') || {}).value || '';
+  var body  = (document.getElementById('emailBody') || {}).value || '';
+  var close = (document.getElementById('emailClosing') || {}).value || '';
+  var sign  = (document.getElementById('emailSignoff') || {}).value || '';
+  var wc    = getEmailBodyWordCount();
 
   var checks = [
-    { id:'lc_to',    ok: to.length > 3 && to.includes('@'),    label:'To: field filled' },
-    { id:'lc_sub',   ok: sub.length > 3,                       label:'Subject line written' },
-    { id:'lc_sal',   ok: /dear/i.test(sal) && sal.length > 5,  label:'Dear [Name], present' },
-    { id:'lc_open',  ok: open.length > 10,                     label:'Opening line present' },
-    { id:'lc_body',  ok: body.length > 50,                     label:'Body paragraphs written' },
-    { id:'lc_close', ok: close.length > 10,                    label:'Closing line present' },
-    { id:'lc_sign',  ok: sign.length > 3,                      label:'Sign-off present' },
-    { id:'lc_wc',    ok: wc >= 130 && wc <= 220,               label:'Word count 130–220 (currently: ' + wc + ')' }
+    { id:'lc_to',   ok: to.length > 3 && to.includes('@'),   label:'To: field filled' },
+    { id:'lc_sub',  ok: sub.length > 5,                       label:'Subject line written' },
+    { id:'lc_sal',  ok: /dear/i.test(sal) && sal.length > 5,  label:'Dear [Name], present' },
+    { id:'lc_open', ok: open.length > 15,                     label:'Opening line present' },
+    { id:'lc_body', ok: body.length > 80,                     label:'Body paragraphs written' },
+    { id:'lc_close',ok: close.length > 10,                    label:'Closing line present' },
+    { id:'lc_sign', ok: sign.length > 3,                      label:'Sign-off present' },
+    { id:'lc_wc',   ok: wc >= 180,                            label:'180+ words (now: ' + wc + ')' }
   ];
 
   var score = 0;
   checks.forEach(function(c) {
     var el = document.getElementById(c.id);
     if (!el) return;
-    if (c.ok) { score++; el.innerHTML = '✅ ' + c.label; el.style.color = 'var(--green)'; }
-    else       { el.innerHTML = '⬜ ' + c.label; el.style.color = 'var(--ink)'; }
+    if (c.ok) { score++; el.innerHTML = '<span style="color:var(--green)">✅</span> ' + c.label; }
+    else       { el.innerHTML = '<span style="color:var(--muted)">⬜</span> ' + c.label; }
   });
 
-  var scoreEl = document.getElementById('lc_score');
-  if (scoreEl) {
-    var col = score >= 7 ? 'var(--green)' : score >= 5 ? 'var(--amber)' : 'var(--red)';
-    scoreEl.innerHTML = 'Format Score: <span style="color:' + col + '">' + score + '/8</span>';
-  }
+  var col = score >= 7 ? 'var(--green)' : score >= 5 ? 'var(--amber)' : 'var(--red)';
+  var sc = document.getElementById('lc_score');
+  if (sc) sc.innerHTML = 'Format: <strong style="color:' + col + '">' + score + '/8</strong>';
 
-  var wcEl = document.getElementById('emailWordCount');
-  if (wcEl) wcEl.textContent = 'Words: ' + wc;
+  var wcel = document.getElementById('emailWordCount');
+  if (wcel) {
+    wcel.textContent = wc + ' words';
+    wcel.style.color = wc >= 180 ? 'var(--green)' : wc >= 130 ? 'var(--amber)' : '#aaa';
+  }
 }
 
 function checkEmailFormat() {
   updateEmailLiveCheck();
-  var to = (document.getElementById('emailTo').value || '').trim();
-  var sub = (document.getElementById('emailSubject').value || '').trim();
-  var sal = (document.getElementById('emailSalutation').value || '').trim();
-  var open = (document.getElementById('emailOpening').value || '').trim();
-  var body = (document.getElementById('emailBody').value || '').trim();
-  var close = (document.getElementById('emailClosing').value || '').trim();
-  var sign = (document.getElementById('emailSignoff').value || '').trim();
-  var wc = getEmailBodyWordCount();
+  var to    = (document.getElementById('emailTo') || {}).value || '';
+  var sub   = (document.getElementById('emailSubject') || {}).value || '';
+  var sal   = (document.getElementById('emailSalutation') || {}).value || '';
+  var open  = (document.getElementById('emailOpening') || {}).value || '';
+  var body  = (document.getElementById('emailBody') || {}).value || '';
+  var close = (document.getElementById('emailClosing') || {}).value || '';
+  var sign  = (document.getElementById('emailSignoff') || {}).value || '';
+  var wc    = getEmailBodyWordCount();
 
-  var issues = [];
-  var passes = [];
+  var issues = [], passes = [];
 
-  if (to.includes('@')) passes.push('To: field has a valid email address'); else issues.push('Missing or invalid To: email address');
-  if (sub.length > 3) passes.push('Subject line is present'); else issues.push('Subject line is missing or too short');
-  if (/dear/i.test(sal) && sal.length > 5) passes.push('Salutation "Dear [Name]," is correct'); else issues.push('Salutation missing — should be "Dear [Name],"');
-  if (open.length > 10) passes.push('Opening line is present'); else issues.push('Opening line missing — start with a friendly sentence');
-  if (body.length > 50) passes.push('Body paragraphs written'); else issues.push('Body is too short — write at least one paragraph per content point');
-  if (close.length > 10) passes.push('Closing line is present'); else issues.push('Closing line missing — e.g. "I hope to hear from you soon."');
-  if (sign.length > 3) passes.push('Sign-off is present'); else issues.push('Sign-off missing — use "Your friend," or "Take care,"');
-  if (/yours sincerely|yours faithfully/i.test(sign)) issues.push('⚠️ Wrong sign-off! "Yours sincerely/faithfully" is FORMAL. Use "Your friend," or "Best wishes,"');
-  if (/i am writing to/i.test(open + body)) issues.push('⚠️ "I am writing to..." is too formal for an informal email');
-  if (/\bu\b|\br\b|gonna|wanna|lol|omg/i.test(body)) issues.push('⚠️ Avoid text-speak: "u", "r", "gonna", "lol" etc.');
-  if (wc < 130) issues.push('Word count too low (' + wc + ') — aim for 150–180 words');
-  else if (wc > 220) issues.push('Word count too high (' + wc + ') — keep to 150–180 words');
-  else passes.push('Word count is good (' + wc + ' words)');
+  if (to.includes('@')) passes.push('To: address is present'); else issues.push('To: email address is missing');
+  if (sub.length > 5) passes.push('Subject line written'); else issues.push('Subject line is missing or too short');
+  if (/dear/i.test(sal)) passes.push('Salutation "Dear [Name]," correct'); else issues.push('Salutation missing — must start with "Dear [Name],"');
+  if (open.length > 15) passes.push('Opening line present'); else issues.push('Opening line missing — start with a friendly greeting');
+  if (body.length > 80) passes.push('Body paragraphs written'); else issues.push('Body is too short — write one paragraph per bullet point');
+  if (close.length > 10) passes.push('Closing line present'); else issues.push('Closing line missing — e.g. "I hope you will visit soon!"');
+  if (sign.length > 3) passes.push('Sign-off present'); else issues.push('Sign-off missing — use "Your friend," or "Take care,"');
+  if (/yours sincerely|yours faithfully/i.test(sign)) issues.push('Wrong sign-off — "Yours sincerely/faithfully" is for FORMAL letters. Use "Your friend,"');
+  if (/i am writing to inform/i.test(open + body)) issues.push('"I am writing to inform you" is too formal for an informal email');
+  if (/\bu\b|\br\b|gonna|wanna|lol/i.test(body)) issues.push('Avoid text-speak: "u", "r", "gonna", "lol"');
+  if (wc < 180) issues.push('Word count too low (' + wc + ') — aim for at least 180 words');
+  else passes.push('Word count good: ' + wc + ' words');
 
-  var html = '<div style="font-weight:700;margin-bottom:.5rem">🔍 Format Check Result</div>';
-  if (passes.length) html += '<div style="margin-bottom:.4rem">' + passes.map(function(p){ return '<div style="color:var(--green);font-size:.8rem">✅ ' + esc(p) + '</div>'; }).join('') + '</div>';
-  if (issues.length) html += issues.map(function(i){ return '<div style="color:var(--red);font-size:.8rem">❌ ' + esc(i) + '</div>'; }).join('');
-  else html += '<div style="color:var(--green);font-weight:700;font-size:.85rem">🎉 Perfect format! Ready for AI marking.</div>';
+  var html = '<div style="font-weight:700;margin-bottom:.5rem">🔍 Format Check</div>';
+  html += passes.map(function(p){ return '<div style="color:var(--green);font-size:.8rem">✅ ' + esc(p) + '</div>'; }).join('');
+  if (issues.length) {
+    html += '<div style="margin-top:.4rem">' + issues.map(function(i){ return '<div style="color:var(--red);font-size:.8rem">❌ ' + esc(i) + '</div>'; }).join('') + '</div>';
+  } else {
+    html += '<div style="color:var(--green);font-weight:700;margin-top:.4rem">🎉 Perfect format! Click Submit for AI marking.</div>';
+  }
 
   var res = document.getElementById('emailFormatResult');
-  res.innerHTML = html;
-  res.style.display = 'block';
-  res.style.background = issues.length ? '#fff5f5' : '#f0fff4';
+  if (res) { res.innerHTML = html; res.style.display = 'block'; res.style.background = issues.length ? '#fff5f5' : '#f0fff4'; }
 }
 
 async function markEmail() {
-  if (!currentEmailPrompt) { alert('Please load a prompt first.'); return; }
-  var fullText = getEmailFullText();
-  var bodyText = (document.getElementById('emailBody').value || '').trim();
-  if (bodyText.length < 30) { alert('Please write your email body before marking.'); return; }
+  if (!currentEmailPrompt) { alert('Please select a prompt first.'); return; }
+  var bodyText = (document.getElementById('emailBody') || {}).value || '';
+  if (bodyText.trim().length < 50) { alert('Please write your email body before submitting.'); return; }
 
   var d = loadData();
   var apiKey = d.apiKey || '';
   var provider = d.apiProvider || 'groq';
-  if (!apiKey && provider !== 'ollama') { alert('Please set your AI API key in the AI Practice tab first.'); return; }
+  if (!apiKey && provider !== 'ollama') {
+    alert('Please set your Groq API key in the AI Practice tab first.');
+    return;
+  }
 
   var btn = document.getElementById('emailMarkBtn');
   var status = document.getElementById('emailMarkStatus');
-  btn.disabled = true; btn.textContent = '⏳ Marking...';
-  status.textContent = '⏳ AI is marking your email...';
+  if (btn) { btn.disabled = true; btn.textContent = 'Marking...'; }
+  if (status) status.textContent = 'AI is marking your email...';
 
-  var pointsList = currentEmailPrompt.points.map(function(p,i){ return (i+1)+'. '+p; }).join('\n');
-  var prompt = 'You are a Singapore secondary school English teacher marking a Sec 1 NT/G1 student\'s informal email.\n\n'
-    + 'PROMPT GIVEN TO STUDENT:\n' + currentEmailPrompt.situation + '\n\n'
-    + 'CONTENT POINTS TO COVER:\n' + pointsList + '\n\n'
-    + 'STUDENT\'S EMAIL:\n' + fullText + '\n\n'
-    + 'Mark using this rubric (G1/NT level):\n'
-    + 'A) FORMAT (5 marks): To/Subject/Salutation/Closing/Sign-off correct and appropriate\n'
-    + 'B) REGISTER (5 marks): Tone is friendly, personal, conversational — not formal, not slang\n'
-    + 'C) CONTENT (10 marks): All content points addressed clearly, with adequate detail\n'
-    + 'D) LANGUAGE (10 marks): Grammar, tense consistency, sentence structure, vocabulary accuracy\n\n'
-    + 'Respond ONLY in this JSON format (no extra text):\n'
+  var fullText = getEmailFullText();
+  var pointsList = currentEmailPrompt.points.map(function(p,i){ return (i+1) + '. ' + p; }).join('\n');
+
+  var prompt = 'You are a Singapore secondary school English teacher marking a Sec 1 NT/G1 student informal email.\n\n'
+    + 'TASK GIVEN TO STUDENT:\n' + currentEmailPrompt.situation + '\n\n'
+    + 'BULLET POINTS TO COVER:\n' + pointsList + '\n\n'
+    + 'STUDENT EMAIL:\n' + fullText + '\n\n'
+    + 'Mark using G1 NT rubric (30 marks total):\n'
+    + 'FORMAT (5 marks): To/Subject/Dear/closing/sign-off correct and appropriate\n'
+    + 'REGISTER (5 marks): Friendly, personal, conversational tone throughout\n'
+    + 'CONTENT (10 marks): All bullet points addressed with sufficient detail (2.5 marks each)\n'
+    + 'LANGUAGE (10 marks): Grammar accuracy, tense consistency, sentence structure, vocabulary\n\n'
+    + 'Look specifically for these common errors: missing "to" in "going to [place]", "a" vs "an", subject-verb agreement (family is/are, food has/have).\n\n'
+    + 'Respond ONLY in this exact JSON (no other text):\n'
     + '{"format":{"score":0,"max":5,"comment":"..."},'
     + '"register":{"score":0,"max":5,"comment":"..."},'
-    + '"content":{"score":0,"max":10,"comment":"...","points_addressed":[true,false,true]},'
-    + '"language":{"score":0,"max":10,"comment":"..."},'
-    + '"total":0,"total_max":30,'
-    + '"grade":"A/B/C/D",'
+    + '"content":{"score":0,"max":10,"comment":"...","points_covered":[true,false,true,false]},'
+    + '"language":{"score":0,"max":10,"comment":"...","errors":["error1","error2"]},'
+    + '"total":0,"total_max":30,"grade":"A/B/C/D",'
     + '"overall_feedback":"2-3 sentence encouraging summary",'
     + '"top_improvements":["specific tip 1","specific tip 2","specific tip 3"]}';
 
   try {
     var response = '';
-    if (provider === 'ollama') response = await callOllama(d.ollamaHost, d.ollamaModel, prompt);
+    if (provider === 'groq') response = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', apiKey, 'llama-3.3-70b-versatile', prompt);
     else if (provider === 'anthropic') response = await callAnthropic(apiKey, prompt);
     else if (provider === 'gemini') response = await callGemini(apiKey, prompt);
-    else response = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', apiKey, 'llama-3.1-8b-instant', prompt);
+    else if (provider === 'ollama') response = await callOllama(d.ollamaHost, d.ollamaModel, prompt);
 
     var result = extractJSON(response);
     displayEmailResult(result, fullText);
     saveEmailAttempt(result, fullText);
-    status.textContent = '✅ Marked! See results below.';
+    if (status) status.textContent = '';
   } catch(e) {
-    status.textContent = '❌ ' + e.message;
+    if (status) status.textContent = 'Error: ' + e.message;
   }
-  btn.disabled = false; btn.textContent = '🤖 AI Mark';
+  if (btn) { btn.disabled = false; btn.textContent = 'Submit & Get AI Feedback'; }
 }
 
 function displayEmailResult(r, text) {
   var pct = Math.round((r.total / r.total_max) * 100);
-  var col = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
-  var criteria = [
-    { name:'Format',   data: r.format },
-    { name:'Register', data: r.register },
-    { name:'Content',  data: r.content },
-    { name:'Language', data: r.language }
-  ];
-  var html = '<div style="font-weight:700;font-size:1rem;margin-bottom:.6rem">📊 AI Marking Result</div>';
-  html += '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:.7rem">'
-    + '<div style="font-size:2rem;font-weight:900;color:' + col + '">' + r.total + '/' + r.total_max + '</div>'
-    + '<div><div style="font-size:1.1rem;font-weight:700;color:' + col + '">' + pct + '% — Grade ' + (r.grade||'') + '</div>'
-    + '<div style="font-size:.78rem;color:var(--muted)">' + esc(r.overall_feedback||'') + '</div></div>'
+  var col = pct >= 80 ? 'var(--green)' : pct >= 65 ? 'var(--amber)' : 'var(--red)';
+  var grade = r.grade || (pct >= 80 ? 'B' : pct >= 65 ? 'C' : 'D');
+
+  var html = '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:.8rem">'
+    + '<div style="text-align:center"><div style="font-size:2rem;font-weight:900;color:' + col + '">' + r.total + '/' + r.total_max + '</div>'
+    + '<div style="font-size:1rem;font-weight:700;color:' + col + '">' + pct + '% — ' + grade + '</div></div>'
+    + '<div style="flex:1;font-size:.8rem;line-height:1.5;color:var(--muted)">' + esc(r.overall_feedback || '') + '</div>'
     + '</div>';
 
+  // Criteria bars
+  var criteria = [
+    {name:'Format',   d:r.format,   max:5},
+    {name:'Register', d:r.register, max:5},
+    {name:'Content',  d:r.content,  max:10},
+    {name:'Language', d:r.language, max:10}
+  ];
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.6rem">';
   criteria.forEach(function(c) {
-    if (!c.data) return;
-    var cp = Math.round((c.data.score/c.data.max)*100);
+    if (!c.d) return;
+    var cp = Math.round((c.d.score/c.max)*100);
     var cc = cp>=80?'var(--green)':cp>=60?'var(--amber)':'var(--red)';
-    html += '<div style="margin-bottom:.4rem;padding:.4rem .6rem;background:var(--bg2,#f8f8f8);border-radius:6px">'
-      + '<div style="display:flex;justify-content:space-between"><strong style="font-size:.8rem">' + c.name + '</strong>'
-      + '<span style="color:' + cc + ';font-weight:700;font-size:.8rem">' + c.data.score + '/' + c.data.max + '</span></div>'
-      + '<div style="font-size:.76rem;color:var(--muted)">' + esc(c.data.comment||'') + '</div></div>';
+    html += '<div style="background:var(--bg2,#f8f8f8);border-radius:6px;padding:.4rem .6rem">'
+      + '<div style="display:flex;justify-content:space-between;font-size:.78rem"><strong>' + c.name + '</strong>'
+      + '<span style="color:' + cc + ';font-weight:700">' + c.d.score + '/' + c.max + '</span></div>'
+      + '<div style="background:var(--border);border-radius:3px;height:4px;margin:.3rem 0"><div style="background:' + cc + ';width:' + cp + '%;height:4px;border-radius:3px"></div></div>'
+      + '<div style="font-size:.72rem;color:var(--muted)">' + esc(c.d.comment || '') + '</div>'
+      + '</div>';
   });
+  html += '</div>';
 
-  if (r.content && r.content.points_addressed) {
-    var pts = currentEmailPrompt ? currentEmailPrompt.points : [];
-    html += '<div style="margin-top:.4rem;padding:.4rem .6rem;background:#fffdf0;border-radius:6px">'
-      + '<div style="font-size:.76rem;font-weight:700;margin-bottom:.2rem">Content Points:</div>'
-      + pts.map(function(pt,i){
-          var ok = r.content.points_addressed[i];
-          return '<div style="font-size:.74rem;color:' + (ok?'var(--green)':'var(--red)') + '">'
-            + (ok?'✅':'❌') + ' ' + esc(pt) + '</div>';
+  // Content points coverage
+  if (r.content && r.content.points_covered && currentEmailPrompt) {
+    html += '<div style="margin-bottom:.5rem;padding:.5rem .6rem;background:#fffdf0;border-radius:6px">'
+      + '<div style="font-size:.75rem;font-weight:700;margin-bottom:.3rem">Content Points:</div>'
+      + currentEmailPrompt.points.map(function(pt, i) {
+          var ok = r.content.points_covered[i];
+          return '<div style="font-size:.74rem;color:' + (ok?'var(--green)':'var(--red)') + ';margin-bottom:.15rem">'
+            + (ok ? '✅' : '❌') + ' ' + esc(pt) + '</div>';
         }).join('')
       + '</div>';
   }
 
+  // Language errors
+  if (r.language && r.language.errors && r.language.errors.length) {
+    html += '<div style="margin-bottom:.5rem;padding:.5rem .6rem;background:#fff5f5;border-radius:6px">'
+      + '<div style="font-size:.75rem;font-weight:700;color:var(--red);margin-bottom:.3rem">Language Errors Found:</div>'
+      + r.language.errors.map(function(e){ return '<div style="font-size:.74rem;margin-bottom:.15rem">• ' + esc(e) + '</div>'; }).join('')
+      + '</div>';
+  }
+
+  // Top improvements
   if (r.top_improvements && r.top_improvements.length) {
-    html += '<div style="margin-top:.5rem;padding:.5rem .7rem;background:#fff5f0;border-radius:6px;border-left:3px solid var(--amber)">'
-      + '<div style="font-size:.76rem;font-weight:700;color:var(--amber);margin-bottom:.25rem">💡 Top 3 Improvements:</div>'
+    html += '<div style="padding:.5rem .6rem;background:#f0f8ff;border-left:3px solid var(--gold);border-radius:0 6px 6px 0">'
+      + '<div style="font-size:.75rem;font-weight:700;color:var(--amber);margin-bottom:.3rem">Top 3 Things to Improve:</div>'
       + '<ol style="margin:.2rem 0 0 1rem;padding:0">'
-      + (r.top_improvements||[]).map(function(t){ return '<li style="font-size:.76rem;margin-bottom:.15rem">' + esc(t) + '</li>'; }).join('')
+      + r.top_improvements.map(function(t){ return '<li style="font-size:.76rem;margin-bottom:.2rem">' + esc(t) + '</li>'; }).join('')
       + '</ol></div>';
   }
 
   var res = document.getElementById('emailMarkResult');
-  res.innerHTML = html;
-  res.style.display = 'block';
+  if (res) { res.innerHTML = '<div style="font-weight:700;margin-bottom:.6rem">📊 AI Marking Result</div>' + html; res.style.display = 'block'; }
+  res.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function saveEmailAttempt(result, text) {
@@ -6838,26 +6809,26 @@ function saveEmailAttempt(result, text) {
   d.emailHistory.unshift({
     promptId: currentEmailPrompt ? currentEmailPrompt.id : '',
     promptTitle: currentEmailPrompt ? currentEmailPrompt.title : '',
-    difficulty: document.getElementById('emailDifficulty').value,
+    difficulty: (document.getElementById('emailDifficulty') || {}).value || 'basic',
     totalScore: result.total,
     totalMax: result.total_max,
     grade: result.grade || '',
     criteria: [
-      { name:'Format',   score: result.format   ? result.format.score   : 0, max: 5  },
-      { name:'Register', score: result.register  ? result.register.score : 0, max: 5  },
-      { name:'Content',  score: result.content   ? result.content.score  : 0, max: 10 },
-      { name:'Language', score: result.language  ? result.language.score : 0, max: 10 }
+      {name:'Format',   score: result.format   ? result.format.score   : 0, max:5},
+      {name:'Register', score: result.register  ? result.register.score : 0, max:5},
+      {name:'Content',  score: result.content   ? result.content.score  : 0, max:10},
+      {name:'Language', score: result.language  ? result.language.score : 0, max:10}
     ],
     overallFeedback: result.overall_feedback || '',
     topImprovements: result.top_improvements || [],
+    errors: (result.language && result.language.errors) || [],
     text: text,
     wordCount: wc,
-    date: new Date().toISOString(),
-    dateDisplay: new Date().toLocaleDateString('en-SG', {day:'numeric',month:'short',year:'numeric'})
+    dateDisplay: new Date().toLocaleDateString('en-SG', {day:'numeric', month:'short', year:'numeric'})
   });
   if (d.emailHistory.length > 30) d.emailHistory.pop();
   saveData(d);
-  if (USE_FIREBASE && currentUser) _syncToFirestore(d);
+  if (USE_FIREBASE && currentUser && !currentUser.uid.startsWith('demo_')) _syncToFirestore(d);
   renderEmailHistory();
 }
 
@@ -6872,38 +6843,40 @@ function renderEmailHistory() {
     list.innerHTML = '<div class="empty-state"><div class="es-icon">✉️</div><p>No emails practised yet.</p></div>';
     return;
   }
-  list.innerHTML = history.slice(0, 20).map(function(e, idx) {
+  list.innerHTML = history.slice(0,20).map(function(e, idx) {
     var pct = Math.round((e.totalScore / e.totalMax) * 100);
-    var col = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
-    var uid = 'emhc_' + idx;
-    var diffLabel = {basic:'🟢 Basic', standard:'🟡 Standard', challenge:'🔴 Challenge'}[e.difficulty] || '';
-    var criteriaHtml = (e.criteria && e.criteria.length) ? '<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0">'
-      + e.criteria.map(function(c) {
-          var cp = Math.round((c.score/c.max)*100);
-          var cc = cp>=80?'var(--green)':cp>=60?'var(--amber)':'var(--red)';
-          return '<span style="font-size:.72rem;background:var(--bg2,#f4f4f4);border-radius:4px;padding:2px 7px;border:1px solid var(--border)">'
-            + c.name + ' <strong style="color:' + cc + '">' + c.score + '/' + c.max + '</strong></span>';
-        }).join('') + '</div>' : '';
-    var tipsHtml = (e.topImprovements && e.topImprovements.length) ? '<div style="margin:.4rem 0"><strong style="font-size:.77rem;color:var(--amber)">💡 Improvements:</strong>'
-      + '<ol style="margin:.2rem 0 0 1.1rem;padding:0;font-size:.77rem">'
-      + e.topImprovements.map(function(t){ return '<li>' + esc(t) + '</li>'; }).join('')
+    var col = pct>=80?'var(--green)':pct>=65?'var(--amber)':'var(--red)';
+    var uid = 'emh_' + idx;
+    var criteriaHtml = (e.criteria||[]).map(function(c){
+      var cp = Math.round((c.score/c.max)*100);
+      var cc = cp>=80?'var(--green)':cp>=65?'var(--amber)':'var(--red)';
+      return '<span style="font-size:.71rem;background:var(--bg2,#f4f4f4);border-radius:4px;padding:1px 6px;border:1px solid var(--border)">'
+        + c.name + ' <strong style="color:'+cc+'">'+c.score+'/'+c.max+'</strong></span>';
+    }).join(' ');
+
+    var tipsHtml = (e.topImprovements||[]).length ? '<div style="margin:.3rem 0"><strong style="font-size:.74rem;color:var(--amber)">Improvements:</strong>'
+      + '<ol style="margin:.2rem 0 0 1rem;padding:0;font-size:.74rem">'
+      + (e.topImprovements||[]).map(function(t){ return '<li>'+esc(t)+'</li>'; }).join('')
       + '</ol></div>' : '';
-    var feedbackHtml = e.overallFeedback ? '<div style="margin:.4rem 0;padding:.4rem .6rem;background:var(--bg2,#f4f4f4);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;font-size:.78rem">'
-      + '<strong>Feedback:</strong> ' + esc(e.overallFeedback) + '</div>' : '';
-    var textHtml = e.text ? '<div style="margin:.4rem 0"><strong style="font-size:.77rem">📧 My Email:</strong>'
-      + '<div style="margin:.2rem 0;padding:.4rem .6rem;background:#f0f8ff;border:1px solid var(--border);border-radius:6px;font-size:.74rem;white-space:pre-wrap;max-height:180px;overflow-y:auto">'
+
+    var errHtml = (e.errors||[]).length ? '<div style="margin:.3rem 0"><strong style="font-size:.74rem;color:var(--red)">Errors:</strong>'
+      + (e.errors||[]).map(function(er){ return '<div style="font-size:.73rem">• '+esc(er)+'</div>'; }).join('')
+      + '</div>' : '';
+
+    var textHtml = e.text ? '<div style="margin:.3rem 0"><strong style="font-size:.74rem">My Email:</strong>'
+      + '<div style="margin:.2rem 0;padding:.4rem .6rem;background:#f0f8ff;border-radius:6px;font-size:.73rem;white-space:pre-wrap;max-height:160px;overflow-y:auto">'
       + esc(e.text) + '</div></div>' : '';
 
     return '<div style="border:1px solid var(--border);border-radius:10px;margin-bottom:.5rem;overflow:hidden">'
-      + '<div onclick="toggleEssayCard(\'" + uid + "\')" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.55rem .8rem;cursor:pointer;user-select:none">'
-      + '<span style="font-size:.72rem">' + esc(diffLabel) + '</span>'
-      + '<span style="font-weight:700;font-size:.83rem;flex:1">' + esc(e.promptTitle) + '</span>'
-      + '<span style="color:' + col + ';font-weight:700">' + e.totalScore + '/' + e.totalMax + ' (' + pct + '%)</span>'
-      + '<span style="font-size:.7rem;color:var(--muted)">' + esc(e.dateDisplay||'') + (e.wordCount?' · '+e.wordCount+'w':'') + '</span>'
-      + '<span id="' + uid + '_arrow" style="font-size:.8rem;color:var(--muted)">▼</span>'
+      + '<div onclick="toggleEssayCard(\\x27" + uid + "\\x27)" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.5rem .8rem;cursor:pointer">'
+      + '<span style="font-weight:700;font-size:.83rem;flex:1">'+esc(e.promptTitle)+'</span>'
+      + '<span style="color:'+col+';font-weight:700">'+e.totalScore+'/'+e.totalMax+' ('+pct+'%)</span>'
+      + '<span style="font-size:.7rem;color:var(--muted)">'+esc(e.dateDisplay||'')+(e.wordCount?' · '+e.wordCount+'w':'')+'</span>'
+      + '<span id="'+uid+'_arrow" style="font-size:.8rem;color:var(--muted)">▼</span>'
       + '</div>'
-      + '<div id="' + uid + '" style="display:none;padding:.5rem .8rem .65rem;border-top:1px solid var(--border)">'
-      + criteriaHtml + tipsHtml + feedbackHtml + textHtml
+      + '<div id="'+uid+'" style="display:none;padding:.5rem .8rem .65rem;border-top:1px solid var(--border)">'
+      + '<div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.3rem">'+criteriaHtml+'</div>'
+      + tipsHtml + errHtml + textHtml
       + '</div></div>';
   }).join('');
 }
