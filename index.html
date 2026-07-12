@@ -1803,7 +1803,7 @@ button, input, select, textarea, a, label,
 </div>
 
 <!-- MAIN LAYOUT: brochure left, email right -->
-<div id="emailMainArea" style="display:none">
+<div id="emailMainArea" style="display:block">
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.8rem">
 
   <!-- LEFT: Question paper style -->
@@ -6485,6 +6485,103 @@ function renderEssayHistory() {
 // ══════════════════════════════════════════════════════════════════════════
 //  EMAIL WRITING TAB — School exam format
 // ══════════════════════════════════════════════════════════════════════════
+
+var EMAIL_PROMPTS = {
+  basic: [
+    { id:'sb1', difficulty:'basic', title:'Sentosa Visit',
+      situation:'You and your parents recently went to Sentosa. One of your friends has always wanted to go there. Write an email to your friend to recommend visiting Sentosa during the upcoming school holidays and describe your experience there.',
+      brochure:[
+        { name:'Adventure Cove Waterpark', desc:'An aquatic adventure park. Zoom down exciting waterslides. Relax at BluWater Bay wave pool. Journey down Adventure River on a tube through a tropical jungle garden. Ages 10+.' },
+        { name:'S.E.A Aquarium', desc:'Immerse yourself in a magical marine world. Observe more than 800 species of marine animals. Watch divers feed sharks. Touch starfish and horseshoe crabs at the petting pool. Suitable for all ages.' },
+        { name:'Universal Studios Singapore', desc:'Experience cutting-edge rides, shows and attractions based on your favourite films. Climb aboard Transformers The Ride. Meet your favourite characters at meet-and-greet sessions. Ages 12+.' }
+      ],
+      points:['Why you and your family decided to visit Sentosa','What you saw and did there','What you liked most about the visit','Why you think your friend should visit Sentosa'],
+      words:'at least 180' },
+    { id:'sb2', difficulty:'basic', title:'Singapore Zoo',
+      situation:'You and your family recently visited the Singapore Zoo. Your cousin has never been there before. Write an email to your cousin recommending a visit to the zoo during the school holidays.',
+      brochure:[
+        { name:'Jungle Breakfast with Wildlife', desc:'Have breakfast with orang utans in the rainforest. Available every morning from 9am. Suitable for all ages.' },
+        { name:'River Safari', desc:"Asia's first river-themed wildlife park. See giant pandas, manatees and river giants. Take the Amazon River Quest boat ride." },
+        { name:'Night Safari', desc:"The world's first wildlife night park. See over 900 animals across 8 zones. Watch the Creatures of the Night show. Tram rides available." }
+      ],
+      points:['Why your family decided to visit the Singapore Zoo','What you saw and did there','What you enjoyed most about the visit','Why your cousin should visit the zoo'],
+      words:'at least 180' },
+    { id:'sb3', difficulty:'basic', title:'Gardens by the Bay',
+      situation:'You recently visited Gardens by the Bay with your family. Your friend has never been there. Write an email to your friend describing your visit and encouraging them to go.',
+      brochure:[
+        { name:'Flower Dome', desc:"The world's largest glass greenhouse. Home to flowers and plants from cool dry regions of the world. Seasonal floral displays throughout the year." },
+        { name:'Cloud Forest', desc:'A misty mountain world filled with rare plants. Features a 35-metre indoor waterfall. Explore the Secret Garden, Cloud Walk and Treetop Walk.' },
+        { name:'Supertree Grove', desc:'Iconic tree-like structures up to 16 storeys high. Garden Rhapsody light and sound show every evening. OCBC Skyway offers a bird\'s eye view of the gardens.' }
+      ],
+      points:['Why your family decided to visit Gardens by the Bay','What you saw and did there','What you liked most about the visit','Why your friend should visit Gardens by the Bay'],
+      words:'at least 180' },
+    { id:'sb4', difficulty:'basic', title:'Sports Carnival',
+      situation:'Your school recently held a Sports Carnival. Your cousin who studies in another school wants to know what happened. Write an email to your cousin describing the event.',
+      brochure:[
+        { name:'Track Events', desc:'100m sprint, 4x100m relay, 800m run. Medals awarded for top 3. House points given to all participants.' },
+        { name:'Field Events', desc:'Shot put, long jump, high jump. Open to all students. Qualified students represent their houses.' },
+        { name:'Games Area', desc:'Frisbee, tug of war, captain\'s ball. Team events. All classes participate. Prizes for winning teams.' }
+      ],
+      points:['What Sports Carnival is and why your school holds it','What events you took part in or watched','What you enjoyed most about the day','Why your cousin should encourage their school to hold a similar event'],
+      words:'at least 180' },
+    { id:'sb5', difficulty:'basic', title:'Science Centre',
+      situation:'Your class went on a school excursion to the Science Centre Singapore. Your pen pal from Malaysia wants to know about it. Write an email telling your pen pal about the trip.',
+      brochure:[
+        { name:'Ecogarden', desc:'An outdoor garden showcasing eco-friendly living. Learn about renewable energy, recycling and sustainable practices.' },
+        { name:'OMNITheatre', desc:"Singapore's only dome theatre with a 23-metre spherical screen. Watch educational films about space, oceans and the natural world." },
+        { name:'KidsSTOP', desc:'A creative playground for children. Build robots, conduct science experiments and explore interactive zones.' }
+      ],
+      points:['Why your class went to the Science Centre','What you saw and did there','What you found most interesting','What your pen pal would enjoy if they visited'],
+      words:'at least 180' }
+  ],
+  standard: [
+    { id:'ss1', difficulty:'standard', title:'Holiday in Japan',
+      situation:'You recently went on a holiday to Japan with your family. Your friend has always wanted to visit Japan. Write an email to your friend describing your trip and encouraging them to visit.',
+      brochure:[
+        { name:'Tokyo Disneyland', desc:'One of the most visited theme parks in the world. Exciting rides and attractions based on Disney films. Character meet-and-greet sessions daily.' },
+        { name:'Mount Fuji', desc:"Japan's highest mountain and a UNESCO World Heritage Site. Stunning views at the summit. Seasonal cherry blossom views at the base." },
+        { name:'Osaka Street Food', desc:'Try takoyaki, ramen, sushi and mochi. Dotonbori district famous for its bright lights and food stalls. Open late into the night.' }
+      ],
+      points:['Why your family decided to visit Japan','What you saw and did there','What you liked most about the trip','Why your friend should visit Japan'],
+      words:'at least 180' },
+    { id:'ss2', difficulty:'standard', title:'Community Service',
+      situation:'You recently took part in a community service project organised by your school. Your friend who missed the event wants to know what happened. Write an email describing the project.',
+      brochure:[
+        { name:'Elderly Home Visit', desc:'Students visited Sunshine Home for the Elderly. Performed songs and dances for residents. Shared a meal together.' },
+        { name:'Park Clean-Up', desc:'Cleaned Bishan-Ang Mo Kio Park. Collected over 50 bags of litter. Planted 30 new trees.' },
+        { name:'Food Donation Drive', desc:'Collected non-perishable food items. Donated over 200 items to Food from the Heart charity.' }
+      ],
+      points:['What the community service project was and why your school organised it','What activities you took part in','What you learned or felt from the experience','Why your friend should join the next community service project'],
+      words:'at least 180' },
+    { id:'ss3', difficulty:'standard', title:'School Camp',
+      situation:'You attended a 3-day school camp at Pulau Ubin. Your cousin wants to know what it was like. Write an email describing the camp and whether you would recommend it.',
+      brochure:[
+        { name:'Kayaking', desc:'Kayak around the mangrove swamps of Pulau Ubin. Spot wildlife including monitor lizards and kingfishers. Led by experienced instructors.' },
+        { name:'Campfire Night', desc:'Build your own campfire with your team. Perform a skit for other groups. Roast marshmallows and share stories. Ends with a stargazing session.' },
+        { name:'Obstacle Course', desc:'Conquer a challenging outdoor obstacle course. Activities include rope bridges, mud crawl and wall climbing. Promotes teamwork and resilience.' }
+      ],
+      points:['What the camp was and why your school organised it','What activities you did during the camp','What you enjoyed or found challenging','Whether you would recommend the camp to your cousin and why'],
+      words:'at least 180' },
+    { id:'ss4', difficulty:'standard', title:'Book Fair',
+      situation:'Your school recently held its annual Book Fair. Your friend who was absent wants to know what it was like. Write an email describing the Book Fair.',
+      brochure:[
+        { name:'Fiction Section', desc:'Wide range of novels for teenagers. Popular titles include fantasy, adventure and romance. Buy 3 books at 20% discount.' },
+        { name:'Author Talk', desc:'Local author shared their writing journey. Students could ask questions and get books signed.' },
+        { name:'Creative Writing Workshop', desc:'30-minute workshop on how to start a story. Best entries displayed on school notice board.' }
+      ],
+      points:['What the Book Fair was and what was available','What you did and bought at the Book Fair','What you enjoyed most about the event','Why your friend should attend the Book Fair next year'],
+      words:'at least 180' },
+    { id:'ss5', difficulty:'standard', title:'Cultural Performance Night',
+      situation:"Your school put on a cultural performance night. Your relative who lives overseas wants to know about Singapore's culture. Write an email describing the performance.",
+      brochure:[
+        { name:'Chinese Dance', desc:'Students performed traditional Chinese fan dance and dragon dance. Colourful costumes and traditional music.' },
+        { name:'Malay Dikir Barat', desc:'A traditional Malay group performance combining singing and rhythmic movement. 20 students performed.' },
+        { name:'Indian Classical Dance', desc:'Bharatanatyam performance by the Indian Cultural Club. Elaborate costumes and expressive gestures.' }
+      ],
+      points:['What the cultural performance night was and why your school organised it','What performances you watched and what they were about','What you found most interesting or meaningful','What your relative would learn about Singapore from such an event'],
+      words:'at least 180' }
+  ]
+};
 
 var currentEmailPrompt = null;
 var emailTimerInterval = null;
