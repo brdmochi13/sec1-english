@@ -7788,21 +7788,24 @@ function setQFFocus(btn, focus) {
 function buildPersonalisedQuestions(focus, count) {
   var pool = [];
   if (focus === 'all') {
-    Object.values(PERSONALISED_QF).forEach(function(cat) {
-      cat.forEach(function(q) { pool.push(q); });
+    Object.keys(PERSONALISED_QF).forEach(function(cat) {
+      PERSONALISED_QF[cat].forEach(function(q) { pool.push({q:q, cat:cat}); });
     });
   } else {
-    pool = (PERSONALISED_QF[focus] || []).slice();
+    (PERSONALISED_QF[focus] || []).forEach(function(q) { pool.push({q:q, cat:focus}); });
   }
   pool.sort(function() { return Math.random() - 0.5; });
-  return pool.slice(0, count).map(function(q) {
+  return pool.slice(0, count).map(function(item) {
+    var q = item.q;
+    // Use 'sva' type so showQFQuestion renders MC buttons
     return {
-      question: q.q,
+      type: 'sva',
+      q: q.q,
       options: q.opts,
-      answer: q.ans,
-      explanation: q.exp,
-      topic: focus,
-      skill: focus,
+      answer: q.opts[q.ans],   // store correct answer TEXT (what answerQF compares)
+      answerIdx: q.ans,
+      reason: q.exp,
+      skill: item.cat,
       isPersonalised: true
     };
   });
