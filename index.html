@@ -7684,10 +7684,135 @@ var qfState = {
   answered: false,
 };
 
+
+// ══════════════════════════════════════════════════════════════════════════
+//  PERSONALISED QUICK FIRE
+// ══════════════════════════════════════════════════════════════════════════
+
+var currentQFFocus = 'all';
+
+var PERSONALISED_QF = {
+  preposition: [
+    { q:'My family and I are going ___ Bali next week.', opts:['going Bali','going to Bali','going at Bali','going in Bali'], ans:1, exp:'Going TO + place always. You wrote "going Bali" in your Bali email.' },
+    { q:'We are going ___ the beach this weekend.', opts:['going beach','going at beach','going in beach','going to the beach'], ans:3, exp:'TO before destination. You wrote this in your Sentosa email.' },
+    { q:'She is going ___ her cousin house tomorrow.', opts:['going house','going to house','going to her cousin house','going at house'], ans:2, exp:'Going TO + destination. Always.' },
+    { q:'He is going ___ school right now.', opts:['going school','going to school','going at school','going in school'], ans:1, exp:'Going to school — TO before any destination.' },
+    { q:'I want to go ___ Universal Studios this holiday.', opts:['go Universal','go to Universal','go at Universal','go in Universal'], ans:1, exp:'Go TO a place. This came up in your Sentosa email.' },
+    { q:'They are going ___ visit the temple tomorrow.', opts:['going visit','going to visit','going at visit','going for visit'], ans:1, exp:'Going to + verb = future plan. Same rule.' },
+    { q:'My parents are going ___ India next December.', opts:['going India','going in India','going to India','going at India'], ans:2, exp:'You wrote "going India" in your India email. Always going TO India.' },
+    { q:'Which sentence is CORRECT?', opts:['I am going mall.','I am going to the mall.','I am going at mall.','I am going in mall.'], ans:1, exp:'Going to the mall — TO + THE + place.' },
+    { q:'We plan to go ___ the zoo next Saturday.', opts:['go zoo','go to zoo','go to the zoo','go at zoo'], ans:2, exp:'Go to the zoo — TO before destination.' },
+    { q:'Mokshith is going ___ visit Uluwatu Temple.', opts:['going visit','going for visit','going to visit','going at visit'], ans:2, exp:'Going to + verb = intention/plan.' }
+  ],
+  aan: [
+    { q:'Bali is ___ island near Indonesia.', opts:['a island','an island','the island','one island'], ans:1, exp:'Island starts with vowel i. AN island. You wrote "a island" in your Bali email.' },
+    { q:'It is ___ ancient place with long history.', opts:['a ancient','an ancient','the ancient','one ancient'], ans:1, exp:'Ancient starts with vowel a. AN ancient. From your India email.' },
+    { q:'I heard it was ___ hour-long flight.', opts:['a hour','an hour','the hour','one hour'], ans:1, exp:'Hour sounds like "ow" (vowel sound). AN hour. Tricky one!' },
+    { q:'India is ___ amazing country to visit.', opts:['a amazing','an amazing','the amazing','one amazing'], ans:1, exp:'Amazing starts with a (vowel). AN amazing country.' },
+    { q:'We saw ___ elephant at the zoo.', opts:['a elephant','an elephant','the elephant','one elephant'], ans:1, exp:'Elephant starts with e (vowel). AN elephant.' },
+    { q:'There was ___ eruption in the past.', opts:['a eruption','an eruption','the eruption','one eruption'], ans:1, exp:'Eruption starts with e (vowel). AN eruption. From your India email.' },
+    { q:'She is ___ honest person.', opts:['a honest','an honest','the honest','one honest'], ans:1, exp:'Honest sounds like it starts with o (silent h). AN honest person.' },
+    { q:'Which is CORRECT?', opts:['a umbrella','an umbrella','the umbrella','one umbrella'], ans:1, exp:'Umbrella starts with u (vowel). AN umbrella.' },
+    { q:'He is ___ university student.', opts:['a university','an university','the university','one university'], ans:0, exp:'Tricky! University sounds like you-ni (y sound, not vowel). A university.' },
+    { q:'It was ___ unforgettable experience.', opts:['a unforgettable','an unforgettable','the unforgettable','one unforgettable'], ans:1, exp:'Unforgettable starts with vowel u sound. AN unforgettable experience.' }
+  ],
+  sva: [
+    { q:'I hope your family ___ doing well.', opts:['family are','family is','family were','family be'], ans:1, exp:'Family is ONE unit (collective noun). IS. You wrote "family are" in every email.' },
+    { q:'The food in Bali ___ a lot of aroma.', opts:['food have','food has','food are having','food were'], ans:1, exp:'Food is singular/uncountable. HAS. You wrote "food have" in your India email.' },
+    { q:'The scenery ___ breathtaking with temples and beaches.', opts:['scenery are','scenery were','scenery is','scenery have'], ans:2, exp:'Scenery is singular/uncountable. IS. The scenery IS beautiful.' },
+    { q:'My class ___ going on a trip next week.', opts:['class are','class is','class were','class have'], ans:1, exp:'Class is collective. IS. My class IS going.' },
+    { q:'The local people ___ kind and friendly.', opts:['people is','people was','people are','people has been'], ans:2, exp:'People is PLURAL. ARE. People ARE kind. Person IS kind.' },
+    { q:'Balinese food ___ a lot of flavour.', opts:['food have','food has','food are having','food were having'], ans:1, exp:'Food (singular). HAS flavour. You made this error in your India email.' },
+    { q:'India ___ a lot of tourists every year.', opts:['India have','India has','India are having','India were having'], ans:1, exp:'India is singular. HAS. Countries are always singular.' },
+    { q:'The highway in India ___ very smooth.', opts:['highway are','highway is','highway were','highway have'], ans:1, exp:'Highway is singular. IS. You wrote about this in your India email.' },
+    { q:'My team ___ the best in the school.', opts:['team are','team is','team were','team have been'], ans:1, exp:'Team is collective. IS. My team IS great.' },
+    { q:'The news ___ very exciting today.', opts:['news are','news is','news were','news have been'], ans:1, exp:'News looks plural but is singular. IS. The news IS good.' }
+  ],
+  tense: [
+    { q:'Last Saturday, we ___ to Universal Studios.', opts:['go','goes','went','going'], ans:2, exp:'Last Saturday = past. WENT. From your Sentosa email.' },
+    { q:'I ___ the 3D show yesterday and it was amazing.', opts:['watch','watches','watched','watching'], ans:2, exp:'Yesterday = past. WATCHED. Keep tense consistent.' },
+    { q:'We ___ to Bali next month for the holidays.', opts:['go','are going','went','goes'], ans:1, exp:'Next month = future plan. ARE GOING.' },
+    { q:'When we arrived, there ___ a big Megatron statue.', opts:['is','was','were','are'], ans:1, exp:'Arrived is past so stay past. WAS. From your Sentosa email.' },
+    { q:'I hope your family ___ doing well.', opts:['is','was','are','were'], ans:0, exp:'Present wish. IS doing well.' },
+    { q:'My parents ___ very proud when they visited their hometown.', opts:['are','is','were','was'], ans:2, exp:'When they visited = past. WERE proud.' },
+    { q:'The hotdog ___ so juicy when I ate it.', opts:['is','are','was','were'], ans:2, exp:'When I ate = past. WAS juicy. From your Sentosa email.' },
+    { q:'We ___ to the beach after the 3D show.', opts:['go','goes','went','going'], ans:2, exp:'Everything in your Sentosa email was past. WENT.' },
+    { q:'I ___ you should visit Sentosa during the holidays.', opts:['think','thought','thinks','thinking'], ans:0, exp:'Present recommendation. THINK.' },
+    { q:'After eating, my mouth ___ with the taste.', opts:['water','waters','watered','watering'], ans:2, exp:'After eating = past. WATERED. Great sentence from your Sentosa email.' }
+  ],
+  pronoun: [
+    { q:'___ went to Bali last year.', opts:['Me and my family','My family and me','My family and I','I and my family'], ans:2, exp:'My family and I — put yourself LAST, use I not me. You wrote "Me and my family" in India email.' },
+    { q:'___ are going to visit our grandparents.', opts:['Me and dad','Dad and me','Dad and I','I and dad'], ans:2, exp:'Dad and I — I not me, put yourself after the other person.' },
+    { q:'My teacher gave ___ a prize.', opts:['I and my friend','my friend and I','me and my friend','my friend and me'], ans:3, exp:'After a verb use ME. Gave my friend and me.' },
+    { q:'___ took a photo with Megatron.', opts:['Me and my family','My family and me','My family and I','I and my family'], ans:2, exp:'My family and I — I is the subject. From your Sentosa email.' },
+    { q:'Which is CORRECT?', opts:['Me and Gokul went to the park.','Gokul and me went to the park.','Gokul and I went to the park.','I and Gokul went to the park.'], ans:2, exp:'Gokul and I went — I is the subject. Put yourself last. Recurring error.' },
+    { q:'Can you help ___ and my sister?', opts:['I and my sister','my sister and I','me and my sister','my sister and me'], ans:3, exp:'After a verb use ME, put yourself last. My sister and me.' },
+    { q:'___ planned the whole trip together.', opts:['Me and my parents','My parents and me','My parents and I','I and my parents'], ans:2, exp:'My parents and I — I is the subject doing the action. Put yourself last.' },
+    { q:'She is taller than ___.', opts:['I','me','my','mine'], ans:1, exp:'After comparison words use ME in informal writing. Taller than me.' },
+    { q:'Between you and ___, this is the best trip.', opts:['I','me','my','mine'], ans:1, exp:'After prepositions always use ME. Between you and me.' },
+    { q:'The prize was shared between him and ___.', opts:['I','me','my','mine'], ans:1, exp:'Between + pronoun = ME always. Between him and me.' }
+  ],
+  spelling: [
+    { q:'The food was very ___ and tasty.', opts:['intresting','interesting','interesing','intersting'], ans:1, exp:'i-n-t-e-r-e-s-t-i-n-g. You wrote "intresting" in your Sentosa email.' },
+    { q:'I hope you can ___ your family to visit.', opts:['convice','convince','convence','convinc'], ans:1, exp:'c-o-n-v-i-n-c-e. You wrote "convice" in your Sentosa email.' },
+    { q:'The temple was very ___.', opts:['anscient','ansient','ancient','ancent'], ans:2, exp:'a-n-c-i-e-n-t. From your India email.' },
+    { q:'The ___ in Bali is breathtaking.', opts:['scenary','scenrey','scenari','scenery'], ans:3, exp:'s-c-e-n-e-r-y. You used this word in your Bali email.' },
+    { q:'The hotdog was ___ and juicy.', opts:['aromatik','arromatic','aromtic','aromatic'], ans:3, exp:'a-r-o-m-a-t-i-c. Great word from your Sentosa email.' },
+    { q:'The ___ in Bali are very beautiful.', opts:['beachs','beackes','beaches','beachess'], ans:2, exp:'b-e-a-c-h-e-s. Plural of beach.' },
+    { q:'India has many ___ like Deepavali.', opts:['festivels','festivalls','festvals','festivals'], ans:3, exp:'f-e-s-t-i-v-a-l-s. From your India email.' },
+    { q:'The locals were very ___.', opts:['freindly','friendy','freidnly','friendly'], ans:3, exp:'f-r-i-e-n-d-l-y. i before e except after c.' },
+    { q:'It was an ___ experience.', opts:['unforgettble','unforgetable','unforgettabel','unforgettable'], ans:3, exp:'u-n-f-o-r-g-e-t-t-a-b-l-e. Double t, ends in -able.' },
+    { q:'The trip was very ___ for our family.', opts:['meaningfull','meanngful','meaningfull','meaningful'], ans:3, exp:'m-e-a-n-i-n-g-f-u-l. One l at the end.' }
+  ]
+};
+
+function onQFTopicChange() {
+  var topic = document.getElementById('qfTopic').value;
+  var panel = document.getElementById('qfPersonalisedPanel');
+  if (panel) panel.style.display = topic === 'personalised' ? 'block' : 'none';
+}
+
+function setQFFocus(btn, focus) {
+  currentQFFocus = focus;
+  var btns = document.querySelectorAll('#qfFocusButtons button');
+  btns.forEach(function(b) {
+    var origColor = b.style.borderColor;
+    b.style.background = 'transparent';
+    b.style.color = origColor;
+  });
+  btn.style.background = btn.style.borderColor;
+  btn.style.color = '#000';
+  if (focus === 'all') { btn.style.background = 'var(--gold)'; btn.style.color = '#000'; }
+}
+
+function buildPersonalisedQuestions(focus, count) {
+  var pool = [];
+  if (focus === 'all') {
+    Object.values(PERSONALISED_QF).forEach(function(cat) {
+      cat.forEach(function(q) { pool.push(q); });
+    });
+  } else {
+    pool = (PERSONALISED_QF[focus] || []).slice();
+  }
+  pool.sort(function() { return Math.random() - 0.5; });
+  return pool.slice(0, count).map(function(q) {
+    return {
+      question: q.q,
+      options: q.opts,
+      answer: q.ans,
+      explanation: q.exp,
+      topic: focus,
+      skill: focus,
+      isPersonalised: true
+    };
+  });
+}
+
+
 function startQuickFire() {
   var topic  = document.getElementById('qfTopic').value;
   var speed  = parseInt(document.getElementById('qfSpeed').value);
-  qfState.questions = buildQFQuestions(topic, 15);
+  qfState.questions = (topic === 'personalised') ? buildPersonalisedQuestions(currentQFFocus, 15) : buildQFQuestions(topic, 15);
   if (!qfState.questions.length) { alert('No questions available for this topic.'); return; }
   qfState.current = 0;
   qfState.score = 0;
