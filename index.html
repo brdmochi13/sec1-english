@@ -1722,7 +1722,8 @@ button, input, select, textarea, a, label,
       </p>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
         <div class="cfg-item"><label>Topic</label>
-          <select id="qfTopic" style="font-size:16px">
+          <select id="qfTopic" style="font-size:16px;background:#fff;color:#111" onchange="onQFTopicChange()">
+            <option value="personalised">🎯 Personalised (my mistakes)</option>
             <option value="mixed">Mixed (all topics)</option>
             <option value="tenses">Tenses</option>
             <option value="articles">Articles</option>
@@ -1732,6 +1733,23 @@ button, input, select, textarea, a, label,
             <option value="editing">Editing</option>
           </select>
         </div>
+        <!-- PERSONALISED FOCUS PANEL -->
+        <div id="qfPersonalisedPanel" style="width:100%;padding:.6rem .8rem;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:10px;margin-bottom:.5rem">
+          <div style="font-size:.8rem;font-weight:700;color:var(--gold);margin-bottom:.5rem">🎯 Focus on which mistakes?</div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem" id="qfFocusButtons">
+            <button onclick="setQFFocus(this,'all')" style="padding:.3rem .7rem;border-radius:20px;border:2px solid var(--gold);background:var(--gold);color:#000;font-size:.75rem;font-weight:700;cursor:pointer">📊 All weak areas</button>
+            <button onclick="setQFFocus(this,'preposition')" style="padding:.3rem .7rem;border-radius:20px;border:2px solid #60a5fa;background:transparent;color:#60a5fa;font-size:.75rem;font-weight:700;cursor:pointer">🔵 going TO (preposition)</button>
+            <button onclick="setQFFocus(this,'aan')" style="padding:.3rem .7rem;border-radius:20px;border:2px solid #fbbf24;background:transparent;color:#fbbf24;font-size:.75rem;font-weight:700;cursor:pointer">🟡 a / an rule</button>
+            <button onclick="setQFFocus(this,'sva')" style="padding:.3rem .7rem;border-radius:20px;border:2px solid #34d399;background:transparent;color:#34d399;font-size:.75rem;font-weight:700;cursor:pointer">🟢 Subject-Verb Agreement</button>
+            <button onclick="setQFFocus(this,'tense')" style="padding:.3rem .7rem;border-radius:20px;border:2px solid #f87171;background:transparent;color:#f87171;font-size:.75rem;font-weight:700;cursor:pointer">🔴 Tense consistency</button>
+            <button onclick="setQFFocus(this,'pronoun')" style="padding:.3rem .7rem;border-radius:20px;border:2px solid #a78bfa;background:transparent;color:#a78bfa;font-size:.75rem;font-weight:700;cursor:pointer">🟣 Pronoun I / me</button>
+            <button onclick="setQFFocus(this,'spelling')" style="padding:.3rem .7rem;border-radius:20px;border:2px solid #fb923c;background:transparent;color:#fb923c;font-size:.75rem;font-weight:700;cursor:pointer">🟠 Spelling</button>
+          </div>
+          <div id="qfPersonalisedInsight" style="font-size:.74rem;color:#aaa;line-height:1.5">
+            📊 Based on Mokshith&#39;s 4 email attempts — top errors: <span style="color:#f87171">going Bali (4x)</span>, <span style="color:#34d399">family are (4x)</span>, <span style="color:#fbbf24">a island (3x)</span> · 60 targeted questions ready
+          </div>
+        </div>
+
         <div class="cfg-item"><label>Speed</label>
           <select id="qfSpeed" style="font-size:16px">
             <option value="30">30 sec/question</option>
