@@ -6779,7 +6779,7 @@ function checkEmailFormat() {
   if (body.length > 80) passes.push('Body paragraphs written'); else issues.push('Body is too short — write one paragraph per bullet point');
   if (close.length > 10) passes.push('Closing line present'); else issues.push('Closing line missing — e.g. "I hope you will visit soon!"');
   if (sign.length > 3) passes.push('Sign-off present'); else issues.push('Sign-off missing — use "Your friend," or "Take care,"');
-  if (/yours sincerely|yours faithfully/i.test(sign)) issues.push('Wrong sign-off — "Yours sincerely/faithfully" is for FORMAL letters. Use "Your friend,"');
+  if (/yours sincerely|yours faithfully/i.test(sign)) issues.push('⚠️ WRONG sign-off: "Yours sincerely/faithfully" is FORMAL. This will cost you 2-3 FORMAT marks. Use "Your friend," or "Take care," instead');
   if (/i am writing to inform/i.test(open + body)) issues.push('"I am writing to inform you" is too formal for an informal email');
   if (/\bu\b|\br\b|gonna|wanna|lol/i.test(body)) issues.push('Avoid text-speak: "u", "r", "gonna", "lol"');
   if (wc < 180) issues.push('Word count too low (' + wc + ') — aim for at least 180 words');
@@ -6829,7 +6829,13 @@ async function markEmail() {
     + 'BULLET POINTS TO COVER:\n' + pointsList + '\n\n'
     + 'STUDENT EMAIL:\n' + fullText + '\n\n'
     + 'Mark using G1 NT rubric (30 marks total):\n'
-    + 'FORMAT (5 marks): To/Subject/Dear/closing/sign-off correct and appropriate\n'
+    + 'FORMAT (5 marks): Award marks as follows:\n'
+    + '  5/5 = To/Subject/Dear [Name]/friendly opening/body paragraphs/closing/informal sign-off (Your friend,/Take care,/Best wishes,) all present\n'
+    + '  4/5 = All present but one minor issue (e.g. sign-off slightly formal but not Yours sincerely)\n'
+    + '  3/5 = Missing one element OR using Yours sincerely/faithfully as sign-off\n'
+    + '  2/5 = Missing two elements\n'
+    + '  1/5 = Only 1-2 elements present\n'
+    + 'NOTE: If the student has To/Subject/Dear [name]/body/sign-off all present and sign-off is informal (Your friend etc), award AT LEAST 4/5 for format.\n'
     + 'REGISTER (5 marks): Friendly, personal, conversational tone throughout\n'
     + 'CONTENT (10 marks): All bullet points addressed with sufficient detail (2.5 marks each)\n'
     + 'LANGUAGE (10 marks): Grammar accuracy, tense consistency, sentence structure, vocabulary\n\n'
