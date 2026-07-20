@@ -2124,6 +2124,7 @@ function onAuthSuccess() {
   if (USE_FIREBASE && !isDemo) {
     loadDataFromFirebase();
   } else {
+    seedEmailHistory();
     renderDashboard();
     initWA1();
   }
@@ -2244,12 +2245,14 @@ function loadDataFromFirebase() {
         localStorage.setItem(STORE_KEY, JSON.stringify(merged));
       }
       _updateSyncBadge('ok');
+      seedEmailHistory();
       renderDashboard();
       initWA1();
     })
     .catch(function(e) {
       console.warn('Firebase load error:', e);
       _updateSyncBadge('error');
+      seedEmailHistory();
       renderDashboard();
       initWA1();
     });
