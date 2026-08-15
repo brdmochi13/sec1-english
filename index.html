@@ -3797,6 +3797,46 @@ https://brdmochi13.github.io/sec1-english/
         </div>
         <!-- Weekly summary row -->
         <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap" id="eoyWeekRow"></div>
+
+        <!-- Ideal vs Actual progress -->
+        <div style="margin-top:.85rem">
+          <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">
+            📈 10-Week Progress — Ideal vs Actual
+          </div>
+          <div id="eoyProgressBars"></div>
+          <div style="display:flex;gap:1rem;margin-top:.45rem;font-size:.7rem;color:var(--muted)">
+            <span><span style="display:inline-block;width:28px;height:6px;background:#93c5fd;border-radius:3px;vertical-align:middle;margin-right:3px"></span>Ideal</span>
+            <span><span style="display:inline-block;width:28px;height:6px;background:#2563eb;border-radius:3px;vertical-align:middle;margin-right:3px"></span>Actual (Mokshith)</span>
+            <span style="margin-left:auto;font-style:italic">Update scores every Saturday →</span>
+          </div>
+        </div>
+
+        <!-- Manual score entry (parent/student) -->
+        <div style="margin-top:.75rem;padding:.55rem .7rem;background:var(--surface,#f9fafb);border-radius:8px;border:1px solid var(--border,#e5e7eb)">
+          <div style="font-size:.75rem;font-weight:700;margin-bottom:.45rem;color:var(--ink)">✏️ Log This Week's Scores <span style="font-weight:400;color:var(--muted);font-size:.7rem">(fill in every Saturday)</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem" id="eoyScoreInputs">
+            <label style="font-size:.75rem;display:flex;flex-direction:column;gap:2px">Email /30
+              <input type="number" min="0" max="30" id="eoyIn_email" placeholder="e.g. 24" style="padding:3px 7px;border-radius:5px;border:1.5px solid var(--border);font-size:.82rem;width:100%;box-sizing:border-box">
+            </label>
+            <label style="font-size:.75rem;display:flex;flex-direction:column;gap:2px">Editing /10
+              <input type="number" min="0" max="10" id="eoyIn_edit" placeholder="e.g. 7" style="padding:3px 7px;border-radius:5px;border:1.5px solid var(--border);font-size:.82rem;width:100%;box-sizing:border-box">
+            </label>
+            <label style="font-size:.75rem;display:flex;flex-direction:column;gap:2px">Comprehension T/F /4
+              <input type="number" min="0" max="4" id="eoyIn_comp" placeholder="e.g. 3" style="padding:3px 7px;border-radius:5px;border:1.5px solid var(--border);font-size:.82rem;width:100%;box-sizing:border-box">
+            </label>
+            <label style="font-size:.75rem;display:flex;flex-direction:column;gap:2px">Cont. Writing /30
+              <input type="number" min="0" max="30" id="eoyIn_cw" placeholder="e.g. 20" style="padding:3px 7px;border-radius:5px;border:1.5px solid var(--border);font-size:.82rem;width:100%;box-sizing:border-box">
+            </label>
+          </div>
+          <div style="display:flex;gap:.5rem;margin-top:.45rem;align-items:center">
+            <label style="font-size:.75rem;display:flex;align-items:center;gap:4px">
+              <input type="number" min="0" max="6" id="eoyIn_days" placeholder="0–6" style="padding:3px 7px;border-radius:5px;border:1.5px solid var(--border);font-size:.82rem;width:55px">
+              Days practiced this week
+            </label>
+            <button class="tbtn tbtn-primary" onclick="saveEOYScores()" style="font-size:.78rem;margin-left:auto">💾 Save Week</button>
+          </div>
+          <div id="eoyScoreSaved" style="display:none;font-size:.73rem;color:#166534;margin-top:.3rem">✅ Saved!</div>
+        </div>
       </div>
     </div>
 
@@ -11607,8 +11647,118 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     });
   }
 
+  // ── EOY Progress bar config ──────────────────────────────────────
+  // Ideal trajectory: what score Mokshith should hit by each week
+  var EOY_COMPONENTS = [
+    { key:'email', label:'✉️ Email /30',        max:30,
+      ideal:[22,23,24,24,25,25,26,26,27,28] },
+    { key:'edit',  label:'✏️ Editing /10',       max:10,
+      ideal:[5,6,6,7,7,8,8,8,9,10] },
+    { key:'comp',  label:'📖 Comp T/F /4',       max:4,
+      ideal:[2,2,3,3,3,3,4,4,4,4] },
+    { key:'cw',    label:'📝 Writing /30',        max:30,
+      ideal:[14,15,16,17,18,20,21,22,23,25] },
+    { key:'days',  label:'📅 Days practiced /6',  max:6,
+      ideal:[4,4,5,5,5,5,6,6,6,6] },
+  ];
+
+  function getEOYScores() {
+    return JSON.parse(localStorage.getItem('eoyWeeklyScores') || '{}');
+  }
+
+  function saveEOYScores() {
+    var scores = getEOYScores();
+    // Which week are we in? (week 1 = 17 Aug 2026)
+    var weekStart = new Date(2026, 7, 17); // 17 Aug
+    var now = new Date();
+    var diffDays = Math.floor((now - weekStart) / (1000*60*60*24));
+    var weekNum = Math.min(10, Math.max(1, Math.floor(diffDays / 7) + 1));
+
+    if (!scores[weekNum]) scores[weekNum] = {};
+    EOY_COMPONENTS.forEach(function(c) {
+      var inp = document.getElementById('eoyIn_' + c.key);
+      if (inp && inp.value !== '') {
+        scores[weekNum][c.key] = parseFloat(inp.value);
+        inp.value = '';
+      }
+    });
+    var daysInp = document.getElementById('eoyIn_days');
+    if (daysInp && daysInp.value !== '') {
+      scores[weekNum]['days'] = parseFloat(daysInp.value);
+      daysInp.value = '';
+    }
+    localStorage.setItem('eoyWeeklyScores', JSON.stringify(scores));
+    var saved = document.getElementById('eoyScoreSaved');
+    if (saved) { saved.style.display='block'; setTimeout(function(){ saved.style.display='none'; },2000); }
+    renderEOYProgressBars();
+  }
+
+  function renderEOYProgressBars() {
+    var el = document.getElementById('eoyProgressBars');
+    if (!el) return;
+    var scores = getEOYScores();
+
+    // How many weeks have elapsed
+    var weekStart = new Date(2026, 7, 17);
+    var now = new Date();
+    var diffDays = Math.floor((now - weekStart) / (1000*60*60*24));
+    var currentWeek = Math.min(10, Math.max(1, Math.floor(diffDays / 7) + 1));
+
+    var html = '';
+    EOY_COMPONENTS.forEach(function(c) {
+      // Ideal for current week
+      var idealNow = c.ideal[currentWeek - 1];
+      var idealPct = Math.round(idealNow / c.max * 100);
+
+      // Best actual across logged weeks
+      var bestActual = null;
+      var latestActual = null;
+      for (var w = 1; w <= 10; w++) {
+        if (scores[w] && scores[w][c.key] != null) {
+          var v = scores[w][c.key];
+          if (bestActual === null || v > bestActual) bestActual = v;
+          latestActual = v;
+        }
+      }
+      var actualPct = latestActual !== null ? Math.round(latestActual / c.max * 100) : 0;
+      var actualVal = latestActual !== null ? latestActual : '—';
+
+      // Colour actual bar
+      var barCol = actualPct >= idealPct ? '#16a34a'
+                 : actualPct >= idealPct - 15 ? '#f59e0b'
+                 : '#ef4444';
+
+      var statusIcon = latestActual === null ? '⬜'
+                     : actualPct >= idealPct ? '✅'
+                     : actualPct >= idealPct - 15 ? '⚠️' : '❌';
+
+      html += '<div style="margin-bottom:.45rem">'
+        + '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.2rem">'
+        + '<span style="font-weight:600">' + statusIcon + ' ' + c.label + '</span>'
+        + '<span style="color:var(--muted)">'
+        + 'Ideal W' + currentWeek + ': <strong>' + idealNow + '/' + c.max + '</strong>'
+        + ' &nbsp;|&nbsp; Actual: <strong style="color:' + (latestActual !== null ? barCol : 'var(--muted)') + '">' + actualVal + (latestActual !== null ? '/'+c.max : '') + '</strong>'
+        + '</span></div>'
+        // Ideal bar (light blue)
+        + '<div style="position:relative;background:#e5e7eb;border-radius:99px;height:10px">'
+        + '<div style="position:absolute;top:0;left:0;height:10px;border-radius:99px;background:#bfdbfe;width:' + idealPct + '%"></div>'
+        // Actual bar (overlaid)
+        + (latestActual !== null
+            ? '<div style="position:absolute;top:1.5px;left:0;height:7px;border-radius:99px;background:' + barCol + ';width:' + actualPct + '%;transition:width .5s"></div>'
+            : '')
+        + '</div>'
+        + '</div>';
+    });
+
+    if (Object.keys(scores).length === 0) {
+      html = '<div style="font-size:.75rem;color:var(--muted);text-align:center;padding:.5rem 0">No scores logged yet — save your first week\'s scores below after Saturday practice</div>';
+    }
+    el.innerHTML = html;
+  }
+
   // Call on page load
   setTimeout(renderEOYTracker, 600);
+  setTimeout(renderEOYProgressBars, 700);
 
   // ══════════════════════════════════════════════════════════════════
   //  EDITING TAB
