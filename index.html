@@ -5044,13 +5044,18 @@ https://brdmochi13.github.io/sec1-english/
             })
             .catch(function (e) {
               // If not a demo account, show a user-friendly error
-              var msg = e.message;
+              var msg = '❌ Firebase error: ' + (e.code || 'unknown') + '\n' + (e.message || '');
               if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')
                 msg = 'Email or password incorrect. Check and try again.';
               if (e.code === 'auth/wrong-password') msg = 'Incorrect password.';
               if (e.code === 'auth/too-many-requests') msg = 'Too many failed attempts — wait a few minutes and try again.';
               if (e.code === 'auth/network-request-failed') msg = 'Network error. Check your internet connection.';
+              if (e.code === 'auth/unauthorized-domain') msg = '⚠️ Firebase: domain not authorised. Code: auth/unauthorized-domain';
+              if (e.code === 'auth/operation-not-allowed') msg = '⚠️ Firebase: Email/password sign-in not enabled. Code: auth/operation-not-allowed';
+              if (e.code === 'auth/api-key-not-valid') msg = '⚠️ Firebase: API key invalid. Code: auth/api-key-not-valid';
+              errEl.style.whiteSpace = 'pre-wrap';
               errEl.textContent = msg;
+              console.error('Firebase auth error:', e.code, e.message);
               document.getElementById('authSubmitBtn').disabled = false;
               document.getElementById('authSubmitBtn').textContent = 'Sign In';
             });
