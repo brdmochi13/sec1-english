@@ -5028,8 +5028,20 @@ https://brdmochi13.github.io/sec1-english/
 
       if (USE_FIREBASE) {
         if (authMode === 'login') {
+          // Wrap Firebase call with a 5-second timeout
+          var firebaseAuthDone = false;
+          var firebaseTimeout = setTimeout(function() {
+            if (!firebaseAuthDone) {
+              firebaseAuthDone = true;
+              errEl.style.whiteSpace = 'pre-wrap';
+              errEl.textContent = '⚠️ Firebase timed out (5s). Check your internet or Firebase Console.\nTip: Use demo accounts below — they work offline.';
+              document.getElementById('authSubmitBtn').disabled = false;
+              document.getElementById('authSubmitBtn').textContent = 'Sign In';
+            }
+          }, 5000);
           auth.signInWithEmailAndPassword(email, pwd)
             .then(function (uc) {
+              clearTimeout(firebaseTimeout); firebaseAuthDone = true;
               currentUser = uc.user;
               // Load role from Firestore, then proceed
               db.collection('users').doc(uc.user.uid).get()
@@ -5043,7 +5055,9 @@ https://brdmochi13.github.io/sec1-english/
                 });
             })
             .catch(function (e) {
-              // If not a demo account, show a user-friendly error
+              clearTimeout(firebaseTimeout);
+              if (firebaseAuthDone) return; // timeout already fired
+              firebaseAuthDone = true;
               var msg = '❌ Firebase error: ' + (e.code || 'unknown') + '\n' + (e.message || '');
               if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')
                 msg = 'Email or password incorrect. Check and try again.';
