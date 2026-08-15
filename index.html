@@ -5017,6 +5017,15 @@ https://brdmochi13.github.io/sec1-english/
       document.getElementById('authSubmitBtn').disabled = true;
       document.getElementById('authSubmitBtn').textContent = 'Please wait...';
 
+      // Always check demo accounts FIRST — instant, no Firebase round-trip
+      var demoCheck = DEMO_ACCOUNTS[email];
+      if (demoCheck && demoCheck.password === pwd) {
+        currentRole = demoCheck.role;
+        currentUser = { email: email, displayName: demoCheck.name, uid: 'demo_' + email };
+        onAuthSuccess();
+        return;
+      }
+
       if (USE_FIREBASE) {
         if (authMode === 'login') {
           auth.signInWithEmailAndPassword(email, pwd)
@@ -5034,14 +5043,6 @@ https://brdmochi13.github.io/sec1-english/
                 });
             })
             .catch(function (e) {
-              // Firebase failed — always try DEMO_ACCOUNTS fallback first
-              var demo = DEMO_ACCOUNTS[email];
-              if (demo && demo.password === pwd) {
-                currentRole = demo.role;
-                currentUser = { email: email, displayName: demo.name, uid: 'demo_' + email };
-                onAuthSuccess();
-                return;
-              }
               // If not a demo account, show a user-friendly error
               var msg = e.message;
               if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')
