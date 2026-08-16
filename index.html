@@ -10873,8 +10873,8 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         html += '</div>';
       } else if (q.type === 'editing') {
         html += '<div style="font-size:.92rem;font-style:italic;margin-bottom:.7rem">' + esc(q.sentence || '') + '</div>';
-        html += '<div style="font-size:.82rem;color:var(--muted);margin-bottom:.3rem">What is the incorrect word?</div>';
-        html += '<input type="text" class="ainp" id="qfInp" placeholder="Type the error word" style="margin-bottom:.5rem" onkeydown="if(event.key===\'Enter\')answerQFInput()">';
+        html += '<div style="font-size:.82rem;color:var(--muted);margin-bottom:.3rem">Find and type the <strong>wrong word</strong> as it appears in the sentence above.</div>';
+        html += '<input type="text" class="ainp" id="qfInp" placeholder="Type the wrong word" style="margin-bottom:.5rem" onkeydown="if(event.key===\'Enter\')answerQFInput()">';
         html += '<button class="tbtn tbtn-primary" onclick="answerQFInput()" style="font-size:.82rem">Submit</button>';
       } else {
         var qtext = esc(q.q || '').replace('_____', '<input type="text" class="ainp" id="qfInp" placeholder="___" style="max-width:120px;text-align:center" onkeydown="if(event.key===\'Enter\')answerQFInput()">');
@@ -10922,10 +10922,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       qfState.answered = true;
       clearInterval(qfState.timer);
       var q = qfState.questions[qfState.current];
-      // Editing questions store the error word in q.error; other types use q.answer
+      // Editing questions: accept both the error word (q.error) AND the correction (q.correction)
       var correctRaw = (q.type === 'editing') ? (q.error || q.answer || '') : (q.answer || '');
+      var extraAccepted = (q.type === 'editing' && q.correction) ? [q.correction.toLowerCase().trim()] : [];
       // Support multiple accepted answers separated by /
-      var accepted = correctRaw.toLowerCase().split('/').map(function (a) { return a.trim(); });
+      var accepted = correctRaw.toLowerCase().split('/').map(function (a) { return a.trim(); }).concat(extraAccepted);
       var ok = accepted.indexOf(given.toLowerCase().trim()) !== -1;
       processQFAnswer(ok, given, q, btn ? btn.closest('.mc-opts') : null);
     }
@@ -12351,6 +12352,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('aanHintBtn').disabled = false;
     document.getElementById('aanStartBtn').textContent = '↺ Restart';
     aanRender();
+    // Scroll so question is visible on mobile
+    setTimeout(function() {
+      var el = document.getElementById('aanQuestion');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
   }
 
   function aanRender() {
