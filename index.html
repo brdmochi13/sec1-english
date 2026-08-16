@@ -5086,9 +5086,14 @@ https://brdmochi13.github.io/sec1-english/
     var db = null, auth = null, currentUser = null, currentRole = null;
 
     if (USE_FIREBASE) {
-      firebase.initializeApp(FIREBASE_CONFIG);
-      db = firebase.firestore();
-      auth = firebase.auth();
+      try {
+        firebase.initializeApp(FIREBASE_CONFIG);
+        db = firebase.firestore();
+        auth = firebase.auth();
+      } catch(e) {
+        console.warn('Firebase init failed — running in offline/demo mode:', e.message);
+        db = null; auth = null;
+      }
     }
 
     // ── Demo accounts (used when Firebase is unavailable) ──
@@ -5143,9 +5148,8 @@ https://brdmochi13.github.io/sec1-english/
         return;
       }
 
-      if (USE_FIREBASE) {
+      if (USE_FIREBASE && auth) {
         if (authMode === 'login') {
-          // Wrap Firebase call with a 5-second timeout
           var firebaseAuthDone = false;
           var firebaseTimeout = setTimeout(function() {
             if (!firebaseAuthDone) {
@@ -5235,23 +5239,27 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     if (USE_FIREBASE) {
-      auth.onAuthStateChanged(function (user) {
-        // Only handle auto-login on page load (when overlay is still showing)
-        var overlay = document.getElementById('authOverlay');
-        if (user && overlay && overlay.style.display !== 'none') {
-          currentUser = user;
-          db.collection('users').doc(user.uid).get()
-            .then(function (doc) {
-              currentRole = doc.exists ? (doc.data().role || 'student') : 'student';
-              onAuthSuccess();
-            })
-            .catch(function (e) {
-              console.warn('Firestore user read failed:', e.message);
-              currentRole = 'student';
-              onAuthSuccess();
-            });
-        }
-      });
+      try {
+        auth.onAuthStateChanged(function (user) {
+          // Only handle auto-login on page load (when overlay is still showing)
+          var overlay = document.getElementById('authOverlay');
+          if (user && overlay && overlay.style.display !== 'none') {
+            currentUser = user;
+            db.collection('users').doc(user.uid).get()
+              .then(function (doc) {
+                currentRole = doc.exists ? (doc.data().role || 'student') : 'student';
+                onAuthSuccess();
+              })
+              .catch(function (e) {
+                console.warn('Firestore user read failed:', e.message);
+                currentRole = 'student';
+                onAuthSuccess();
+              });
+          }
+        });
+      } catch(e) {
+        console.warn('Firebase auth.onAuthStateChanged failed — running in offline mode:', e.message);
+      }
     }
 
     function signOutUser() {
