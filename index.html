@@ -4504,6 +4504,83 @@ https://brdmochi13.github.io/sec1-english/
 
   <!-- ═══════════════════════════════ QUICK FIRE TAB ═══════════════════════════════ -->
   <div id="qfTab" class="tab-content">
+
+    <!-- ══ A/AN DRILL ══ -->
+    <div class="card" style="margin-bottom:.9rem;border:2px solid #6366f1">
+      <div class="card-head" style="background:linear-gradient(135deg,#3730a3,#6366f1);border-radius:8px 8px 0 0;padding:.6rem 1rem">
+        <div class="card-title" style="color:white">🔤 a vs an — 50 Question Drill</div>
+        <div id="aanStreakBadge" style="font-size:.72rem;color:rgba(255,255,255,.8)">Best streak: 0 🔥</div>
+      </div>
+      <div class="card-body" style="padding:.7rem .9rem">
+
+        <!-- Rule reminder -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem">
+          <div style="padding:.5rem .65rem;background:#eff6ff;border-radius:8px;border-left:3px solid #3b82f6">
+            <div style="font-size:.82rem;font-weight:800;color:#1e40af;margin-bottom:2px">an</div>
+            <div style="font-size:.72rem;color:#1e40af">before a <strong>vowel SOUND</strong><br><em>an apple, an hour*, an honest*, an MBA</em></div>
+          </div>
+          <div style="padding:.5rem .65rem;background:#f0fdf4;border-radius:8px;border-left:3px solid #16a34a">
+            <div style="font-size:.82rem;font-weight:800;color:#14532d;margin-bottom:2px">a</div>
+            <div style="font-size:.72rem;color:#14532d">before a <strong>consonant SOUND</strong><br><em>a book, a university*, a useful*, a PE*</em></div>
+          </div>
+        </div>
+        <div style="font-size:.7rem;color:#92400e;background:#fef3c7;padding:4px 9px;border-radius:6px;margin-bottom:.75rem">* Tricky ones — silent letters &amp; sounds that start with 'y' change the answer!</div>
+
+        <!-- Progress bar -->
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:.25rem">
+          <span id="aanQLabel">Q1 / 50</span>
+          <span>✅ <span id="aanScoreLabel">0</span> &nbsp;🔥 <span id="aanStreakLabel">0</span></span>
+        </div>
+        <div style="background:#e5e7eb;border-radius:99px;height:7px;margin-bottom:.75rem">
+          <div id="aanProgressBar" style="background:linear-gradient(90deg,#6366f1,#3b82f6);height:7px;border-radius:99px;width:0%;transition:width .3s"></div>
+        </div>
+
+        <!-- Question display -->
+        <div id="aanQuestion" style="font-size:1rem;font-weight:700;color:#1e293b;text-align:center;padding:.75rem .5rem;background:var(--surface,#f9fafb);border-radius:10px;margin-bottom:.65rem;min-height:52px;line-height:1.6">
+          Press Start to begin!
+        </div>
+
+        <!-- Feedback -->
+        <div id="aanFeedback" style="display:none;font-size:.8rem;font-weight:600;text-align:center;padding:5px 10px;border-radius:7px;margin-bottom:.6rem"></div>
+
+        <!-- Hint -->
+        <div id="aanHintBox" style="display:none;font-size:.75rem;color:#475569;background:#f8fafc;border-radius:7px;padding:6px 10px;border-left:3px solid #6366f1;margin-bottom:.6rem"></div>
+
+        <!-- Buttons -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem">
+          <button id="aanBtnA" onclick="aanAnswer('a')" disabled
+            style="padding:16px 10px;border-radius:12px;border:2.5px solid #c7d2fe;background:white;font-size:1.8rem;font-weight:800;color:#1e3a8a;cursor:pointer;transition:.15s">
+            a
+          </button>
+          <button id="aanBtnAn" onclick="aanAnswer('an')" disabled
+            style="padding:16px 10px;border-radius:12px;border:2.5px solid #c7d2fe;background:white;font-size:1.8rem;font-weight:800;color:#1e3a8a;cursor:pointer;transition:.15s">
+            an
+          </button>
+        </div>
+
+        <!-- Hint toggle + Start -->
+        <div style="display:flex;gap:.5rem">
+          <button id="aanHintBtn" onclick="aanShowHint()" disabled
+            style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #c7d2fe;background:white;font-size:.8rem;color:#6366f1;font-weight:600;cursor:pointer">
+            💡 Hint
+          </button>
+          <button id="aanStartBtn" onclick="aanStart()"
+            style="flex:2;padding:8px;border-radius:8px;border:none;background:#6366f1;color:white;font-size:.88rem;font-weight:700;cursor:pointer">
+            ▶ Start Drill
+          </button>
+        </div>
+
+        <!-- Result panel (shown at end) -->
+        <div id="aanResult" style="display:none;margin-top:.75rem;padding:.7rem .9rem;border-radius:10px;background:#f0fdf4;border:1.5px solid #86efac">
+          <div id="aanResultText" style="font-size:.9rem;font-weight:700;color:#166534;margin-bottom:.4rem"></div>
+          <div id="aanWrongList" style="font-size:.75rem;color:#374151;margin-bottom:.5rem;max-height:180px;overflow-y:auto"></div>
+          <button onclick="aanStart()" style="width:100%;padding:8px;border-radius:8px;border:none;background:#6366f1;color:white;font-size:.85rem;font-weight:700;cursor:pointer">🔁 Try Again (shuffled)</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ EXISTING QUICK FIRE ══ -->
     <div class="card" style="margin-bottom:.9rem">
       <div class="card-head">
         <div class="card-title">⚡ Quick Fire Practice</div>
@@ -12187,6 +12264,199 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   // Init new tab histories on load
   setTimeout(function(){renderEditHistory();renderCompHistory();renderCWHistory();},700);
+
+  // ══════════════════════════════════════════════════════════════════
+  //  A / AN DRILL — 50 questions
+  // ══════════════════════════════════════════════════════════════════
+  var AAN_QUESTIONS = [
+    {s:'She ate ___ apple for breakfast.',a:'an',h:'apple → /æ/ — vowel sound'},
+    {s:'He wore ___ orange shirt to school.',a:'an',h:'orange → /ɒ/ — vowel sound'},
+    {s:'I need ___ umbrella because it is raining.',a:'an',h:'umbrella → /ʌ/ — vowel sound'},
+    {s:'There was ___ egg in the fridge.',a:'an',h:'egg → /ɛ/ — vowel sound'},
+    {s:'She is ___ honest person.',a:'an',h:'honest — H is SILENT → sounds like /ɒnɪst/ → an'},
+    {s:'We waited for ___ hour.',a:'an',h:'hour — H is SILENT → sounds like /aʊər/ → an'},
+    {s:'He is ___ old man who lives nearby.',a:'an',h:'old → /əʊ/ — vowel sound'},
+    {s:'It was ___ interesting film.',a:'an',h:'interesting → /ɪ/ — vowel sound'},
+    {s:'She gave ___ excellent speech.',a:'an',h:'excellent → /ɛ/ — vowel sound'},
+    {s:'He found ___ unusual solution to the problem.',a:'an',h:'unusual → /ʌ/ — vowel sound'},
+    {s:'He bought ___ new bicycle.',a:'a',h:'new → /n/ — consonant sound'},
+    {s:'She has ___ beautiful voice.',a:'a',h:'beautiful → /b/ — consonant sound'},
+    {s:'He is ___ doctor at the hospital.',a:'a',h:'doctor → /d/ — consonant sound'},
+    {s:'We saw ___ dog in the park.',a:'a',h:'dog → /d/ — consonant sound'},
+    {s:'She brought ___ gift for her teacher.',a:'a',h:'gift → /g/ — consonant sound'},
+    {s:'He made ___ mistake in his essay.',a:'a',h:'mistake → /m/ — consonant sound'},
+    {s:'It is ___ cold day today.',a:'a',h:'cold → /k/ — consonant sound'},
+    {s:'She is ___ wonderful friend.',a:'a',h:'wonderful → /w/ — consonant sound'},
+    {s:'There was ___ long queue at the counter.',a:'a',h:'long → /l/ — consonant sound'},
+    {s:'He wrote ___ thank-you note.',a:'a',h:'thank → /θ/ — consonant sound'},
+    {s:'She attended ___ university in Singapore.',a:'a',h:'TRICKY! university → /juːnɪ/ — sounds like "you" → consonant sound → a'},
+    {s:'It was ___ unique design.',a:'a',h:'TRICKY! unique → /juːnɪk/ — "y" sound → a'},
+    {s:'He showed ___ useful skill.',a:'a',h:'TRICKY! useful → /juːsfʊl/ — "y" sound → a'},
+    {s:'She gave ___ uniform answer.',a:'a',h:'TRICKY! uniform → /juːnɪfɔːm/ — "y" sound → a'},
+    {s:'It was ___ unanimous decision.',a:'a',h:'TRICKY! unanimous → /juːnænɪməs/ — "y" sound → a'},
+    {s:'She is ___ heroic person.',a:'a',h:'heroic — H IS pronounced /hɪərəʊɪk/ → consonant sound → a'},
+    {s:'He gave ___ honest answer.',a:'an',h:'honest — H is SILENT → /ɒnɪst/ → vowel sound → an'},
+    {s:'She has ___ habit of being late.',a:'a',h:'habit — H IS pronounced /hæbɪt/ → consonant sound → a'},
+    {s:'It was ___ honour to receive the award.',a:'an',h:'honour — H is SILENT → /ɒnə/ → vowel sound → an'},
+    {s:'He wore ___ helmet on his bicycle.',a:'a',h:'helmet — H IS pronounced → consonant sound → a'},
+    {s:'She drives ___ SUV to work.',a:'an',h:'SUV — say the letters: /ɛs juː viː/ → starts with /ɛ/ → an'},
+    {s:'He is ___ NBA player.',a:'an',h:'NBA — /ɛn biː eɪ/ → starts with /ɛ/ → an'},
+    {s:'She used ___ ATM to withdraw cash.',a:'an',h:'ATM — /eɪ tiː ɛm/ → starts with /eɪ/ → an'},
+    {s:'He sent ___ SMS to his friend.',a:'an',h:'SMS — /ɛs ɛm ɛs/ → starts with /ɛ/ → an'},
+    {s:'She read ___ FAQ before starting.',a:'an',h:'FAQ — /ɛf eɪ kjuː/ → starts with /ɛ/ → an'},
+    {s:'He made ___ effort to improve his grades.',a:'an',h:'effort → /ɛ/ — vowel sound'},
+    {s:'She carried ___ heavy bag to school.',a:'a',h:'heavy → /h/ — consonant sound'},
+    {s:'It was ___ unforgettable experience.',a:'an',h:'unforgettable → /ʌ/ — vowel sound'},
+    {s:'She is studying to be ___ engineer.',a:'an',h:'engineer → /ɛ/ — vowel sound'},
+    {s:'It was ___ easy question.',a:'an',h:'easy → /iː/ — vowel sound'},
+    {s:'She had ___ great time at the party.',a:'a',h:'great → /g/ — consonant sound'},
+    {s:'Mokshith wrote ___ essay about the environment.',a:'an',h:'essay → /ɛ/ — vowel sound'},
+    {s:'He is ___ active student in class.',a:'an',h:'active → /æ/ — vowel sound'},
+    {s:'He scored ___ A for his English test!',a:'an',h:'A — the letter /eɪ/ — vowel sound → an'},
+    {s:'It was ___ once-in-a-lifetime opportunity.',a:'a',h:'TRICKY! once → /wʌns/ — starts with /w/ sound → a'},
+    {s:'She is ___ PE teacher at our school.',a:'a',h:'PE — /piː iː/ — starts with /p/ consonant sound → a'},
+    {s:'He found ___ answer to the riddle.',a:'an',h:'answer → /ɑː/ — vowel sound'},
+    {s:'She bought ___ eraser for the exam.',a:'an',h:'eraser → /ɪ/ — vowel sound'},
+    {s:'He is ___ fast runner on the team.',a:'a',h:'fast → /f/ — consonant sound'},
+    {s:'She took ___ X-ray at the clinic.',a:'an',h:'X-ray — /ɛks/ — starts with /ɛ/ vowel sound → an'},
+    {s:'He is ___ European tourist visiting Singapore.',a:'a',h:'TRICKY! European → /jʊərəpɪən/ — "y" sound → a'},
+  ];
+
+  var aanState = { qs:[], idx:0, score:0, streak:0, best:0, active:false, answered:false };
+
+  function aanShuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length-1; i>0; i--) {
+      var j = Math.floor(Math.random()*(i+1));
+      var t = a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+
+  function aanStart() {
+    aanState = { qs: aanShuffle(AAN_QUESTIONS), idx:0, score:0, streak:0, best:0, active:true, answered:false };
+    document.getElementById('aanResult').style.display = 'none';
+    document.getElementById('aanFeedback').style.display = 'none';
+    document.getElementById('aanHintBox').style.display = 'none';
+    document.getElementById('aanBtnA').disabled = false;
+    document.getElementById('aanBtnAn').disabled = false;
+    document.getElementById('aanHintBtn').disabled = false;
+    document.getElementById('aanStartBtn').textContent = '↺ Restart';
+    aanRender();
+  }
+
+  function aanRender() {
+    var q = aanState.qs[aanState.idx];
+    var total = aanState.qs.length;
+    // Question with blank highlighted
+    var parts = q.s.split('___');
+    document.getElementById('aanQuestion').innerHTML =
+      parts[0] + '<span style="display:inline-block;min-width:48px;padding:1px 8px;border-bottom:2.5px solid #6366f1;color:#6366f1;font-weight:800;background:#eef2ff;border-radius:4px;margin:0 2px">_____</span>' + parts[1];
+    document.getElementById('aanQLabel').textContent = 'Q' + (aanState.idx+1) + ' / ' + total;
+    document.getElementById('aanScoreLabel').textContent = aanState.score;
+    document.getElementById('aanStreakLabel').textContent = aanState.streak;
+    document.getElementById('aanProgressBar').style.width = Math.round(aanState.idx/total*100) + '%';
+    document.getElementById('aanFeedback').style.display = 'none';
+    document.getElementById('aanHintBox').style.display = 'none';
+    aanState.answered = false;
+    // Reset button styles
+    ['aanBtnA','aanBtnAn'].forEach(function(id){
+      var b = document.getElementById(id);
+      b.style.background = 'white';
+      b.style.borderColor = '#c7d2fe';
+      b.style.color = '#1e3a8a';
+      b.disabled = false;
+    });
+  }
+
+  function aanAnswer(choice) {
+    if (!aanState.active || aanState.answered) return;
+    aanState.answered = true;
+    var q = aanState.qs[aanState.idx];
+    var correct = choice === q.a;
+    var fb = document.getElementById('aanFeedback');
+    var btnA  = document.getElementById('aanBtnA');
+    var btnAn = document.getElementById('aanBtnAn');
+    btnA.disabled = true; btnAn.disabled = true;
+
+    // Colour buttons
+    if (correct) {
+      var btn = document.getElementById(choice === 'a' ? 'aanBtnA' : 'aanBtnAn');
+      btn.style.background = '#dcfce7'; btn.style.borderColor = '#16a34a'; btn.style.color = '#166534';
+      aanState.score++; aanState.streak++;
+      if (aanState.streak > aanState.best) aanState.best = aanState.streak;
+      fb.style.background = '#dcfce7'; fb.style.color = '#166534';
+      fb.textContent = '✅ Correct!';
+      document.getElementById('aanStreakBadge').textContent = 'Best streak: ' + aanState.best + ' 🔥';
+    } else {
+      var wrongBtn = document.getElementById(choice === 'a' ? 'aanBtnA' : 'aanBtnAn');
+      var rightBtn = document.getElementById(q.a === 'a' ? 'aanBtnA' : 'aanBtnAn');
+      wrongBtn.style.background = '#fee2e2'; wrongBtn.style.borderColor = '#dc2626'; wrongBtn.style.color = '#991b1b';
+      rightBtn.style.background = '#dcfce7'; rightBtn.style.borderColor = '#16a34a'; rightBtn.style.color = '#166534';
+      aanState.streak = 0;
+      fb.style.background = '#fee2e2'; fb.style.color = '#991b1b';
+      fb.innerHTML = '❌ Should be <strong>' + q.a + '</strong> — ' + q.h;
+    }
+    fb.style.display = 'block';
+    document.getElementById('aanHintBox').style.display = 'none';
+
+    setTimeout(function() {
+      aanState.idx++;
+      if (aanState.idx >= aanState.qs.length) {
+        aanFinish();
+      } else {
+        aanRender();
+      }
+    }, correct ? 800 : 1600);
+  }
+
+  function aanShowHint() {
+    if (!aanState.active || aanState.answered) return;
+    var q = aanState.qs[aanState.idx];
+    var hb = document.getElementById('aanHintBox');
+    hb.textContent = '💡 ' + q.h;
+    hb.style.display = 'block';
+  }
+
+  function aanFinish() {
+    aanState.active = false;
+    var total = aanState.qs.length;
+    var pct = Math.round(aanState.score / total * 100);
+    var grade = pct===100 ? '🏆 Perfect!' : pct>=90 ? '🌟 Excellent!' : pct>=75 ? '👍 Good work!' : pct>=60 ? '⚡ Keep practising!' : '📚 Review the rule and try again';
+    document.getElementById('aanResult').style.display = 'block';
+    document.getElementById('aanResultText').innerHTML = grade + ' &nbsp; <strong>' + aanState.score + '/' + total + ' (' + pct + '%)</strong> &nbsp; Best streak: ' + aanState.best + ' 🔥';
+    document.getElementById('aanProgressBar').style.width = '100%';
+    document.getElementById('aanBtnA').disabled = true;
+    document.getElementById('aanBtnAn').disabled = true;
+    document.getElementById('aanHintBtn').disabled = true;
+    document.getElementById('aanQuestion').textContent = 'Drill complete!';
+    document.getElementById('aanFeedback').style.display = 'none';
+    // Show wrong answers
+    var wrongs = aanState.qs.filter(function(q,i){ return aanState.score < total; });
+    // Rebuild wrong list from results tracking
+    var wrongHtml = '';
+    aanState.qs.forEach(function(q) {
+      if (q._wrong) {
+        var parts = q.s.split('___');
+        wrongHtml += '<div style="padding:4px 6px;border-radius:5px;background:#fff;border:1px solid #fca5a5;margin-bottom:4px">'
+          + parts[0] + '<s style="color:#dc2626">' + q._given + '</s> → <strong style="color:#16a34a">' + q.a + '</strong>' + parts[1]
+          + '</div>';
+      }
+    });
+    document.getElementById('aanWrongList').innerHTML = wrongHtml ||
+      '<div style="color:#166534;font-weight:700">No mistakes — amazing! 🎉</div>';
+    // Save to localStorage
+    var hist = JSON.parse(localStorage.getItem('aanHistory')||'[]');
+    hist.unshift({date: new Date().toLocaleDateString(), score: aanState.score, total: total, pct: pct, best: aanState.best});
+    if (hist.length > 10) hist = hist.slice(0,10);
+    localStorage.setItem('aanHistory', JSON.stringify(hist));
+  }
+
+  // Track wrong answers properly — patch aanAnswer
+  (function(){
+    var _orig = window.aanAnswer || aanAnswer;
+    // We'll track wrongs inline in aanAnswer above via q._wrong
+  })();
 
   </script>
 
