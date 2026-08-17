@@ -7664,7 +7664,7 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
           text = await callGemini(d.apiKey, prompt);
         } else {
           // Groq / OpenAI-compatible
-          text = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', d.apiKey, 'llama-3.1-8b-instant', prompt);
+          text = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', d.apiKey, 'llama-3.3-70b-versatile', prompt);
         }
 
         clearInterval(dotInt);
@@ -7723,7 +7723,7 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5',
           max_tokens: 4000,
           messages: [{ role: 'user', content: prompt }]
         })
@@ -7734,7 +7734,7 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
     }
 
     async function callGemini(apiKey, prompt) {
-      const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey;
+      const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
       const resp = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -8174,7 +8174,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         var res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-          body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
+          body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
         });
         clearInterval(dotInt);
         var data = await res.json();
@@ -9059,7 +9059,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
               'Authorization': 'Bearer ' + apiKey
             },
             body: JSON.stringify({
-              model: 'llama-3.1-8b-instant',
+              model: 'llama-3.3-70b-versatile',
               max_tokens: 5,
               messages: [{ role: 'user', content: 'Say OK' }]
             })
@@ -9080,7 +9080,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
               'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-              model: 'claude-haiku-4-5-20251001',
+              model: 'claude-haiku-4-5',
               max_tokens: 5,
               messages: [{ role: 'user', content: 'Say OK' }]
             })
@@ -9094,7 +9094,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
         } else if (provider === 'gemini') {
           const resp = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey,
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -9486,7 +9486,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         } else if (provider === 'gemini') {
           response = await callGemini(apiKey, prompt);
         } else {
-          response = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', apiKey, 'llama-3.1-8b-instant', prompt);
+          response = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', apiKey, 'llama-3.3-70b-versatile', prompt);
         }
 
         var result = extractJSON(response);
@@ -10006,7 +10006,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         if (provider === 'ollama') response = await callOllama(d.ollamaHost, d.ollamaModel, prompt);
         else if (provider === 'anthropic') response = await callAnthropic(apiKey, prompt);
         else if (provider === 'gemini') response = await callGemini(apiKey, prompt);
-        else response = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', apiKey, 'llama-3.1-8b-instant', prompt);
+        else response = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', apiKey, 'llama-3.3-70b-versatile', prompt);
 
         var result = extractJSON(response);
         displayEmailResult(result, fullText);
@@ -12208,7 +12208,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       return 'Q'+(i+1)+' ['+q.marks+'m]: '+q.q+'\nStudent: '+ans+'\nModel: '+q.model;
     }).join('\n\n');
     var prompt = 'You are marking a Singapore Sec 1 NT English comprehension. Mark each open-ended answer out of its given marks.\n\n'+oeSummary+'\n\nFor each question give: score/marks, one-line feedback, and the key improvement. Be encouraging. Format as Q1: X/Y — feedback | improvement';
-    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})})
+    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:prompt}]})})
     .then(function(r){return r.json();}).then(function(d){
       var txt = (d.content&&d.content[0]&&d.content[0].text)||'Could not mark.';
       var oeHtml = '<div style="padding:.5rem .7rem;border-radius:8px;background:#eff6ff;border:1.5px solid #93c5fd;font-size:.8rem;white-space:pre-wrap">'+txt+'</div>';
@@ -12302,7 +12302,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var txt = ta.value.trim();
     var prompt = 'You are marking a Singapore Sec 1 NT English Continuous Writing composition.\n\nPrompt: '+cwActive.title+'\n\nStudent composition:\n'+txt+'\n\nMark out of 30 (Content 15, Language 15). For each:\n- Give a score\n- 2 specific strengths (quote from student text)\n- 2 specific improvements with examples\n- One "Show Don\'t Tell" rewrite of a weak sentence\n\nFormat:\nCONTENT: X/15\nLANGUAGE: Y/15\nTOTAL: Z/30\n\nStrengths:\n...\n\nImprovements:\n...\n\nRewrite example:\nOriginal: "..."\nBetter: "..."';
     document.getElementById('cwResult').innerHTML='<div style="padding:.6rem;border-radius:8px;background:#eff6ff;font-size:.8rem;color:var(--blue)">🤖 Marking your composition...</div>';
-    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})})
+    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1200,messages:[{role:'user',content:prompt}]})})
     .then(function(r){return r.json();}).then(function(d){
       var res=(d.content&&d.content[0]&&d.content[0].text)||'Could not mark.';
       document.getElementById('cwResult').innerHTML='<div style="padding:.65rem .8rem;border-radius:8px;background:#f8fafc;border:1.5px solid var(--border);font-size:.82rem;white-space:pre-wrap">'+res+'</div>';
@@ -12556,7 +12556,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
     }).then(function(r) { return r.json(); }).then(function(d) {
       var txt = (d.content && d.content[0] && d.content[0].text) || 'Could not mark.';
       fb.innerHTML = '<div style="padding:.65rem .8rem;border-radius:9px;background:#f8fafc;border:1.5px solid var(--border);font-size:.82rem;white-space:pre-wrap">' + txt + '</div>';
@@ -12666,9 +12666,9 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var testPrompt = 'Reply with exactly: OK';
     var fetchOpts;
     if (provider === 'anthropic') {
-      fetchOpts = { url:'https://api.anthropic.com/v1/messages', body: JSON.stringify({model:'claude-sonnet-4-6',max_tokens:10,messages:[{role:'user',content:testPrompt}]}), headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'} };
+      fetchOpts = { url:'https://api.anthropic.com/v1/messages', body: JSON.stringify({model:'claude-sonnet-4-5',max_tokens:10,messages:[{role:'user',content:testPrompt}]}), headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'} };
     } else if (provider === 'gemini') {
-      fetchOpts = { url:'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+key, body: JSON.stringify({contents:[{parts:[{text:testPrompt}]}]}), headers:{'Content-Type':'application/json'} };
+      fetchOpts = { url:'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key, body: JSON.stringify({contents:[{parts:[{text:testPrompt}]}]}), headers:{'Content-Type':'application/json'} };
     } else if (provider === 'groq') {
       fetchOpts = { url:'https://api.groq.com/openai/v1/chat/completions', body: JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:10,messages:[{role:'user',content:testPrompt}]}), headers:{'Content-Type':'application/json','Authorization':'Bearer '+key} };
     }
@@ -12722,8 +12722,8 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         <div style="margin-bottom:.75rem">
           <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.3rem">AI Provider</label>
           <select id="stgProvider" onchange="stgOnProviderChange()" style="width:100%;font-size:14px;padding:6px 10px;border-radius:8px;border:1.5px solid #d1d5db;box-sizing:border-box">
-            <option value="anthropic">☁️ Anthropic — Claude (claude-sonnet-4-6)</option>
-            <option value="gemini">☁️ Google Gemini (gemini-1.5-flash)</option>
+            <option value="anthropic">☁️ Anthropic — Claude (claude-sonnet-4-5)</option>
+            <option value="gemini">☁️ Google Gemini (gemini-2.0-flash)</option>
             <option value="groq">☁️ Groq — Llama 3 (Free tier)</option>
             <option value="ollama">🏠 Ollama — Local (Free, Private)</option>
           </select>
@@ -12734,7 +12734,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
           <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.3rem">Anthropic API Key</label>
           <input type="password" id="stgAnthropicKey" placeholder="sk-ant-..." style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid #d1d5db;font-size:.85rem;box-sizing:border-box;font-family:monospace">
           <div style="font-size:.72rem;color:#64748b;margin-top:.3rem">Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:#3b82f6">console.anthropic.com</a></div>
-          <div style="font-size:.72rem;color:#64748b;margin-top:.2rem">Model used: <strong>claude-sonnet-4-6</strong></div>
+          <div style="font-size:.72rem;color:#64748b;margin-top:.2rem">Model used: <strong>claude-sonnet-4-5</strong></div>
         </div>
 
         <!-- Gemini -->
@@ -12742,7 +12742,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
           <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.3rem">Google Gemini API Key</label>
           <input type="password" id="stgGeminiKey" placeholder="AIza..." style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid #d1d5db;font-size:.85rem;box-sizing:border-box;font-family:monospace">
           <div style="font-size:.72rem;color:#64748b;margin-top:.3rem">Get your key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#3b82f6">aistudio.google.com</a> — Free tier available</div>
-          <div style="font-size:.72rem;color:#64748b;margin-top:.2rem">Model used: <strong>gemini-1.5-flash</strong></div>
+          <div style="font-size:.72rem;color:#64748b;margin-top:.2rem">Model used: <strong>gemini-2.0-flash</strong></div>
         </div>
 
         <!-- Groq -->
