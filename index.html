@@ -3737,6 +3737,7 @@ https://brdmochi13.github.io/sec1-english/
       <span id="fsSyncBadge"
         style="font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--border);color:var(--muted);cursor:pointer"
         onclick="pullFromFirestore()" title="Click to force sync">☁ Connecting...</span>
+      <button class="tbtn tbtn-outline" onclick="openSettingsModal()">⚙️ Settings</button>
       <button class="tbtn tbtn-outline" onclick="document.getElementById('pwdModal').classList.add('show')">🔑 Change
         Pwd</button>
       <button class="tbtn tbtn-gold" onclick="window.print()">🖨 Print</button>
@@ -12565,11 +12566,228 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   }
   // ==== END PEEL TOOL ====
 
+  // ==== SETTINGS MODAL ====
+  function openSettingsModal() {
+    var modal = document.getElementById('settingsModal');
+    modal.style.display = 'flex';
+    // Load current saved config
+    var d = JSON.parse(localStorage.getItem('appData') || '{}');
+    var provider = d.apiProvider || 'anthropic';
+    var sel = document.getElementById('stgProvider');
+    if (sel) sel.value = provider;
+    stgOnProviderChange();
+    // Populate saved keys
+    if (d.apiKey) {
+      var keyField = {anthropic:'stgAnthropicKey',gemini:'stgGeminiKey',groq:'stgGroqKey'}[provider];
+      if (keyField) { var el = document.getElementById(keyField); if (el) el.value = d.apiKey; }
+    }
+    if (d.geminiKey) { var ge = document.getElementById('stgGeminiKey'); if (ge) ge.value = d.geminiKey; }
+    if (d.groqKey) { var gr = document.getElementById('stgGroqKey'); if (gr) gr.value = d.groqKey; }
+    if (d.anthropicKey) { var an = document.getElementById('stgAnthropicKey'); if (an) an.value = d.anthropicKey; }
+    if (d.ollamaHost) { var oh = document.getElementById('stgOllamaHost'); if (oh) oh.value = d.ollamaHost; }
+    if (d.ollamaModel) { var om = document.getElementById('stgOllamaModel'); if (om) om.value = d.ollamaModel; }
+    stgUpdateSummary();
+  }
+
+  function closeSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'none';
+  }
+
+  function stgOnProviderChange() {
+    var provider = (document.getElementById('stgProvider') || {}).value || 'anthropic';
+    ['anthropic','gemini','groq','ollama'].forEach(function(p) {
+      var panel = document.getElementById('stg_' + p);
+      if (panel) panel.style.display = p === provider ? 'block' : 'none';
+    });
+    var status = document.getElementById('stgStatus');
+    if (status) status.style.display = 'none';
+  }
+
+  function stgUpdateSummary() {
+    var d = JSON.parse(localStorage.getItem('appData') || '{}');
+    var el = document.getElementById('stgCurrentSummary');
+    if (!el) return;
+    var provider = d.apiProvider || 'none';
+    var labels = {anthropic:'Anthropic (Claude)',gemini:'Google Gemini',groq:'Groq (Llama 3)',ollama:'Ollama (Local)'};
+    var hasKey = d.apiKey && d.apiKey.length > 8;
+    if (provider === 'none' || !hasKey) {
+      el.innerHTML = '⚠️ No AI provider configured — AI marking features will not work.';
+    } else {
+      var masked = d.apiKey ? (d.apiKey.substring(0,8) + '••••••••') : '—';
+      el.innerHTML = '✅ Active: <strong>' + (labels[provider]||provider) + '</strong> &nbsp;|&nbsp; Key: <code>' + masked + '</code>'
+        + (provider==='ollama' ? ' &nbsp;|&nbsp; Host: ' + (d.ollamaHost||'localhost') : '');
+    }
+  }
+
+  function stgSaveKey() {
+    var provider = (document.getElementById('stgProvider') || {}).value || 'anthropic';
+    var d = JSON.parse(localStorage.getItem('appData') || '{}');
+    var key = '';
+    if (provider === 'anthropic') key = (document.getElementById('stgAnthropicKey') || {}).value || '';
+    if (provider === 'gemini')    key = (document.getElementById('stgGeminiKey') || {}).value || '';
+    if (provider === 'groq')      key = (document.getElementById('stgGroqKey') || {}).value || '';
+    if (provider === 'ollama') {
+      key = 'ollama-local';
+      d.ollamaHost  = (document.getElementById('stgOllamaHost') || {}).value || 'http://localhost:11434';
+      d.ollamaModel = (document.getElementById('stgOllamaModel') || {}).value || 'llama3.2';
+    }
+    // Save per-provider keys separately so switching doesn't erase them
+    if (provider === 'anthropic') d.anthropicKey = key;
+    if (provider === 'gemini')    d.geminiKey = key;
+    if (provider === 'groq')      d.groqKey = key;
+    d.apiProvider = provider;
+    d.apiKey = key;
+    localStorage.setItem('appData', JSON.stringify(d));
+    // Also sync to the AI Practice tab fields
+    var provSel = document.getElementById('apiProvider');
+    if (provSel) { provSel.value = provider; if (typeof onProviderChange === 'function') onProviderChange(); }
+    var keyInp = document.getElementById('apikeyInp');
+    if (keyInp && provider !== 'ollama') keyInp.value = key;
+    var status = document.getElementById('stgStatus');
+    if (status) {
+      status.style.display = 'block';
+      status.style.background = '#dcfce7'; status.style.color = '#166534';
+      status.textContent = '✅ Saved! ' + ({anthropic:'Anthropic (Claude)',gemini:'Google Gemini',groq:'Groq',ollama:'Ollama (Local)'}[provider]||provider) + ' is now active.';
+    }
+    stgUpdateSummary();
+  }
+
+  function stgTestKey() {
+    var provider = (document.getElementById('stgProvider') || {}).value || 'anthropic';
+    var status = document.getElementById('stgStatus');
+    if (!status) return;
+    if (provider === 'ollama') { stgTestOllama(); return; }
+    var key = '';
+    if (provider === 'anthropic') key = (document.getElementById('stgAnthropicKey') || {}).value || '';
+    if (provider === 'gemini')    key = (document.getElementById('stgGeminiKey') || {}).value || '';
+    if (provider === 'groq')      key = (document.getElementById('stgGroqKey') || {}).value || '';
+    if (!key) { status.style.display='block'; status.style.background='#fee2e2'; status.style.color='#991b1b'; status.textContent='⚠️ Please enter an API key first.'; return; }
+    status.style.display='block'; status.style.background='#eff6ff'; status.style.color='#1e40af'; status.textContent='🔌 Testing...';
+    var testPrompt = 'Reply with exactly: OK';
+    var fetchOpts;
+    if (provider === 'anthropic') {
+      fetchOpts = { url:'https://api.anthropic.com/v1/messages', body: JSON.stringify({model:'claude-sonnet-4-6',max_tokens:10,messages:[{role:'user',content:testPrompt}]}), headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'} };
+    } else if (provider === 'gemini') {
+      fetchOpts = { url:'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+key, body: JSON.stringify({contents:[{parts:[{text:testPrompt}]}]}), headers:{'Content-Type':'application/json'} };
+    } else if (provider === 'groq') {
+      fetchOpts = { url:'https://api.groq.com/openai/v1/chat/completions', body: JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:10,messages:[{role:'user',content:testPrompt}]}), headers:{'Content-Type':'application/json','Authorization':'Bearer '+key} };
+    }
+    fetch(fetchOpts.url, {method:'POST', headers:fetchOpts.headers, body:fetchOpts.body})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var ok = d.content||d.candidates||d.choices;
+        status.style.background = ok?'#dcfce7':'#fef9c3';
+        status.style.color = ok?'#166534':'#854d0e';
+        status.textContent = ok ? '✅ API key works! Provider is connected.' : '⚠️ Unexpected response — key may be invalid. Error: '+(d.error&&d.error.message||JSON.stringify(d).substring(0,80));
+      })
+      .catch(function(e){ status.style.background='#fee2e2'; status.style.color='#991b1b'; status.textContent='❌ Connection failed: '+e.message; });
+  }
+
+  function stgTestOllama() {
+    var host = (document.getElementById('stgOllamaHost')||{}).value || 'http://localhost:11434';
+    var result = document.getElementById('stgOllamaTestResult');
+    if (result) result.textContent = 'Testing...';
+    fetch(host + '/api/tags')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var models = (d.models||[]).map(function(m){return m.name;}).join(', ');
+        if (result) { result.style.color='#166534'; result.textContent = '✅ Connected! Models: ' + (models||'none pulled yet'); }
+        var status = document.getElementById('stgStatus');
+        if (status) { status.style.display='block'; status.style.background='#dcfce7'; status.style.color='#166534'; status.textContent='✅ Ollama is running at '+host; }
+      })
+      .catch(function(){ if (result) { result.style.color='#991b1b'; result.textContent='❌ Not reachable — is Ollama running?'; } });
+  }
+
+  document.getElementById('settingsModal').addEventListener('click', function(e) {
+    if (e.target === this) closeSettingsModal();
+  });
+  // ==== END SETTINGS MODAL ====
   </script>
 
   <div class="autosave-bar" id="autosaveBar">
     <div class="as-dot"></div><span id="autosaveMsg">Auto-save active</span>
   </div>
+  <!-- ═══ SETTINGS MODAL ═══ -->
+  <div id="settingsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;align-items:center;justify-content:center;padding:1rem">
+    <div style="background:white;border-radius:14px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.25)">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);padding:.75rem 1rem;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center">
+        <div style="color:white;font-weight:700;font-size:.95rem">⚙️ AI Provider Settings</div>
+        <button onclick="closeSettingsModal()" style="background:rgba(255,255,255,.2);border:none;color:white;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;line-height:1">✕</button>
+      </div>
+      <div style="padding:1rem">
+        <p style="font-size:.8rem;color:#64748b;margin-bottom:.85rem">Choose your AI provider and enter the API key. Keys are stored only in this browser — never sent anywhere except the provider's own API.</p>
+
+        <!-- Provider selector -->
+        <div style="margin-bottom:.75rem">
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.3rem">AI Provider</label>
+          <select id="stgProvider" onchange="stgOnProviderChange()" style="width:100%;font-size:14px;padding:6px 10px;border-radius:8px;border:1.5px solid #d1d5db;box-sizing:border-box">
+            <option value="anthropic">☁️ Anthropic — Claude (claude-sonnet-4-6)</option>
+            <option value="gemini">☁️ Google Gemini (gemini-1.5-flash)</option>
+            <option value="groq">☁️ Groq — Llama 3 (Free tier)</option>
+            <option value="ollama">🏠 Ollama — Local (Free, Private)</option>
+          </select>
+        </div>
+
+        <!-- Anthropic -->
+        <div id="stg_anthropic" class="stg-provider-panel">
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.3rem">Anthropic API Key</label>
+          <input type="password" id="stgAnthropicKey" placeholder="sk-ant-..." style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid #d1d5db;font-size:.85rem;box-sizing:border-box;font-family:monospace">
+          <div style="font-size:.72rem;color:#64748b;margin-top:.3rem">Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:#3b82f6">console.anthropic.com</a></div>
+          <div style="font-size:.72rem;color:#64748b;margin-top:.2rem">Model used: <strong>claude-sonnet-4-6</strong></div>
+        </div>
+
+        <!-- Gemini -->
+        <div id="stg_gemini" class="stg-provider-panel" style="display:none">
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.3rem">Google Gemini API Key</label>
+          <input type="password" id="stgGeminiKey" placeholder="AIza..." style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid #d1d5db;font-size:.85rem;box-sizing:border-box;font-family:monospace">
+          <div style="font-size:.72rem;color:#64748b;margin-top:.3rem">Get your key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#3b82f6">aistudio.google.com</a> — Free tier available</div>
+          <div style="font-size:.72rem;color:#64748b;margin-top:.2rem">Model used: <strong>gemini-1.5-flash</strong></div>
+        </div>
+
+        <!-- Groq -->
+        <div id="stg_groq" class="stg-provider-panel" style="display:none">
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.3rem">Groq API Key</label>
+          <input type="password" id="stgGroqKey" placeholder="gsk_..." style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid #d1d5db;font-size:.85rem;box-sizing:border-box;font-family:monospace">
+          <div style="font-size:.72rem;color:#64748b;margin-top:.3rem">Get your free key at <a href="https://console.groq.com" target="_blank" style="color:#3b82f6">console.groq.com</a> — generous free tier</div>
+          <div style="font-size:.72rem;color:#64748b;margin-top:.2rem">Model used: <strong>llama-3.3-70b-versatile</strong></div>
+        </div>
+
+        <!-- Ollama -->
+        <div id="stg_ollama" class="stg-provider-panel" style="display:none">
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.3rem">Ollama Host</label>
+          <input type="text" id="stgOllamaHost" placeholder="http://localhost:11434" value="http://localhost:11434" style="width:100%;padding:7px 10px;border-radius:8px;border:1.5px solid #d1d5db;font-size:.85rem;box-sizing:border-box;font-family:monospace">
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-top:.5rem;margin-bottom:.3rem">Model</label>
+          <select id="stgOllamaModel" style="width:100%;font-size:14px;padding:6px 10px;border-radius:8px;border:1.5px solid #d1d5db;box-sizing:border-box">
+            <option value="llama3.2">llama3.2 (recommended)</option>
+            <option value="llama3.1">llama3.1</option>
+            <option value="llama3">llama3</option>
+            <option value="mistral">mistral</option>
+            <option value="gemma2">gemma2</option>
+            <option value="phi4">phi4</option>
+            <option value="qwen2.5">qwen2.5</option>
+          </select>
+          <div style="font-size:.72rem;color:#64748b;margin-top:.3rem">No API key needed. Must be running on the same device (or same network with CORS configured).</div>
+          <button onclick="stgTestOllama()" style="margin-top:.5rem;padding:5px 14px;border-radius:7px;border:1.5px solid #d1d5db;background:white;font-size:.78rem;cursor:pointer">🔌 Test Connection</button>
+          <span id="stgOllamaTestResult" style="font-size:.75rem;margin-left:.5rem"></span>
+        </div>
+
+        <!-- Status -->
+        <div id="stgStatus" style="display:none;margin-top:.65rem;padding:6px 10px;border-radius:7px;font-size:.8rem;font-weight:600"></div>
+
+        <!-- Current config summary -->
+        <div id="stgCurrentSummary" style="margin-top:.75rem;padding:.5rem .7rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;font-size:.75rem;color:#475569"></div>
+
+        <!-- Buttons -->
+        <div style="display:flex;gap:.5rem;margin-top:.85rem">
+          <button onclick="stgSaveKey()" style="flex:2;padding:9px;border-radius:8px;border:none;background:#1e3a8a;color:white;font-size:.88rem;font-weight:700;cursor:pointer">💾 Save & Apply</button>
+          <button onclick="stgTestKey()" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid #d1d5db;background:white;font-size:.82rem;cursor:pointer">🔌 Test</button>
+          <button onclick="closeSettingsModal()" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid #d1d5db;background:white;font-size:.82rem;cursor:pointer">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>
