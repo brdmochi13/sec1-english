@@ -12698,9 +12698,12 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       .catch(function(){ if (result) { result.style.color='#991b1b'; result.textContent='❌ Not reachable — is Ollama running?'; } });
   }
 
-  document.getElementById('settingsModal').addEventListener('click', function(e) {
-    if (e.target === this) closeSettingsModal();
-  });
+  setTimeout(function() {
+    var sm = document.getElementById('settingsModal');
+    if (sm) sm.addEventListener('click', function(e) {
+      if (e.target === this) closeSettingsModal();
+    });
+  }, 0);
   // ==== END SETTINGS MODAL ====
   </script>
 
