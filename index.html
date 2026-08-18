@@ -3774,7 +3774,12 @@ https://brdmochi13.github.io/sec1-english/
       </div>
       <div class="card-body" style="padding:.7rem .9rem">
         <!-- Today's tasks -->
-        <div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.45rem">Today's Tasks — <span id="eoyDayLabel" style="color:var(--blue)">Loading...</span></div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem">
+          <button onclick="eoyNavDay(-1)" style="padding:2px 8px;border-radius:6px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.8rem">◀</button>
+          <div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;flex:1">Tasks — <span id="eoyDayLabel" style="color:var(--blue)">Loading...</span></div>
+          <button onclick="eoyNavDay(1)" style="padding:2px 8px;border-radius:6px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.8rem">▶</button>
+          <button onclick="eoyNavDay(0)" style="padding:2px 8px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1e40af;cursor:pointer;font-size:.7rem;font-weight:700">Today</button>
+        </div>
         <div id="eoyTasks" style="display:flex;flex-direction:column;gap:.35rem"></div>
         <!-- Completion bar -->
         <div style="margin-top:.65rem;margin-bottom:.3rem">
@@ -11727,14 +11732,37 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     return 'eoyweek_' + d.getFullYear() + '_' + (d.getMonth()+1) + '_' + d.getDate();
   }
 
+  var _eoyDayOffset = 0; // 0 = today, -1 = yesterday, +1 = tomorrow
+
+  function eoyNavDay(offset) {
+    if (offset === 0) { _eoyDayOffset = 0; }
+    else { _eoyDayOffset = Math.max(-6, Math.min(0, _eoyDayOffset + offset)); }
+    renderEOYTracker();
+  }
+
+  function eoyTodayKeyOffset(offset) {
+    var d = new Date();
+    d.setDate(d.getDate() + (offset || 0));
+    return 'eoy_' + d.getFullYear() + '_' + (d.getMonth()+1) + '_' + d.getDate();
+  }
+
   function renderEOYTracker() {
-    var dow = new Date().getDay();
+    var targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + _eoyDayOffset);
+    var dow = targetDate.getDay();
     var sched = EOY_SCHEDULE[dow];
-    var _eoyd=loadData(); if(!_eoyd.eoyDailyTicks)_eoyd.eoyDailyTicks={}; var stored=_eoyd.eoyDailyTicks[eoyTodayKey()]||{};
+    var tickKey = eoyTodayKeyOffset(_eoyDayOffset);
+    var _eoyd = loadData();
+    if (!_eoyd.eoyDailyTicks) _eoyd.eoyDailyTicks = {};
+    var stored = _eoyd.eoyDailyTicks[tickKey] || {};
+
     var dayLbl = document.getElementById('eoyDayLabel');
     var dateBadge = document.getElementById('eoyDateBadge');
+    var isToday = _eoyDayOffset === 0;
+    var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var dateStr = targetDate.toDateString();
     if (dayLbl) dayLbl.textContent = sched.label;
-    if (dateBadge) dateBadge.textContent = new Date().toDateString();
+    if (dateBadge) dateBadge.textContent = isToday ? dateStr : ((_eoyDayOffset === -1 ? 'Yesterday — ' : (Math.abs(_eoyDayOffset) + ' days ago — ')) + dateStr);
 
     var container = document.getElementById('eoyTasks');
     if (!container) return;
@@ -11743,8 +11771,9 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       var done = !!stored[t.id];
       var row = document.createElement('div');
       row.className = 'eoy-task' + (done ? ' done' : '');
-      row.innerHTML = '<input type="checkbox" ' + (done?'checked':'') + ' onchange="eoyToggle(\''+t.id+'\',this.checked)">'
-        + '<span style="flex:1">' + t.label + '</span>'
+      var offsetAttr = _eoyDayOffset !== 0 ? 'data-offset="'+_eoyDayOffset+'"' : '';
+      row.innerHTML = '<input type="checkbox" ' + (done?'checked':'') + ' onchange="eoyToggleOffset(\''+t.id+'\',this.checked,'+_eoyDayOffset+')">'
+        + '<span style="flex:1">' + t.label + (isToday ? '' : ' <span style="font-size:.65rem;color:#f59e0b;font-weight:700">(catch-up)</span>') + '</span>'
         + (t.tab ? '<button onclick="showTab(\''+t.tab+'\',null)" class="tbtn tbtn-outline" style="font-size:.68rem;padding:2px 8px;color:var(--blue)">Go →</button>' : '');
       container.appendChild(row);
     });
@@ -11752,19 +11781,22 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     renderEOYWeekRow();
   }
 
-  function eoyToggle(taskId, checked) {
-    var key = eoyTodayKey();
-    var stored = JSON.parse(localStorage.getItem(key) || '{}');
+  function eoyToggleOffset(taskId, checked, offset) {
+    var key = eoyTodayKeyOffset(offset || 0);
+    var _eoydt = loadData();
+    if (!_eoydt.eoyDailyTicks) _eoydt.eoyDailyTicks = {};
+    var stored = _eoydt.eoyDailyTicks[key] || {};
     stored[taskId] = checked;
-    var _eoydt=loadData(); if(!_eoydt.eoyDailyTicks)_eoydt.eoyDailyTicks={}; _eoydt.eoyDailyTicks[key]=stored; saveData(_eoydt);
-    var dow = new Date().getDay();
-    eoyUpdateBar(stored, EOY_SCHEDULE[dow].tasks.length);
-    // mark week summary
-    var _edr=loadData(); var wk=(_edr.eoyDailyTicks&&_edr.eoyDailyTicks[eoyWeekKey()])||{};
-    var allDone = Object.values(stored).filter(Boolean).length >= EOY_SCHEDULE[dow].tasks.length;
-    wk[new Date().getDay()] = Object.values(stored).filter(Boolean).length;
-    if(!_edr.eoyDailyTicks)_edr.eoyDailyTicks={}; _edr.eoyDailyTicks[eoyWeekKey()]=wk; saveData(_edr);
+    _eoydt.eoyDailyTicks[key] = stored;
+    saveData(_eoydt);
+    var targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + (offset || 0));
+    eoyUpdateBar(stored, EOY_SCHEDULE[targetDate.getDay()].tasks.length);
     renderEOYWeekRow();
+  }
+
+  function eoyToggle(taskId, checked) {
+    eoyToggleOffset(taskId, checked, 0);
   }
 
   function eoyUpdateBar(stored, total) {
