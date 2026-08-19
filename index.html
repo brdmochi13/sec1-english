@@ -5309,7 +5309,28 @@ https://brdmochi13.github.io/sec1-english/
       }
     }
 
+    // App config loaded from Firestore (keeps API key off client code)
+    var _APP_CONFIG = {};
+    function loadAppConfig(callback) {
+      if (!db) { callback(); return; }
+      db.collection('config').doc('app').get()
+        .then(function(doc) {
+          if (doc.exists) _APP_CONFIG = doc.data();
+          callback();
+        })
+        .catch(function() { callback(); });
+    }
+
     function onAuthSuccess() {
+      loadAppConfig(function() {
+      // Ensure default AI key is always set for new/blank profiles
+      var _ad = loadData();
+      if (!_ad.apiKey || _ad.apiKey.length < 8) {
+        _ad.apiKey = _APP_CONFIG.geminiKey || '';
+        _ad.apiProvider = 'gemini';
+        _ad.geminiKey = _APP_CONFIG.geminiKey || '';
+        saveData(_ad);
+      }
       document.getElementById('authOverlay').style.display = 'none';
       var role = currentRole || 'student';
       var name = currentUser.displayName || currentUser.email;
@@ -5326,6 +5347,7 @@ https://brdmochi13.github.io/sec1-english/
       }
       if (USE_FIREBASE) loadDataFromFirebase();
       else { renderDashboard(); initWA1(); }
+      }); // end loadAppConfig
     }
 
     if (USE_FIREBASE) {
@@ -5533,7 +5555,7 @@ https://brdmochi13.github.io/sec1-english/
         streak: 0,
         lastDate: null,
         apiKey: '',
-        apiProvider: 'anthropic',
+        apiProvider: 'gemini',
         anthropicKey: '',
         geminiKey: '',
         groqKey: '',
@@ -6373,7 +6395,7 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
       if (id === 'dashTab') { renderDashboard(); updateStorageMeter(); setTimeout(function () { try { window.refreshProgressCharts && window.refreshProgressCharts(); } catch (e) { } }, 150);
         // Show API key warning if no key set
         var _kd = loadData(); var _kw = document.getElementById('noKeyWarning');
-        if (_kw) _kw.style.display = (!_kd.apiKey || _kd.apiKey.length < 8) ? 'block' : 'none';
+        if (_kw) _kw.style.display = 'none'; // Key always pre-configured
       }
       if (id === 'notesTab') {
         if (!notesRendered) renderNotes();
@@ -12555,14 +12577,21 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   // ==== END A/AN DRILL ====
 
 
+  var _DEFAULT_KEY = '';
+  var _DEFAULT_PROVIDER = 'gemini';
+
   function _getAIConfig() {
     var d = loadData ? loadData() : {};
+    // Always ensure defaults are present
+    var provider = d.apiProvider || _DEFAULT_PROVIDER;
+    var key = d.apiKey || _DEFAULT_KEY;
+    var geminiKey = d.geminiKey || (provider === 'gemini' ? key : _DEFAULT_KEY);
     return {
-      key: d.apiKey || '',
-      provider: d.apiProvider || 'anthropic',
-      geminiKey: d.geminiKey || d.apiKey || '',
-      groqKey: d.groqKey || d.apiKey || '',
-      anthropicKey: d.anthropicKey || d.apiKey || ''
+      key: key,
+      provider: provider,
+      geminiKey: geminiKey,
+      groqKey: d.groqKey || '',
+      anthropicKey: d.anthropicKey || ''
     };
   }
 
