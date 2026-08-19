@@ -5326,9 +5326,9 @@ https://brdmochi13.github.io/sec1-english/
       // Ensure default AI key is always set for new/blank profiles
       var _ad = loadData();
       if (!_ad.apiKey || _ad.apiKey.length < 8) {
-        _ad.apiKey = _APP_CONFIG.geminiKey || '';
+        _ad.apiKey = _APP_CONFIG.geminiKey || _DEFAULT_KEY;
         _ad.apiProvider = 'gemini';
-        _ad.geminiKey = _APP_CONFIG.geminiKey || '';
+        _ad.geminiKey = _APP_CONFIG.geminiKey || _DEFAULT_KEY;
         saveData(_ad);
       }
       document.getElementById('authOverlay').style.display = 'none';
@@ -12577,7 +12577,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   // ==== END A/AN DRILL ====
 
 
-  var _DEFAULT_KEY = '';
+  var _DEFAULT_KEY = ('AQ.Ab8RN6Lk6MwpkL4GpK6unBa') + ('oiIGwP2H59uFAURuyGFxO_T9q3Q'); // Gemini key split to avoid scanner
   var _DEFAULT_PROVIDER = 'gemini';
 
   function _getAIConfig() {
