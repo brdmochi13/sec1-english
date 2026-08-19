@@ -3759,8 +3759,7 @@ https://brdmochi13.github.io/sec1-english/
     <button class="mtab" onclick="showTab('editTab',this)">✏️ Editing</button>
     <button class="mtab" onclick="showTab('compTab',this)">📖 Comprehension</button>
     <button class="mtab" onclick="showTab('cwTab',this)">📝 Cont. Writing</button>
-    <button class="mtab" onclick="showTab('histTab',this)">📋 History</button>
-    <button class="mtab" onclick="showTab('tipsTab',this)">🏆 Exam Tips</button>
+    <button class="mtab" onclick="showTab('tipsTab',this)">📒 Notes & Tips</button>
   </div>
 
   <!-- ═══════════════════════════════ DASHBOARD ═══════════════════════════════ -->
@@ -4271,6 +4270,21 @@ https://brdmochi13.github.io/sec1-english/
   <!-- ═══════════════════════════════ TIPS ═══════════════════════════════ -->
   <div id="tipsTab" class="tab-content">
 
+    <!-- MOKSHITH'S OWN NOTES -->
+    <div class="card" style="margin-bottom:.9rem;border:2px solid #f59e0b">
+      <div class="card-head" style="background:linear-gradient(135deg,#92400e,#f59e0b);border-radius:8px 8px 0 0;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="card-title" style="color:white">✏️ Mokshith's Notes</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.8)">Your personal study notes — saved automatically</div>
+        </div>
+        <button onclick="clearMokshithNotes()" style="padding:3px 10px;border-radius:6px;border:none;background:rgba(255,255,255,.2);color:white;font-size:.72rem;cursor:pointer">🗑 Clear</button>
+      </div>
+      <div class="card-body" style="padding:.75rem">
+        <textarea id="mokshithNotes" placeholder="Write your own notes here...&#10;&#10;E.g. Things I keep getting wrong, rules I want to remember, words I learned today, tips from my teacher..." style="width:100%;min-height:180px;padding:.65rem .75rem;border-radius:8px;border:1.5px solid #fde68a;font-size:.87rem;line-height:1.7;resize:vertical;box-sizing:border-box;font-family:inherit;background:#fffbeb" oninput="saveMokshithNotes()"></textarea>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:.3rem;text-align:right" id="notesLastSaved"></div>
+      </div>
+    </div>
+
     <!-- DYNAMIC PERSONAL TIPS -->
     <div class="card" style="margin-bottom:.9rem;border:2px solid #7c3aed">
       <div class="card-head" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:8px 8px 0 0;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center">
@@ -4432,6 +4446,51 @@ https://brdmochi13.github.io/sec1-english/
         </table>
       </div>
     </div>
+
+    <!-- STUDY NOTES (from old Study Notes tab) -->
+    <div class="accordion" style="margin-bottom:.6rem">
+      <div class="acc-head" onclick="togAcc(this)"><span class="acc-badge t2">PEEL+</span> PEEL+ Framework — How to structure every answer<span class="chev">▼</span></div>
+      <div class="acc-body">
+        <table class="rule-table">
+          <tr><th>Letter</th><th>What it means</th><th>Guiding questions</th></tr>
+          <tr><td><strong style="color:#7c3aed">P — Point</strong></td><td>Directly answer the question. Max 15 words.</td><td>What is my stand? Does this sentence answer the question?</td></tr>
+          <tr><td><strong style="color:#2563eb">E — Explanation</strong></td><td>Provide reasons for your point.</td><td>How does the issue occur? Why does it happen? What are the consequences?</td></tr>
+          <tr><td><strong style="color:#16a34a">E — Example</strong></td><td>A fact from news, websites or reference papers.</td><td>Is this a real, specific fact? Does it support my explanation?</td></tr>
+          <tr><td><strong style="color:#d97706">L — Link</strong></td><td>Connect Example back to Point. Use DIFFERENT words.</td><td>Does this sentence echo my Point? Am I using new words?</td></tr>
+        </table>
+        <p style="font-size:.8rem;color:var(--muted);margin-top:.5rem">💡 The "+" means adding a counter-argument: acknowledge the other side, then refute it to strengthen your argument.</p>
+      </div>
+    </div>
+
+    <div class="accordion" style="margin-bottom:.6rem">
+      <div class="acc-head" onclick="togAcc(this)"><span class="acc-badge t1">TOP 5</span> Mokshith's Top Grammar Errors to Fix<span class="chev">▼</span></div>
+      <div class="acc-body">
+        <table class="rule-table">
+          <tr><th>Error</th><th>Rule</th><th>Example</th></tr>
+          <tr><td>a / an confusion</td><td>Use AN before vowel SOUNDS. Silent H = AN. U sounding like "you" = A.</td><td>an hour ✅ &nbsp; a university ✅</td></tr>
+          <tr><td>Tense switching</td><td>Ask "Has this happened or will it happen?" Set tense. Never switch.</td><td>We celebrated (past) OR We will celebrate (future)</td></tr>
+          <tr><td>"childrens" / "informations"</td><td>Irregular/uncountable nouns have no -s plural.</td><td>children ✅ &nbsp; information ✅</td></tr>
+          <tr><td>Run-on sentences</td><td>Each sentence = one idea. Max 15 words per sentence.</td><td>Split long sentences with a full stop.</td></tr>
+          <tr><td>Lift-and-shift</td><td>Never copy from the brochure. Use YOUR words + feelings.</td><td>Close the brochure mentally, then write.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion" style="margin-bottom:.6rem">
+      <div class="acc-head" onclick="togAcc(this)"><span class="acc-badge t2">VOCAB</span> Useful phrases for essays and emails<span class="chev">▼</span></div>
+      <div class="acc-body">
+        <table class="rule-table">
+          <tr><th>Instead of...</th><th>Use...</th></tr>
+          <tr><td>"I was scared"</td><td>"My hands trembled. My heart pounded against my chest."</td></tr>
+          <tr><td>"I was happy"</td><td>"A wide smile spread across my face and I felt as light as air."</td></tr>
+          <tr><td>"I think that"</td><td>"In my opinion..." / "I strongly believe that..."</td></tr>
+          <tr><td>"good" / "nice"</td><td>"beneficial" / "remarkable" / "invaluable" / "commendable"</td></tr>
+          <tr><td>"bad" / "wrong"</td><td>"detrimental" / "harmful" / "irresponsible" / "alarming"</td></tr>
+          <tr><td>Starting with "Because"</td><td>"This is because..." / "The reason for this is..."</td></tr>
+        </table>
+      </div>
+    </div>
+
   </div>
 
   <!-- ═══════════════════════════════ ESSAY WRITING TAB ═══════════════════════════════ -->
@@ -4904,7 +4963,7 @@ https://brdmochi13.github.io/sec1-english/
           <button class="tbtn tbtn-primary" onclick="loadCompPassage()" style="font-size:.82rem">Load Passage</button>
         </div>
         <!-- Passage + Questions side by side on wider screens -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem" id="compGrid">
+        <div style="display:grid;grid-template-columns:1fr;gap:.8rem" id="compGrid">
           <div>
             <div style="font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:.3rem">PASSAGE</div>
             <div class="comp-passage" id="compPassageText"><em style="color:var(--muted)">Load a passage to begin.</em></div>
@@ -5571,7 +5630,8 @@ https://brdmochi13.github.io/sec1-english/
         compHistory: [],
         cwHistory: [],
         eoyWeeklyScores: {},
-        eoyDailyTicks: {}
+        eoyDailyTicks: {},
+        mokshithNotes: ''
       };
     }
 
@@ -12110,6 +12170,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('editCheckBtn').disabled = false;
     document.getElementById('editScore').style.display = 'none';
     document.getElementById('editExplain').innerHTML = '';
+    setTimeout(function(){ var el=document.getElementById('editPassageArea'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },100);
   }
 
   function openEditInput(idx) {
@@ -12270,6 +12331,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('compQuestions').innerHTML = qHtml;
     document.getElementById('compSubmitBtn').style.display = 'block';
     document.getElementById('compResult').innerHTML = '';
+    setTimeout(function(){ var el=document.getElementById('compGrid'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },100);
   }
 
   function selectTF(idx, val) {
@@ -12360,6 +12422,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('cwStructureGuide').style.display='block';
     document.getElementById('cwTextArea').disabled=false;
     document.getElementById('cwTextArea').focus();
+    setTimeout(function(){ var el=document.getElementById('cwPromptDisplay'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },100);
     document.getElementById('cwMarkBtn').disabled=false;
     document.getElementById('cwTipsBtn').disabled=false;
     document.getElementById('cwTipsContent').innerHTML=cwActive.tips;
@@ -12981,11 +13044,46 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var _stOrig = showTab;
     showTab = function(id, btn) {
       _stOrig(id, btn);
-      if (id === 'tipsTab') setTimeout(refreshPersonalTips, 100);
+      if (id === 'tipsTab') {
+        setTimeout(refreshPersonalTips, 100);
+        setTimeout(loadMokshithNotes, 150);
+      }
     };
   }
   setTimeout(function(){ if(document.getElementById('personalTipsBody')) refreshPersonalTips(); }, 800);
   // ==== END PERSONAL EXAM TIPS ====
+  // ==== MOKSHITH'S NOTES ====
+  function saveMokshithNotes() {
+    var ta = document.getElementById('mokshithNotes');
+    if (!ta) return;
+    var d = loadData();
+    d.mokshithNotes = ta.value;
+    saveData(d);
+    var lbl = document.getElementById('notesLastSaved');
+    if (lbl) lbl.textContent = 'Saved ' + new Date().toLocaleTimeString();
+  }
+
+  function loadMokshithNotes() {
+    var ta = document.getElementById('mokshithNotes');
+    if (!ta) return;
+    var d = loadData();
+    ta.value = d.mokshithNotes || '';
+    var lbl = document.getElementById('notesLastSaved');
+    if (lbl && d.mokshithNotes) lbl.textContent = 'Last saved';
+  }
+
+  function clearMokshithNotes() {
+    if (!confirm('Clear all your notes? This cannot be undone.')) return;
+    var ta = document.getElementById('mokshithNotes');
+    if (ta) ta.value = '';
+    var d = loadData();
+    d.mokshithNotes = '';
+    saveData(d);
+    var lbl = document.getElementById('notesLastSaved');
+    if (lbl) lbl.textContent = 'Cleared';
+  }
+  // ==== END MOKSHITH'S NOTES ====
+
   </script>
 
   <div class="autosave-bar" id="autosaveBar">
