@@ -6475,7 +6475,9 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
       if (id === 'essayTab') { initEssay(); renderEssayHistory(); }
       if (id === 'emailTab') { initEmailTab(); }
       if (id === 'histTab') { initHistory(); }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll to top of tab on tab switch
+      var tabEl = document.getElementById(id);
+      if (tabEl) tabEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function bindTabs() {
@@ -12152,6 +12154,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   var editState = { passage: null, inputs: {}, checked: false };
 
   function loadEditPassage() {
+    try {
     var idx = parseInt(document.getElementById('editDiffSelect').value);
     var p = EDIT_PASSAGES[idx];
     editState = { passage: p, inputs: {}, checked: false, idx: idx };
@@ -12171,6 +12174,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('editScore').style.display = 'none';
     document.getElementById('editExplain').innerHTML = '';
     setTimeout(function(){ var el=document.getElementById('editPassageArea'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },100);
+    } catch(e) { _showToast('Edit load error: '+e.message, true); console.error(e); }
   }
 
   function openEditInput(idx) {
@@ -12308,6 +12312,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   var compState = { passage: null, tfAnswers: {}, oeAnswers: {} };
 
   function loadCompPassage() {
+    try {
     var idx = parseInt(document.getElementById('compPassageSelect').value);
     var p = COMP_PASSAGES[idx];
     compState = { passage: p, tfAnswers: {}, oeAnswers: {}, idx: idx };
@@ -12332,6 +12337,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('compSubmitBtn').style.display = 'block';
     document.getElementById('compResult').innerHTML = '';
     setTimeout(function(){ var el=document.getElementById('compGrid'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },100);
+    } catch(e) { _showToast('Comp load error: '+e.message, true); console.error(e); }
   }
 
   function selectTF(idx, val) {
@@ -12415,6 +12421,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   var cwActive = null;
 
   function loadCWPrompt() {
+    try {
     var idx = parseInt(document.getElementById('cwPromptSelect').value);
     cwActive = CW_PROMPTS[idx];
     document.getElementById('cwPromptDisplay').style.display='block';
@@ -12428,6 +12435,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('cwTipsContent').innerHTML=cwActive.tips;
     document.getElementById('cwResult').innerHTML='';
     updateCWStats();
+    } catch(e) { _showToast('CW load error: '+e.message, true); console.error(e); }
   }
 
   function updateCWStats() {
@@ -12550,6 +12558,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   function _aanShuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
 
   function aanGo(){
+    try {
     _aanSt={active:true,idx:0,score:0,streak:0,best:0,answered:false,qs:_aanShuffle(_aanQ)};
     var d=document.getElementById.bind(document);
     d('aan_done').style.display='none';
@@ -12561,6 +12570,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     d('aan_start').textContent='Restart';
     _aanRender();
     setTimeout(function(){var e=d('aan_q');if(e)e.scrollIntoView({behavior:'smooth',block:'center'});},150);
+    } catch(e) { _showToast('a/an error: '+e.message, true); console.error(e); }
   }
 
   function _aanRender(){
@@ -13052,6 +13062,15 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   }
   setTimeout(function(){ if(document.getElementById('personalTipsBody')) refreshPersonalTips(); }, 800);
   // ==== END PERSONAL EXAM TIPS ====
+
+  function _showToast(msg, isErr) {
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:'+(isErr?'#dc2626':'#166534')+';color:white;padding:8px 18px;border-radius:8px;font-size:.85rem;font-weight:700;z-index:99999;max-width:90vw;text-align:center';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 4000);
+  }
+
   // ==== MOKSHITH'S NOTES ====
   function saveMokshithNotes() {
     var ta = document.getElementById('mokshithNotes');
