@@ -4270,7 +4270,29 @@ https://brdmochi13.github.io/sec1-english/
 
   <!-- ═══════════════════════════════ TIPS ═══════════════════════════════ -->
   <div id="tipsTab" class="tab-content">
-    <div class="strat-grid" style="margin-bottom:1.2rem">
+
+    <!-- DYNAMIC PERSONAL TIPS -->
+    <div class="card" style="margin-bottom:.9rem;border:2px solid #7c3aed">
+      <div class="card-head" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:8px 8px 0 0;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="card-title" style="color:white">🎯 Mokshith's Personal Tips</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.75)">Based on YOUR actual mistakes — refreshes automatically</div>
+        </div>
+        <button onclick="refreshPersonalTips()" style="padding:5px 12px;border-radius:7px;border:none;background:rgba(255,255,255,.2);color:white;font-size:.78rem;font-weight:700;cursor:pointer">🔄 Refresh</button>
+      </div>
+      <div class="card-body" style="padding:.75rem" id="personalTipsBody">
+        <div style="text-align:center;color:var(--muted);font-size:.83rem;padding:.5rem">Loading your personal tips...</div>
+      </div>
+    </div>
+
+    <!-- EOY COMPONENT TIPS -->
+    <div class="card" style="margin-bottom:.9rem">
+      <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title">📊 Your EOY Component Status</div>
+        <button onclick="refreshPersonalTips()" style="font-size:.72rem;padding:3px 10px;border-radius:6px;border:1.5px solid var(--border);background:white;cursor:pointer">🔄</button>
+      </div>
+      <div class="card-body" id="eoyStatusTips" style="padding:.65rem"></div>
+    </div>
       <div class="strat-c">
         <div class="ico">⏱️</div>
         <h4>Time Management</h4>
@@ -5511,6 +5533,12 @@ https://brdmochi13.github.io/sec1-english/
         streak: 0,
         lastDate: null,
         apiKey: '',
+        apiProvider: 'anthropic',
+        anthropicKey: '',
+        geminiKey: '',
+        groqKey: '',
+        ollamaHost: 'http://localhost:11434',
+        ollamaModel: 'llama3.2',
         answers: {},
         timeSpent: {},
         lastPaper: null,
@@ -12660,7 +12688,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var modal = document.getElementById('settingsModal');
     modal.style.display = 'flex';
     // Load current saved config
-    var d = JSON.parse(localStorage.getItem('appData') || '{}');
+    var d = loadData();
     var provider = d.apiProvider || 'anthropic';
     var sel = document.getElementById('stgProvider');
     if (sel) sel.value = provider;
@@ -12693,7 +12721,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   }
 
   function stgUpdateSummary() {
-    var d = JSON.parse(localStorage.getItem('appData') || '{}');
+    var d = loadData();
     var el = document.getElementById('stgCurrentSummary');
     if (!el) return;
     var provider = d.apiProvider || 'none';
@@ -12710,7 +12738,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   function stgSaveKey() {
     var provider = (document.getElementById('stgProvider') || {}).value || 'anthropic';
-    var d = JSON.parse(localStorage.getItem('appData') || '{}');
+    var d = loadData();
     var key = '';
     if (provider === 'anthropic') key = (document.getElementById('stgAnthropicKey') || {}).value || '';
     if (provider === 'gemini')    key = (document.getElementById('stgGeminiKey') || {}).value || '';
@@ -12726,8 +12754,8 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     if (provider === 'groq')      d.groqKey = key;
     d.apiProvider = provider;
     d.apiKey = key;
-    localStorage.setItem('appData', JSON.stringify(d));
-    // Also sync to the AI Practice tab fields
+    saveData(d); // syncs to Firebase
+    // Also sync to AI Practice tab fields
     var provSel = document.getElementById('apiProvider');
     if (provSel) { provSel.value = provider; if (typeof onProviderChange === 'function') onProviderChange(); }
     var keyInp = document.getElementById('apikeyInp');
@@ -12736,7 +12764,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     if (status) {
       status.style.display = 'block';
       status.style.background = '#dcfce7'; status.style.color = '#166534';
-      status.textContent = '✅ Saved! ' + ({anthropic:'Anthropic (Claude)',gemini:'Google Gemini',groq:'Groq',ollama:'Ollama (Local)'}[provider]||provider) + ' is now active.';
+      status.textContent = '✅ Saved to all devices! ' + ({anthropic:'Anthropic (Claude)',gemini:'Google Gemini',groq:'Groq',ollama:'Ollama (Local)'}[provider]||provider) + ' is now active.';
     }
     stgUpdateSummary();
   }
@@ -12794,6 +12822,139 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     });
   }, 0);
   // ==== END SETTINGS MODAL ====
+  // ==== PERSONAL EXAM TIPS (dynamic, based on Mokshith's mistakes) ====
+  function refreshPersonalTips() {
+    var body = document.getElementById('personalTipsBody');
+    var eoyStatus = document.getElementById('eoyStatusTips');
+    if (!body) return;
+
+    var d = loadData();
+
+    // ── Collect mistake patterns ──────────────────────────────────────
+    var tips = [];
+
+    // From Quick Fire / skill data
+    var skills = d.skills || {};
+    var weakSkills = [];
+    Object.keys(skills).forEach(function(sk) {
+      var arr = skills[sk];
+      if (arr && arr[0] > 2) { // at least 3 attempts
+        var pct = Math.round((arr[1]||0) / arr[0] * 100);
+        if (pct < 70) weakSkills.push({ name: sk, pct: pct, attempts: arr[0] });
+      }
+    });
+    weakSkills.sort(function(a,b){ return a.pct - b.pct; });
+
+    var skillTipMap = {
+      'articles_a_an': { icon:'🔤', title:'a vs an', fix:'Remember: vowel SOUND (not spelling) = an. "university" starts with Y sound → a university. "hour" is silent H → an hour.' },
+      'tenses': { icon:'⏰', title:'Tense errors', fix:'Before writing: ask "Has this happened or will it happen?" Set your tense and never switch mid-paragraph.' },
+      'sva': { icon:'👥', title:'Subject-Verb Agreement', fix:'"She/He/It" + verb+s. "They/We/You" + base verb. "The children" is already plural — never "childrens".' },
+      'passive': { icon:'🔄', title:'Passive voice', fix:'was + past participle. "was born" not "was borned". "was given" not "was gave". The past participle is the third form.' },
+      'comparatives': { icon:'📊', title:'Comparatives', fix:'"more faster" and "more better" are wrong — "faster" and "better" are already comparative. Never use both.' },
+      'prepositions': { icon:'📍', title:'Prepositions', fix:'at school (not in), interested in (not at), good at (not in), arrive at/in (not to).' },
+      'conjunctions': { icon:'🔗', title:'Conjunctions', fix:'although/even though = contrast. because = reason. so that = purpose. Never start a sentence with "Because" alone.' },
+      'uncountable': { icon:'📦', title:'Uncountable nouns', fix:'"information", "advice", "equipment", "furniture" have no plural. Never add -s. Use "a piece of advice".' },
+    };
+
+    weakSkills.slice(0, 4).forEach(function(sk) {
+      var tip = skillTipMap[sk.name];
+      if (tip) tips.push({ icon: tip.icon, title: tip.title + ' (' + sk.pct + '% correct)', fix: tip.fix, priority: 'high', source: 'Quick Fire: ' + sk.attempts + ' attempts' });
+    });
+
+    // From Editing history
+    var editHist = d.editHistory || [];
+    if (editHist.length > 0) {
+      var avgEdit = Math.round(editHist.reduce(function(s,h){return s+h.pct;},0)/editHist.length);
+      if (avgEdit < 80) tips.push({ icon:'✏️', title:'Editing accuracy: ' + avgEdit + '%', fix:'Practice editing daily. Focus on: a/an, is/are/was/were, irregular past tenses (went/gone, gave/given), uncountable nouns.', priority: avgEdit < 60 ? 'high' : 'medium', source: editHist.length + ' editing attempts' });
+    }
+
+    // From Comprehension history
+    var compHist = d.compHistory || [];
+    if (compHist.length > 0) {
+      var avgComp = Math.round(compHist.reduce(function(s,h){return s+(h.tfScore/h.tfTotal*100);},0)/compHist.length);
+      if (avgComp < 75) tips.push({ icon:'📖', title:'Comprehension T/F/NS: ' + Math.round(avgComp) + '%', fix:'For True/False/Not Stated: always find the exact line in the passage. If you cannot find it — it is Not Stated. Never guess.', priority: avgComp < 60 ? 'high' : 'medium', source: compHist.length + ' comprehension attempts' });
+    }
+
+    // From Email history
+    var emailHist = d.emailHistory || [];
+    if (emailHist.length > 0) {
+      var recentEmail = emailHist.slice(0, 5);
+      var avgEmail = Math.round(recentEmail.reduce(function(s,h){return s+(h.score||0);},0)/recentEmail.length);
+      if (avgEmail < 25) tips.push({ icon:'✉️', title:'Email Writing: avg ' + avgEmail + '/30', fix:'Check tense before writing. One paragraph per bullet point. No copy-paste from the brochure. Sign off correctly.', priority: 'medium', source: emailHist.length + ' email attempts' });
+    }
+
+    // From CW history
+    var cwHist = d.cwHistory || [];
+    if (cwHist.length === 0) tips.push({ icon:'📝', title:'Continuous Writing — not practised yet', fix:'Start with 1 writing attempt this week. Use the structure: Hook → Problem → Climax → Reflection. Keep sentences short.', priority: 'medium', source: 'No attempts recorded' });
+
+    // EOY weekly scores
+    var eoyScores = d.eoyWeeklyScores || {};
+    var weekNums = Object.keys(eoyScores).filter(function(w){ return eoyScores[w] && Object.keys(eoyScores[w]).length > 0; });
+    if (weekNums.length === 0) tips.push({ icon:'📅', title:'EOY scores not tracked yet', fix:'After Saturday practice, fill in your scores in the Dashboard EOY tracker. This shows your progress trend.', priority: 'low', source: 'No scores logged' });
+
+    // ── Render personal tips ──────────────────────────────────────────
+    if (tips.length === 0) {
+      body.innerHTML = '<div style="text-align:center;padding:.75rem"><div style="font-size:1.5rem">🎉</div><div style="font-weight:700;color:#166534">No weak areas detected yet!</div><div style="font-size:.8rem;color:var(--muted);margin-top:.3rem">Keep practising — tips will appear based on your mistakes.</div></div>';
+    } else {
+      var priorityOrder = { high:0, medium:1, low:2 };
+      tips.sort(function(a,b){ return priorityOrder[a.priority] - priorityOrder[b.priority]; });
+      body.innerHTML = tips.map(function(t) {
+        var bg = t.priority==='high' ? '#fef2f2' : t.priority==='medium' ? '#fefce8' : '#f0fdf4';
+        var border = t.priority==='high' ? '#fca5a5' : t.priority==='medium' ? '#fde047' : '#86efac';
+        var badge = t.priority==='high' ? '#dc2626' : t.priority==='medium' ? '#d97706' : '#16a34a';
+        var badgeTxt = t.priority==='high' ? 'FOCUS NOW' : t.priority==='medium' ? 'IMPROVE' : 'MAINTAIN';
+        return '<div style="padding:.55rem .7rem;border-radius:8px;background:'+bg+';border:1.5px solid '+border+';margin-bottom:.45rem">'
+          + '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.25rem">'
+          + '<span style="font-size:1rem">'+t.icon+'</span>'
+          + '<strong style="font-size:.83rem;flex:1">'+t.title+'</strong>'
+          + '<span style="font-size:.65rem;font-weight:700;color:white;background:'+badge+';padding:2px 7px;border-radius:20px">'+badgeTxt+'</span>'
+          + '</div>'
+          + '<div style="font-size:.78rem;color:#374151;line-height:1.5">'+t.fix+'</div>'
+          + '<div style="font-size:.67rem;color:var(--muted);margin-top:.2rem">Source: '+t.source+'</div>'
+          + '</div>';
+      }).join('');
+    }
+
+    // ── EOY component status ──────────────────────────────────────────
+    if (eoyStatus) {
+      var components = [
+        { key:'email', label:'✉️ Email /30', target:25, max:30 },
+        { key:'edit',  label:'✏️ Editing /10', target:8, max:10 },
+        { key:'comp',  label:'📖 Comp T/F /4', target:3, max:4 },
+        { key:'cw',    label:'📝 Writing /30', target:20, max:30 },
+        { key:'days',  label:'📅 Days /6', target:5, max:6 },
+      ];
+      var lastWeek = weekNums.length > 0 ? eoyScores[weekNums[weekNums.length-1]] : {};
+      eoyStatus.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">'
+        + components.map(function(c) {
+          var val = lastWeek[c.key];
+          var hasVal = val !== undefined && val !== null;
+          var pct = hasVal ? Math.round(val/c.max*100) : null;
+          var ok = hasVal && val >= c.target;
+          var bg = !hasVal ? '#f3f4f6' : ok ? '#dcfce7' : '#fee2e2';
+          var clr = !hasVal ? '#6b7280' : ok ? '#166534' : '#991b1b';
+          var icon = !hasVal ? '⬜' : ok ? '✅' : '❌';
+          return '<div style="padding:.4rem .6rem;border-radius:7px;background:'+bg+';font-size:.78rem">'
+            + '<div style="font-weight:700;color:'+clr+'">'+icon+' '+c.label+'</div>'
+            + '<div style="color:'+clr+'">'+(hasVal ? val+'/'+c.max+' (target: '+c.target+')' : 'Not logged yet')+'</div>'
+            + '</div>';
+        }).join('')
+        + '</div>'
+        + (weekNums.length === 0 ? '<div style="font-size:.75rem;color:var(--muted);margin-top:.4rem;text-align:center">Log your scores every Saturday in the Dashboard</div>' : '<div style="font-size:.7rem;color:var(--muted);margin-top:.4rem">Showing Week '+weekNums[weekNums.length-1]+' scores</div>');
+    }
+  }
+
+  // Auto-refresh tips when switching to tips tab
+  var _origShowTab = window.showTab;
+  if (typeof showTab === 'function') {
+    var _stOrig = showTab;
+    showTab = function(id, btn) {
+      _stOrig(id, btn);
+      if (id === 'tipsTab') setTimeout(refreshPersonalTips, 100);
+    };
+  }
+  setTimeout(function(){ if(document.getElementById('personalTipsBody')) refreshPersonalTips(); }, 800);
+  // ==== END PERSONAL EXAM TIPS ====
   </script>
 
   <div class="autosave-bar" id="autosaveBar">
