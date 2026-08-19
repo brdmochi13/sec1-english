@@ -3750,7 +3750,6 @@ https://brdmochi13.github.io/sec1-english/
   <!-- MAIN TABS -->
   <div class="main-tabs">
     <button class="mtab active" onclick="showTab('dashTab',this)">📊 Dashboard</button>
-    <button class="mtab" onclick="showTab('notesTab',this)">📚 Study Notes</button>
     <button class="mtab" onclick="showTab('wa1Tab',this)">✏️ WA Papers</button>
     <button class="mtab" onclick="showTab('aiTab',this)">🤖 AI Practice</button>
     <button class="mtab" onclick="showTab('essayTab',this)">✍ Essay Writing</button>
@@ -3851,6 +3850,35 @@ https://brdmochi13.github.io/sec1-english/
 
     <!-- 1. STAT CARDS -->
     <div class="dash-grid" id="dashStats"></div>
+
+    <!-- 2. ADAPTIVE LEARNING PANEL -->
+    <div class="card" style="margin-bottom:.9rem;border:2px solid #2563eb">
+      <div class="card-head" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:8px 8px 0 0;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="card-title" style="color:white">🧠 Adaptive Learning — Mokshith's Profile</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.75)">Based on all your practice data</div>
+        </div>
+        <button onclick="renderAdaptivePanel()" style="padding:3px 10px;border-radius:6px;border:none;background:rgba(255,255,255,.2);color:white;font-size:.72rem;font-weight:700;cursor:pointer">🔄</button>
+      </div>
+      <div class="card-body" style="padding:.7rem .9rem">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.7rem">
+          <!-- Strong areas -->
+          <div>
+            <div style="font-size:.72rem;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem">💪 Strong Areas</div>
+            <div id="adaptiveStrong" style="font-size:.78rem;color:#374151">Loading...</div>
+          </div>
+          <!-- Weak areas -->
+          <div>
+            <div style="font-size:.72rem;font-weight:700;color:#991b1b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem">⚠️ Needs Work</div>
+            <div id="adaptiveWeak" style="font-size:.78rem;color:#374151">Loading...</div>
+          </div>
+        </div>
+        <!-- Today's adaptive recommendation -->
+        <div id="adaptiveToday" style="padding:.55rem .7rem;border-radius:8px;background:#eff6ff;border:1.5px solid #93c5fd;font-size:.8rem"></div>
+        <!-- Progress bars for each component -->
+        <div style="margin-top:.65rem" id="adaptiveBars"></div>
+      </div>
+    </div>
 
     <!-- 2. RECOMMENDED NEXT PAPER -->
     <div
@@ -4102,20 +4130,7 @@ https://brdmochi13.github.io/sec1-english/
 
   </div>
   <!-- ═══════════════════════════════ STUDY NOTES ═══════════════════════════════ -->
-  <div id="notesTab" class="tab-content">
-    <div class="notes-tabs-row" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
-      <button class="ptab active" onclick="showNotesSec('wa1notes',this)">📝 Grammar Rules</button>
-      <button class="ptab" onclick="showNotesSec('editnotes',this)">✏️ Editing (Cloze)</button>
-      <button class="ptab" onclick="showNotesSec('c1notes',this)">📋 Cloze I</button>
-      <button class="ptab" onclick="showNotesSec('c2notes',this)">🔤 Cloze II</button>
-    </div>
-    <div id="wa1notes" class="note-panel" style="display:block"><!-- WA1 Grammar notes --></div>
-    <div id="editnotes" class="note-panel" style="display:none"><!-- Editing notes --></div>
-    <div id="c1notes" class="note-panel" style="display:none"><!-- Cloze I notes --></div>
-    <div id="c2notes" class="note-panel" style="display:none"><!-- Cloze II notes --></div>
-  </div>
-
-  <!-- ═══════════════════════════════ WA PAPERS ═══════════════════════════════ -->
+    <!-- ═══════════════════════════════ WA PAPERS ═══════════════════════════════ -->
   <div id="wa1Tab" class="tab-content">
     <div class="paper-tabs" id="paperTabsRow"></div>
     <!-- WARM-UP PASSAGE AREA - shown before each paper -->
@@ -4282,6 +4297,24 @@ https://brdmochi13.github.io/sec1-english/
       <div class="card-body" style="padding:.75rem">
         <textarea id="mokshithNotes" placeholder="Write your own notes here...&#10;&#10;E.g. Things I keep getting wrong, rules I want to remember, words I learned today, tips from my teacher..." style="width:100%;min-height:180px;padding:.65rem .75rem;border-radius:8px;border:1.5px solid #fde68a;font-size:.87rem;line-height:1.7;resize:vertical;box-sizing:border-box;font-family:inherit;background:#fffbeb" oninput="saveMokshithNotes()"></textarea>
         <div style="font-size:.7rem;color:var(--muted);margin-top:.3rem;text-align:right" id="notesLastSaved"></div>
+      </div>
+    </div>
+
+    <!-- STUDY NOTES (merged from Study Notes tab) -->
+    <div class="card" style="margin-bottom:.9rem">
+      <div class="card-head" style="padding:.5rem .9rem">
+        <div class="notes-tabs-row" style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <button class="ptab active" onclick="showNotesSec('wa1notes',this)">📝 Grammar Rules</button>
+          <button class="ptab" onclick="showNotesSec('editnotes',this)">✏️ Editing</button>
+          <button class="ptab" onclick="showNotesSec('c1notes',this)">📋 Cloze I</button>
+          <button class="ptab" onclick="showNotesSec('c2notes',this)">🔤 Cloze II</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:.6rem .9rem">
+        <div id="wa1notes" class="note-panel" style="display:block"><!-- WA1 Grammar notes --></div>
+        <div id="editnotes" class="note-panel" style="display:none"><!-- Editing notes --></div>
+        <div id="c1notes" class="note-panel" style="display:none"><!-- Cloze I notes --></div>
+        <div id="c2notes" class="note-panel" style="display:none"><!-- Cloze II notes --></div>
       </div>
     </div>
 
@@ -5532,12 +5565,14 @@ https://brdmochi13.github.io/sec1-english/
           _updateSyncBadge('ok');
           renderDashboard();
           initWA1();
+          setTimeout(renderAdaptivePanel, 300);
         })
         .catch(function (e) {
           console.warn('Firebase load error:', e);
           _updateSyncBadge('error');
           renderDashboard();
           initWA1();
+          setTimeout(renderAdaptivePanel, 300);
         });
     }
 
@@ -6666,17 +6701,12 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
         // Show API key warning if no key set
         var _kd = loadData(); var _kw = document.getElementById('noKeyWarning');
         if (_kw) _kw.style.display = 'none'; // Key always pre-configured
+        setTimeout(renderAdaptivePanel, 200);
       }
-      if (id === 'notesTab') {
+      if (id === 'tipsTab' || id === 'notesTab') {
         if (!notesRendered) renderNotes();
-        // Always show wa1notes first when switching to this tab
-        showNotesSec('wa1notes', null);
-        // Activate first button
-        const firstBtn = document.querySelector('#notesTab .notes-tabs-row .ptab');
-        if (firstBtn) {
-          document.querySelectorAll('#notesTab .notes-tabs-row .ptab').forEach(b => b.classList.remove('active'));
-          firstBtn.classList.add('active');
-        }
+        setTimeout(refreshPersonalTips, 100);
+        setTimeout(loadMokshithNotes, 150);
       }
       if (id === 'wa1Tab') { if (!wa1Rendered) initWA1(); }
       if (id === 'aiTab') initAI();
@@ -13102,6 +13132,154 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     if (lbl) lbl.textContent = 'Cleared';
   }
   // ==== END MOKSHITH'S NOTES ====
+
+  // ==== ADAPTIVE LEARNING PANEL ====
+  function renderAdaptivePanel() {
+    var d = loadData();
+    var skills = d.skills || {};
+    var editHist  = d.editHistory  || [];
+    var compHist  = d.compHistory  || [];
+    var cwHist    = d.cwHistory    || [];
+    var emailHist = d.emailHistory || [];
+    var eoyScores = d.eoyWeeklyScores || {};
+
+    // ── Build component scores ─────────────────────────────────────
+    var components = [];
+
+    // Quick Fire skills
+    var skillMap = {
+      articles_a_an: 'a/an Articles',
+      tenses:        'Tenses',
+      sva:           'Subject-Verb Agreement',
+      passive:       'Passive Voice',
+      comparatives:  'Comparatives',
+      prepositions:  'Prepositions',
+      conjunctions:  'Conjunctions',
+      uncountable:   'Uncountable Nouns',
+      editing_misc:  'Editing',
+    };
+    Object.keys(skills).forEach(function(sk) {
+      var arr = skills[sk];
+      if (arr && arr[0] >= 2) {
+        var pct = Math.round((arr[1]||0) / arr[0] * 100);
+        components.push({ name: skillMap[sk]||sk, pct: pct, attempts: arr[0], source: 'Quick Fire' });
+      }
+    });
+
+    // Email writing
+    if (emailHist.length > 0) {
+      var recent = emailHist.slice(0,5);
+      var avgEmail = Math.round(recent.reduce(function(s,h){ return s+(h.score||0); },0) / recent.length / 30 * 100);
+      components.push({ name: 'Email Writing', pct: avgEmail, attempts: emailHist.length, source: 'Email Tab' });
+    }
+
+    // Editing
+    if (editHist.length > 0) {
+      var avgEdit = Math.round(editHist.reduce(function(s,h){ return s+h.pct; },0) / editHist.length);
+      components.push({ name: 'Editing', pct: avgEdit, attempts: editHist.length, source: 'Editing Tab' });
+    }
+
+    // Comprehension
+    if (compHist.length > 0) {
+      var avgComp = Math.round(compHist.reduce(function(s,h){ return s+h.tfScore/h.tfTotal*100; },0) / compHist.length);
+      components.push({ name: 'Comprehension', pct: avgComp, attempts: compHist.length, source: 'Comp Tab' });
+    }
+
+    // Continuous Writing
+    if (cwHist.length > 0) {
+      components.push({ name: 'Cont. Writing', pct: null, attempts: cwHist.length, source: 'Writing Tab' });
+    }
+
+    // ── Strong vs Weak ────────────────────────────────────────────
+    var scored = components.filter(function(c){ return c.pct !== null; });
+    scored.sort(function(a,b){ return b.pct - a.pct; });
+    var strong = scored.filter(function(c){ return c.pct >= 75; }).slice(0,3);
+    var weak   = scored.filter(function(c){ return c.pct < 70; }).sort(function(a,b){ return a.pct-b.pct; }).slice(0,3);
+    var notPractised = ['Email Writing','Editing','Comprehension','Cont. Writing'].filter(function(name){
+      return !components.find(function(c){ return c.name === name; });
+    });
+
+    var strongEl = document.getElementById('adaptiveStrong');
+    var weakEl   = document.getElementById('adaptiveWeak');
+    if (strongEl) {
+      if (strong.length === 0) {
+        strongEl.innerHTML = '<span style="color:var(--muted);font-style:italic">Keep practising — your strengths will show here</span>';
+      } else {
+        strongEl.innerHTML = strong.map(function(c){
+          return '<div style="display:flex;align-items:center;gap:.35rem;margin-bottom:.25rem">'
+            + '<span style="font-size:.8rem">✅</span>'
+            + '<span style="flex:1">'+c.name+'</span>'
+            + '<span style="font-weight:700;color:#166534">'+c.pct+'%</span></div>';
+        }).join('');
+      }
+    }
+    if (weakEl) {
+      var weakItems = weak.map(function(c){
+        return '<div style="display:flex;align-items:center;gap:.35rem;margin-bottom:.25rem">'
+          + '<span style="font-size:.8rem">🔴</span>'
+          + '<span style="flex:1">'+c.name+'</span>'
+          + '<span style="font-weight:700;color:#991b1b">'+c.pct+'%</span></div>';
+      });
+      notPractised.forEach(function(name){
+        weakItems.push('<div style="display:flex;align-items:center;gap:.35rem;margin-bottom:.25rem">'
+          + '<span style="font-size:.8rem">⬜</span>'
+          + '<span style="flex:1;color:var(--muted)">'+name+'</span>'
+          + '<span style="font-size:.7rem;color:var(--muted)">Not started</span></div>');
+      });
+      weakEl.innerHTML = weakItems.length ? weakItems.join('') : '<span style="color:#166534;font-style:italic">No weak areas! 🎉</span>';
+    }
+
+    // ── Today's adaptive recommendation ───────────────────────────
+    var dow = new Date().getDay();
+    var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var schedule = {
+      0: {tab:'dashTab',    label:'Rest & Review — check your Dashboard scores'},
+      1: {tab:'emailTab',   label:'Email Writing — practice one timed email'},
+      2: {tab:'compTab',    label:'Comprehension — load and answer one passage'},
+      3: {tab:'cwTab',      label:'Continuous Writing — write your opening paragraph'},
+      4: {tab:'editTab',    label:'Editing — find all 10 errors in one passage'},
+      5: {tab:'qfTab',      label:'Quick Fire — 20 questions in Personalised mode'},
+      6: {tab:'emailTab',   label:'Full Practice — timed email + comprehension passage'},
+    };
+    var todayPlan = schedule[dow];
+    // Override with weakest area if we have data
+    if (weak.length > 0) {
+      var weakest = weak[0];
+      var tabMap = {'a/an Articles':'qfTab','Tenses':'qfTab','Subject-Verb Agreement':'qfTab',
+        'Email Writing':'emailTab','Editing':'editTab','Comprehension':'compTab','Cont. Writing':'cwTab'};
+      var recTab = tabMap[weakest.name] || todayPlan.tab;
+      var todayEl = document.getElementById('adaptiveToday');
+      if (todayEl) todayEl.innerHTML = '<div style="font-weight:700;margin-bottom:.25rem">📅 '+dayNames[dow]+' — Today\'s Focus</div>'
+        + '<div>Scheduled: <strong>'+todayPlan.label+'</strong></div>'
+        + (weakest.pct < 60 ? '<div style="margin-top:.25rem;color:#991b1b">⚠️ Priority: <strong>'+weakest.name+'</strong> is at '+weakest.pct+'% — spend extra time here today</div>' : '')
+        + '<div style="margin-top:.4rem;display:flex;gap:.5rem">'
+        + '<button onclick="showTab(\''+todayPlan.tab+'\',null)" style="padding:4px 12px;border-radius:6px;border:none;background:#2563eb;color:white;font-size:.75rem;font-weight:700;cursor:pointer">Go to today\'s tab →</button>'
+        + (recTab !== todayPlan.tab ? '<button onclick="showTab(\''+recTab+'\',null)" style="padding:4px 12px;border-radius:6px;border:1.5px solid #dc2626;background:white;color:#991b1b;font-size:.75rem;font-weight:700;cursor:pointer">Fix weakest: '+weakest.name+' →</button>' : '')
+        + '</div>';
+    } else {
+      var todayEl = document.getElementById('adaptiveToday');
+      if (todayEl) todayEl.innerHTML = '<div style="font-weight:700;margin-bottom:.25rem">📅 '+dayNames[dow]+' — Today\'s Focus</div>'
+        + '<div>'+todayPlan.label+'</div>'
+        + '<div style="margin-top:.4rem"><button onclick="showTab(\''+todayPlan.tab+'\',null)" style="padding:4px 12px;border-radius:6px;border:none;background:#2563eb;color:white;font-size:.75rem;font-weight:700;cursor:pointer">Go →</button></div>';
+    }
+
+    // ── Progress bars for all components ──────────────────────────
+    var barsEl = document.getElementById('adaptiveBars');
+    if (barsEl && scored.length > 0) {
+      barsEl.innerHTML = '<div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem">All Scores</div>'
+        + scored.map(function(c){
+          var col = c.pct >= 80 ? '#16a34a' : c.pct >= 60 ? '#f59e0b' : '#dc2626';
+          return '<div style="margin-bottom:.4rem">'
+            + '<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.15rem">'
+            + '<span>'+c.name+'</span><span style="font-weight:700;color:'+col+'">'+c.pct+'%</span></div>'
+            + '<div style="background:#e5e7eb;border-radius:99px;height:6px">'
+            + '<div style="width:'+c.pct+'%;background:'+col+';height:6px;border-radius:99px;transition:width .4s"></div></div></div>';
+        }).join('');
+    } else if (barsEl) {
+      barsEl.innerHTML = '<div style="font-size:.75rem;color:var(--muted);text-align:center;padding:.3rem 0">Complete some practice to see your scores here</div>';
+    }
+  }
+  // ==== END ADAPTIVE LEARNING PANEL ====
 
   </script>
 
