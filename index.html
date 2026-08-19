@@ -3767,6 +3767,10 @@ https://brdmochi13.github.io/sec1-english/
   <div id="dashTab" class="tab-content active">
 
     <!-- 0. EOY DAILY HABIT TRACKER -->
+    <div id="noKeyWarning" style="display:none;margin-bottom:.75rem;padding:.6rem .9rem;border-radius:8px;background:#fef3c7;border:1.5px solid #fde047;font-size:.8rem;color:#92400e">
+      ⚠️ <strong>No AI API key set.</strong> AI marking features (Email, Comprehension, Writing, PEEL) won't work.
+      <button onclick="openSettingsModal()" style="margin-left:.5rem;padding:3px 10px;border-radius:6px;border:none;background:#f59e0b;color:white;font-size:.75rem;font-weight:700;cursor:pointer">⚙️ Set Key Now</button>
+    </div>
     <div class="card" style="margin-bottom:.9rem;border:2px solid var(--blue,#3b82f6)">
       <div class="card-head" style="background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:8px 8px 0 0;padding:.6rem 1rem">
         <div class="card-title" style="color:white;font-size:.95rem">🎯 EOY Exam — Daily Habit Tracker</div>
@@ -6338,7 +6342,11 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
       if (btn) btn.classList.add('active');
       const strip = document.getElementById('scoreStrip');
       if (strip) strip.classList.toggle('visible', id === 'wa1Tab');
-      if (id === 'dashTab') { renderDashboard(); updateStorageMeter(); setTimeout(function () { try { window.refreshProgressCharts && window.refreshProgressCharts(); } catch (e) { } }, 150); }
+      if (id === 'dashTab') { renderDashboard(); updateStorageMeter(); setTimeout(function () { try { window.refreshProgressCharts && window.refreshProgressCharts(); } catch (e) { } }, 150);
+        // Show API key warning if no key set
+        var _kd = loadData(); var _kw = document.getElementById('noKeyWarning');
+        if (_kw) _kw.style.display = (!_kd.apiKey || _kd.apiKey.length < 8) ? 'block' : 'none';
+      }
       if (id === 'notesTab') {
         if (!notesRendered) renderNotes();
         // Always show wa1notes first when switching to this tab
@@ -12245,7 +12253,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       return 'Q'+(i+1)+' ['+q.marks+'m]: '+q.q+'\nStudent: '+ans+'\nModel: '+q.model;
     }).join('\n\n');
     var prompt = 'You are marking a Singapore Sec 1 NT English comprehension. Mark each open-ended answer out of its given marks.\n\n'+oeSummary+'\n\nFor each question give: score/marks, one-line feedback, and the key improvement. Be encouraging. Format as Q1: X/Y — feedback | improvement';
-    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:prompt}]})})
+    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':(loadData().apiKey||''),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:prompt}]})})
     .then(function(r){return r.json();}).then(function(d){
       var txt = (d.content&&d.content[0]&&d.content[0].text)||'Could not mark.';
       var oeHtml = '<div style="padding:.5rem .7rem;border-radius:8px;background:#eff6ff;border:1.5px solid #93c5fd;font-size:.8rem;white-space:pre-wrap">'+txt+'</div>';
@@ -12338,16 +12346,15 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var txt = ta.value.trim();
     var prompt = 'You are marking a Singapore Sec 1 NT English Continuous Writing composition.\n\nPrompt: '+cwActive.title+'\n\nStudent composition:\n'+txt+'\n\nMark out of 30 (Content 15, Language 15). For each:\n- Give a score\n- 2 specific strengths (quote from student text)\n- 2 specific improvements with examples\n- One "Show Don\'t Tell" rewrite of a weak sentence\n\nFormat:\nCONTENT: X/15\nLANGUAGE: Y/15\nTOTAL: Z/30\n\nStrengths:\n...\n\nImprovements:\n...\n\nRewrite example:\nOriginal: "..."\nBetter: "..."';
     document.getElementById('cwResult').innerHTML='<div style="padding:.6rem;border-radius:8px;background:#eff6ff;font-size:.8rem;color:var(--blue)">🤖 Marking your composition...</div>';
-    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1200,messages:[{role:'user',content:prompt}]})})
-    .then(function(r){return r.json();}).then(function(d){
-      var res=(d.content&&d.content[0]&&d.content[0].text)||'Could not mark.';
+    _callAI(prompt, 1200, function(res) {
       document.getElementById('cwResult').innerHTML='<div style="padding:.65rem .8rem;border-radius:8px;background:#f8fafc;border:1.5px solid var(--border);font-size:.82rem;white-space:pre-wrap">'+res+'</div>';
-      // Save
       var _cw=loadData(); if(!_cw.cwHistory)_cw.cwHistory=[]; _cw.cwHistory.unshift({date:new Date().toLocaleDateString(),prompt:cwActive.title,text:txt.substring(0,200),result:res});
       if(_cw.cwHistory.length>10)_cw.cwHistory=_cw.cwHistory.slice(0,10);
       saveData(_cw);
       renderCWHistory();
-    }).catch(function(){document.getElementById('cwResult').innerHTML='<div style="color:#991b1b;font-size:.8rem">AI marking unavailable.</div>';});
+    }, function(err) {
+      document.getElementById('cwResult').innerHTML='<div style="color:#991b1b;font-size:.8rem;padding:.5rem;background:#fee2e2;border-radius:7px">❌ '+err+'</div>';
+    });
   }
 
   function renderCWHistory() {
@@ -12519,6 +12526,58 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   }
   // ==== END A/AN DRILL ====
 
+
+  function _getAIConfig() {
+    var d = loadData ? loadData() : {};
+    return {
+      key: d.apiKey || '',
+      provider: d.apiProvider || 'anthropic',
+      geminiKey: d.geminiKey || d.apiKey || '',
+      groqKey: d.groqKey || d.apiKey || '',
+      anthropicKey: d.anthropicKey || d.apiKey || ''
+    };
+  }
+
+  function _callAI(prompt, maxTokens, onResult, onError) {
+    var cfg = _getAIConfig();
+    if (!cfg.key && cfg.provider !== 'ollama') {
+      onError('No API key set. Please go to ⚙️ Settings and add your API key first.');
+      return;
+    }
+    var url, headers, body;
+    if (cfg.provider === 'gemini') {
+      url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' + cfg.key;
+      headers = {'Content-Type':'application/json'};
+      body = JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens||1000}});
+    } else if (cfg.provider === 'groq') {
+      url = 'https://api.groq.com/openai/v1/chat/completions';
+      headers = {'Content-Type':'application/json','Authorization':'Bearer '+cfg.key};
+      body = JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:maxTokens||1000,messages:[{role:'user',content:prompt}]});
+    } else if (cfg.provider === 'ollama') {
+      var d2 = loadData ? loadData() : {};
+      url = (d2.ollamaHost||'http://localhost:11434') + '/api/chat';
+      headers = {'Content-Type':'application/json'};
+      body = JSON.stringify({model:d2.ollamaModel||'llama3.2',messages:[{role:'user',content:prompt}],stream:false});
+    } else {
+      // anthropic
+      url = 'https://api.anthropic.com/v1/messages';
+      headers = {'Content-Type':'application/json','x-api-key':cfg.key,'anthropic-version':'2023-06-01'};
+      body = JSON.stringify({model:'claude-sonnet-4-5',max_tokens:maxTokens||1000,messages:[{role:'user',content:prompt}]});
+    }
+    fetch(url, {method:'POST', headers:headers, body:body})
+      .then(function(r){return r.json();})
+      .then(function(d) {
+        var txt = '';
+        if (cfg.provider === 'gemini') txt = d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts&&d.candidates[0].content.parts[0]&&d.candidates[0].content.parts[0].text;
+        else if (cfg.provider === 'groq') txt = d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content;
+        else if (cfg.provider === 'ollama') txt = d.message&&d.message.content;
+        else txt = d.content&&d.content[0]&&d.content[0].text;
+        if (!txt && d.error) { onError('API error: ' + (d.error.message||JSON.stringify(d.error))); return; }
+        onResult(txt || 'No response received.');
+      })
+      .catch(function(e){ onError('Connection failed: ' + e.message); });
+  }
+
   // ==== PEEL TOOL ====
   var _peelStand = '';
   var _peelQuestions = {
@@ -12588,15 +12647,10 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     fb.style.display = 'block';
     fb.innerHTML = '<div style="padding:.6rem;border-radius:8px;background:#eff6ff;font-size:.8rem;color:var(--blue)">🤖 Marking your PEEL paragraph...</div>';
     var prompt = 'You are an experienced Singapore Secondary 1 English teacher marking a PEEL paragraph.\n\nQuestion: ' + question + '\nStudent stand: ' + (_peelStand || 'not stated') + '\n\nStudent PEEL:\nP (Point): ' + p + '\nE (Explanation): ' + e1 + '\nE (Example): ' + e2 + '\nL (Link): ' + l + '\n\nMark each component out of 3 and give specific, encouraging feedback. Focus on:\n1. Does the Point directly answer the question within 15 words?\n2. Does the Explanation answer WHY and CONSEQUENCE?\n3. Is the Example a real fact from a credible source?\n4. Does the Link connect back using DIFFERENT words?\n5. Are sentences short and clear (not run-on)?\n\nAlso flag: any "a lot" written as "alot", any repetition, any grammar errors.\n\nFormat:\nP: X/3 — [feedback]\nE (Explanation): X/3 — [feedback]\nE (Example): X/3 — [feedback]\nL: X/3 — [feedback]\nTotal: X/12\n\nKey improvement: [one most important thing to fix]\nStrong point: [what was done well]';
-    fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
-    }).then(function(r) { return r.json(); }).then(function(d) {
-      var txt = (d.content && d.content[0] && d.content[0].text) || 'Could not mark.';
+    _callAI(prompt, 1000, function(txt) {
       fb.innerHTML = '<div style="padding:.65rem .8rem;border-radius:9px;background:#f8fafc;border:1.5px solid var(--border);font-size:.82rem;white-space:pre-wrap">' + txt + '</div>';
-    }).catch(function() {
-      fb.innerHTML = '<div style="color:#991b1b;font-size:.8rem">AI marking unavailable — check your connection.</div>';
+    }, function(err) {
+      fb.innerHTML = '<div style="color:#991b1b;font-size:.8rem;padding:.5rem;background:#fee2e2;border-radius:7px">❌ ' + err + '</div>';
     });
   }
   // ==== END PEEL TOOL ====
