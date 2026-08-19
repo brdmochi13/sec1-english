@@ -6024,7 +6024,215 @@ https://brdmochi13.github.io/sec1-english/
     // ══════════════════════════════════════════
     //  WA PAPER DATA (condensed — 10 papers)
     // ══════════════════════════════════════════
-    var CONJOPTS = ['and', 'but', 'or', 'so', 'because', 'although', 'if', 'when', 'while', 'unless', 'so that'];
+    var EDIT_PASSAGES = [
+    {
+      title: 'Passage 1 — Everyday Life',
+      errors: [
+        { wrong: 'go', right: 'goes', type: 'SVA', explain: 'She → singular → goes (not go)' },
+        { wrong: 'a apple', right: 'an apple', type: 'Article', explain: '"an" before vowel sounds (a, e, i, o, u)' },
+        { wrong: 'was go', right: 'was going', type: 'Tense', explain: 'Past continuous = was + verb-ing' },
+        { wrong: 'more faster', right: 'faster', type: 'Comparison', explain: 'Faster is already comparative — no "more" needed' },
+        { wrong: 'at home', right: 'at home', correct: true, type:'OK' },
+        { wrong: 'she dont', right: 'she doesn\'t', type: 'SVA+Neg', explain: 'She → doesn\'t (not don\'t)' },
+        { wrong: 'listened careful', right: 'listened carefully', type: 'Adverb', explain: 'Listened = verb → needs adverb "carefully" not adjective "careful"' },
+        { wrong: 'has went', right: 'has gone', type: 'Tense', explain: 'Present perfect of "go" = has gone (not has went)' },
+        { wrong: 'a uniform', right: 'a uniform', correct: true, type: 'OK' },
+        { wrong: 'the childrens', right: 'the children', type: 'Plural', explain: '"Children" is already plural — no apostrophe or extra "s"' }
+      ],
+      text: 'Every morning, Maya go to school with her younger sister. She always eat a apple for breakfast. Yesterday, she was go to the library when she met her friend. Her friend walked more faster than her. Maya doesn\'t like to be late. At school, she dont understand the question, but she listened careful. She has went to the library many times before. All the childrens in her class wore a uniform.'
+    },
+    {
+      title: 'Passage 2 — Nature & Animals',
+      errors: [
+        { wrong: 'lives', right: 'live', type: 'SVA', explain: 'Otters (plural) → live' },
+        { wrong: 'a hour', right: 'an hour', type: 'Article', explain: '"Hour" starts with a vowel sound → an' },
+        { wrong: 'swimed', right: 'swam', type: 'Tense', explain: 'Past tense of swim = swam (irregular verb)' },
+        { wrong: 'more quieter', right: 'quieter', type: 'Comparison', explain: '"Quieter" is already comparative — no "more"' },
+        { wrong: 'was catched', right: 'was caught', type: 'Tense', explain: 'Passive past of catch = was caught (irregular)' },
+        { wrong: 'informations', right: 'information', type: 'Uncountable', explain: '"Information" is uncountable — no plural "s"' },
+        { wrong: 'a owl', right: 'an owl', type: 'Article', explain: '"Owl" starts with vowel sound → an owl' },
+        { wrong: 'seen', right: 'saw', type: 'Tense', explain: 'Simple past = saw (not seen — that needs "have")' },
+        { wrong: 'beautifuly', right: 'beautifully', type: 'Spelling', explain: 'beautifully — double "l" before "y"' },
+        { wrong: 'is run', right: 'is running', type: 'Tense', explain: 'Present continuous = is + verb-ing' }
+      ],
+      text: 'Otters lives near rivers and lakes. They spend a hour each day searching for food. Last week, the researchers swimed alongside them to observe their habits. The river was more quieter in the evening. One young otter was catched on camera for the first time. The team gathered many informations about their behaviour. A owl watched from a nearby tree. The researchers seen the otter dive beautifly into the water. Now a conservation programme is run to protect these animals.'
+    },
+    {
+      title: 'Passage 3 — School & Friends',
+      errors: [
+        { wrong: 'was gave', right: 'was given', type: 'Passive', explain: 'Passive of give = was given' },
+        { wrong: 'alot', right: 'a lot', type: 'Spelling', explain: '"A lot" is two words, always' },
+        { wrong: 'more better', right: 'better', type: 'Comparison', explain: '"Better" is already comparative' },
+        { wrong: 'have forgot', right: 'had forgotten', type: 'Tense', explain: 'Past perfect = had + past participle → forgotten' },
+        { wrong: 'the students was', right: 'the students were', type: 'SVA', explain: 'Students (plural) → were' },
+        { wrong: 'an useful', right: 'a useful', type: 'Article', explain: '"Useful" starts with a "y" sound → a useful' },
+        { wrong: 'teached', right: 'taught', type: 'Tense', explain: 'Past tense of teach = taught (irregular)' },
+        { wrong: 'brang', right: 'brought', type: 'Tense', explain: 'Past tense of bring = brought (irregular)' },
+        { wrong: 'to went', right: 'to go', type: 'Infinitive', explain: 'After "to" → use base form of verb' },
+        { wrong: 'they was', right: 'they were', type: 'SVA', explain: 'They → were (not was)' }
+      ],
+      text: 'Last year, our class was gave a project about the environment. We worked alot together. Some students were more better at research. By the time we presented, we have forgot some of our notes. However, the students was confident. Our teacher gave us an useful tip: always practise aloud. She teached us many techniques over the term. On the last day, everyone brang something to share. We decided to went to the hall together. In the end, they was proud of what they had done.'
+    },
+    {
+      title: 'Passage 4 — Travel & Culture',
+      errors: [
+        { wrong: 'visited', right: 'will visit', type: 'Tense', explain: 'Future plan → will visit or are going to visit' },
+        { wrong: 'is planning', right: 'are planning', type: 'SVA', explain: 'We → are planning' },
+        { wrong: 'a exciting', right: 'an exciting', type: 'Article', explain: '"Exciting" starts with vowel sound → an' },
+        { wrong: 'have never went', right: 'have never been', type: 'Tense', explain: '"Have been" is correct for experience (not went)' },
+        { wrong: 'look forward to see', right: 'look forward to seeing', type: 'Gerund', explain: 'After "look forward to" → verb + ing' },
+        { wrong: 'more cheaper', right: 'cheaper', type: 'Comparison', explain: '"Cheaper" already comparative' },
+        { wrong: 'informations', right: 'information', type: 'Uncountable', explain: '"Information" = uncountable, no plural' },
+        { wrong: 'will arrived', right: 'will arrive', type: 'Tense', explain: 'After "will" → base form of verb' },
+        { wrong: 'a umbrella', right: 'an umbrella', type: 'Article', explain: '"Umbrella" starts with vowel → an' },
+        { wrong: 'equipments', right: 'equipment', type: 'Uncountable', explain: '"Equipment" is uncountable — no plural' }
+      ],
+      text: 'Next month, my family visited Japan for the first time. We is planning a an exciting itinerary. I have never went to Japan before and I look forward to see Mount Fuji. We found a more cheaper hotel near the station. We gathered many informations about local transport. The plane will arrived at midnight. I have packed a umbrella and all the necessary equipments for the trip.'
+    },
+    {
+      title: 'Passage 5 — Mixed Challenge',
+      errors: [
+        { wrong: 'dont', right: 'doesn\'t', type: 'SVA+Neg', explain: 'She → doesn\'t' },
+        { wrong: 'have saw', right: 'have seen', type: 'Tense', explain: 'Present perfect of see = have seen' },
+        { wrong: 'a hour', right: 'an hour', type: 'Article', explain: '"Hour" has vowel sound → an' },
+        { wrong: 'more noisier', right: 'noisier', type: 'Comparison', explain: '"Noisier" already comparative' },
+        { wrong: 'was ate', right: 'was eaten', type: 'Passive', explain: 'Passive of eat = was eaten' },
+        { wrong: 'advices', right: 'advice', type: 'Uncountable', explain: '"Advice" is uncountable — no plural s' },
+        { wrong: 'go to school everyday', right: 'go to school every day', type: 'Spelling', explain: '"Every day" (adverb phrase) = two words' },
+        { wrong: 'had wrote', right: 'had written', type: 'Tense', explain: 'Past perfect of write = had written' },
+        { wrong: 'an university', right: 'a university', type: 'Article', explain: '"University" starts with "y" sound → a' },
+        { wrong: 'is study', right: 'is studying', type: 'Tense', explain: 'Present continuous = is + verb-ing' }
+      ],
+      text: 'She dont enjoy crowded places. I have saw that film three times. It took a hour to finish the task. The classroom was more noisier after recess. All the food was ate quickly. He gave me many advices about the exam. Most students go to school everyday without fail. By then, she had wrote five paragraphs. He hopes to enter an university next year. Currently, she is study hard for her exams.'
+    }
+  ];
+
+  var COMP_PASSAGES = [
+    {
+      title: 'School Canteen Waste',
+      text: 'Every day, tonnes of food are wasted in school canteens across Singapore. Students often buy more food than they can finish, and uneaten portions end up in the bin. According to a recent survey, each student wastes an average of 150 grams of food daily. This adds up to hundreds of kilograms across the whole school each week.\n\nThe school has introduced several measures to tackle this problem. A "Clean Plate Campaign" encourages students to take only what they can finish. Posters showing the environmental cost of food waste have been put up around the canteen. Some schools have also introduced composting programmes, turning food scraps into fertiliser for school gardens.\n\nDespite these efforts, many students remain unaware of the impact of their actions. Teachers believe that education is the key. When students understand where food comes from and how much effort goes into producing it, they are more likely to appreciate what is on their plate.',
+      tfqs: [
+        { q:'Students waste an average of 150 grams of food daily.', ans:'T', line:'each student wastes an average of 150 grams of food daily' },
+        { q:'The school composting programme has been in place for five years.', ans:'NS', line:null },
+        { q:'Posters about environmental cost have been placed in classrooms.', ans:'F', line:'Posters...have been put up around the canteen' },
+        { q:'Teachers think education can help reduce food waste.', ans:'T', line:'Teachers believe that education is the key' }
+      ],
+      oeqs: [
+        { q:'Why do students waste food according to the passage?', marks:2, model:'Students waste food because they often buy more food than they can finish, and uneaten portions are thrown away.' },
+        { q:'What does the "Clean Plate Campaign" encourage students to do?', marks:1, model:'The campaign encourages students to take only the amount of food they can finish.' },
+        { q:'In your own words, explain why students who understand how food is produced are less likely to waste it.', marks:2, model:'When students realise the effort required to produce food, they value it more and are less likely to discard it.' }
+      ]
+    },
+    {
+      title: "Singapore's Green Spaces",
+      text: "Singapore is often called a 'City in a Garden'. Despite being one of the world's most densely populated cities, it has managed to preserve and even expand its green spaces. The government's commitment to greenery is evident in projects like the Gardens by the Bay, which attracts millions of visitors each year.\n\nParks and nature reserves cover about 47% of Singapore's land area. These spaces are not only beautiful but also serve important ecological functions. They help to cool the urban environment, reduce flooding by absorbing rainwater, and provide habitats for native wildlife.\n\nHowever, rapid urbanisation poses a threat to these green areas. As the population grows, the demand for housing and infrastructure increases. Urban planners must balance the need for development with the preservation of nature. One solution is the concept of 'biophilic design' — incorporating plants and natural features directly into buildings and urban spaces.",
+      tfqs: [
+        { q:'Gardens by the Bay is visited by millions of people every year.', ans:'T', line:'Gardens by the Bay, which attracts millions of visitors each year' },
+        { q:'Green spaces cover more than half of Singapore\'s land area.', ans:'F', line:'Parks and nature reserves cover about 47% of Singapore\'s land area' },
+        { q:'Singapore plans to build ten new nature reserves by 2030.', ans:'NS', line:null },
+        { q:'Green spaces help to reduce flooding in urban areas.', ans:'T', line:'reduce flooding by absorbing rainwater' }
+      ],
+      oeqs: [
+        { q:'Give TWO benefits of green spaces mentioned in the passage.', marks:2, model:'Green spaces help cool the urban environment and reduce flooding by absorbing rainwater. They also provide habitats for native wildlife.' },
+        { q:'What problem does rapid urbanisation cause for green spaces?', marks:2, model:'Rapid urbanisation increases the demand for housing and infrastructure, which threatens existing green areas.' },
+        { q:'In your own words, explain what "biophilic design" means.', marks:1, model:'Biophilic design means including plants and natural features as part of buildings and city spaces.' }
+      ]
+    },
+    {
+      title: 'Technology and Young People',
+      text: "Smartphones and social media have become an inseparable part of teenagers' lives. A survey conducted in 2024 found that young people in Singapore spend an average of six hours a day on their devices. While technology offers many benefits — from instant communication to access to educational resources — experts are increasingly concerned about its impact on mental health.\n\nResearch suggests that excessive screen time is linked to higher rates of anxiety and depression among teenagers. Constant exposure to carefully curated images on social media can lead young people to compare themselves unfavourably with others. This phenomenon, known as 'social comparison', can damage self-esteem and lead to feelings of inadequacy.\n\nHowever, not all screen time is equal. Educational videos, online tutoring, and creative applications can be genuinely beneficial. Experts recommend that parents help children develop 'digital literacy' — the ability to use technology critically and responsibly. Setting boundaries around screen time and encouraging offline activities are also seen as important steps.",
+      tfqs: [
+        { q:'Teenagers in Singapore spend an average of six hours daily on devices.', ans:'T', line:'young people in Singapore spend an average of six hours a day on their devices' },
+        { q:'All forms of screen time are harmful to teenagers.', ans:'F', line:'not all screen time is equal' },
+        { q:'The government plans to ban social media for children under 16.', ans:'NS', line:null },
+        { q:'"Social comparison" can lower a teenager\'s self-esteem.', ans:'T', line:'can damage self-esteem and lead to feelings of inadequacy' }
+      ],
+      oeqs: [
+        { q:'What is "social comparison" and how does it affect teenagers?', marks:2, model:'Social comparison is when teenagers compare themselves unfavourably with the idealised images they see on social media. This can damage their self-esteem and make them feel inadequate.' },
+        { q:'Give ONE benefit of technology mentioned in the passage.', marks:1, model:'Technology gives young people access to educational resources and instant communication.' },
+        { q:'In your own words, explain what "digital literacy" means.', marks:1, model:'Digital literacy means having the skills to use technology in a thoughtful and responsible way.' }
+      ]
+    },
+    {
+      title: 'Community Service',
+      text: "Community service has long been encouraged in Singapore schools as a way to build character and foster a sense of social responsibility among young people. Students are often required to complete a minimum number of service hours each year, volunteering at places such as elderly care homes, food banks, and environmental clean-up events.\n\nMany students find these experiences transformative. Seventeen-year-old Rachel shares: 'Before I started volunteering at the care home, I never really thought about the challenges faced by the elderly. Now I make it a point to spend time with my grandparents whenever I can.'\n\nDespite the benefits, some students admit they initially see community service as a chore — something to be ticked off a list. Educators argue that the key to changing this attitude is personal connection. When students are matched to causes they genuinely care about, the experience becomes meaningful rather than obligatory. Schools are now moving towards giving students more choice in how they fulfil their service requirements.",
+      tfqs: [
+        { q:'Students in Singapore schools are required to complete service hours each year.', ans:'T', line:'Students are often required to complete a minimum number of service hours each year' },
+        { q:'Rachel volunteers at a food bank.', ans:'F', line:'volunteering at the care home' },
+        { q:'Community service requirements will be removed from schools by 2026.', ans:'NS', line:null },
+        { q:'Some students initially view community service as an obligation rather than a privilege.', ans:'T', line:'some students admit they initially see community service as a chore' }
+      ],
+      oeqs: [
+        { q:'How did volunteering change Rachel\'s attitude?', marks:2, model:'Volunteering made Rachel more aware of the difficulties faced by elderly people. As a result, she now makes an effort to spend time with her own grandparents.' },
+        { q:'According to the passage, what makes community service meaningful rather than obligatory?', marks:2, model:'Community service becomes meaningful when students are matched to causes they genuinely care about, creating a personal connection to the work.' },
+        { q:'In your own words, what change are schools making to community service requirements?', marks:1, model:'Schools are now allowing students more choice in selecting how they complete their community service hours.' }
+      ]
+    }
+  ];
+
+  var CW_PROMPTS = [
+    { title:'A time you helped someone', tips:'Show how you felt before, during, and after. Use Show Don\'t Tell for emotions. End with what you learnt.', structure:'Opening: set the scene → Problem: someone needed help → Your action → Outcome → Reflection' },
+    { title:'An unforgettable school event', tips:'Describe sights, sounds, smells. Include dialogue. Show your feelings at the climax of the event.', structure:'Opening hook (a moment from the event) → Background → Build-up → Climax → Aftermath + feelings' },
+    { title:'A challenge you overcame', tips:'The reader should feel your struggle. Use short sentences at the most intense moment. End with growth.', structure:'Introduce the challenge → Your attempts → Lowest point → Turning point → Success + lesson learnt' },
+    { title:'Your favourite place and why', tips:'Use all five senses. Compare it to somewhere ordinary. Include a personal memory connected to the place.', structure:'Vivid description of the place → Why it matters to you → A specific memory → What it means to you' },
+    { title:'A mistake that taught you a lesson', tips:'Be honest — examiners reward authenticity. Show regret, then show growth. Avoid blaming others.', structure:'The mistake → Immediate consequences → How you felt → What you did to fix it → The lesson' },
+    { title:'A person who inspires you', tips:'Choose specific examples — not just "she is kind". Show a moment when you saw their qualities in action.', structure:'Introduce the person → One key quality with example → Another quality with example → How they changed you' }
+  ];
+
+  var _aanQ = [
+    {s:"She ate ___ apple.",a:"an",h:"apple - vowel sound"},
+    {s:"He wore ___ orange shirt.",a:"an",h:"orange - vowel sound"},
+    {s:"I need ___ umbrella.",a:"an",h:"umbrella - vowel sound"},
+    {s:"There was ___ egg in the fridge.",a:"an",h:"egg - vowel sound"},
+    {s:"She is ___ honest person.",a:"an",h:"honest - H is silent, sounds like /on/"},
+    {s:"We waited for ___ hour.",a:"an",h:"hour - H is silent, sounds like /ow/"},
+    {s:"He is ___ old man.",a:"an",h:"old - vowel sound"},
+    {s:"It was ___ interesting film.",a:"an",h:"interesting - vowel sound"},
+    {s:"She gave ___ excellent speech.",a:"an",h:"excellent - vowel sound"},
+    {s:"He found ___ unusual solution.",a:"an",h:"unusual - vowel sound"},
+    {s:"He bought ___ new bicycle.",a:"a",h:"new - consonant sound /n/"},
+    {s:"She has ___ beautiful voice.",a:"a",h:"beautiful - consonant sound /b/"},
+    {s:"He is ___ doctor.",a:"a",h:"doctor - consonant sound /d/"},
+    {s:"We saw ___ dog in the park.",a:"a",h:"dog - consonant sound /d/"},
+    {s:"She brought ___ gift.",a:"a",h:"gift - consonant sound /g/"},
+    {s:"He made ___ mistake.",a:"a",h:"mistake - consonant sound /m/"},
+    {s:"It is ___ cold day.",a:"a",h:"cold - consonant sound /k/"},
+    {s:"She is ___ wonderful friend.",a:"a",h:"wonderful - consonant sound /w/"},
+    {s:"There was ___ long queue.",a:"a",h:"long - consonant sound /l/"},
+    {s:"He wrote ___ thank-you note.",a:"a",h:"thank - consonant sound /th/"},
+    {s:"She attended ___ university.",a:"a",h:"TRICKY: university sounds like yoo-ni - starts with Y sound, so use A"},
+    {s:"It was ___ unique design.",a:"a",h:"TRICKY: unique sounds like yoo-neek - Y sound, use A"},
+    {s:"He showed ___ useful skill.",a:"a",h:"TRICKY: useful sounds like yoose-ful - Y sound, use A"},
+    {s:"She gave ___ uniform answer.",a:"a",h:"TRICKY: uniform sounds like yoo-ni-form - Y sound, use A"},
+    {s:"It was ___ unanimous decision.",a:"a",h:"TRICKY: unanimous sounds like yoo-nan - Y sound, use A"},
+    {s:"She is ___ heroic person.",a:"a",h:"heroic - H IS pronounced here, consonant sound"},
+    {s:"He gave ___ honest answer.",a:"an",h:"honest - H is SILENT, vowel sound /on/"},
+    {s:"She has ___ habit of being late.",a:"a",h:"habit - H IS pronounced, consonant sound"},
+    {s:"It was ___ honour to receive the award.",a:"an",h:"honour - H is SILENT, vowel sound /on/"},
+    {s:"He wore ___ helmet.",a:"a",h:"helmet - H IS pronounced, consonant sound"},
+    {s:"She drives ___ SUV.",a:"an",h:"SUV - say the letters: ess-you-vee - starts with vowel sound E"},
+    {s:"He is ___ NBA player.",a:"an",h:"NBA - say the letters: en-bee-ay - starts with vowel sound E"},
+    {s:"She used ___ ATM.",a:"an",h:"ATM - say the letters: ay-tee-em - starts with vowel sound A"},
+    {s:"He sent ___ SMS.",a:"an",h:"SMS - say the letters: ess-em-ess - starts with vowel sound E"},
+    {s:"She read ___ FAQ.",a:"an",h:"FAQ - say the letters: eff-ay-kyoo - starts with vowel sound E"},
+    {s:"He made ___ effort.",a:"an",h:"effort - vowel sound /e/"},
+    {s:"She carried ___ heavy bag.",a:"a",h:"heavy - consonant sound /h/"},
+    {s:"It was ___ unforgettable experience.",a:"an",h:"unforgettable - vowel sound /u/"},
+    {s:"She is studying to be ___ engineer.",a:"an",h:"engineer - vowel sound /e/"},
+    {s:"It was ___ easy question.",a:"an",h:"easy - vowel sound /ee/"},
+    {s:"She had ___ great time.",a:"a",h:"great - consonant sound /g/"},
+    {s:"Mokshith wrote ___ essay.",a:"an",h:"essay - vowel sound /e/"},
+    {s:"He is ___ active student.",a:"an",h:"active - vowel sound /a/"},
+    {s:"He scored ___ A for English!",a:"an",h:"the letter A sounds like /ay/ - vowel sound"},
+    {s:"It was ___ once-in-a-lifetime chance.",a:"a",h:"TRICKY: once sounds like wunce - starts with W sound, use A"},
+    {s:"She is ___ PE teacher.",a:"a",h:"PE - say the letters: pee-ee - starts with consonant sound P"},
+    {s:"He found ___ answer.",a:"an",h:"answer - vowel sound /an/"},
+    {s:"She bought ___ eraser.",a:"an",h:"eraser - vowel sound /e/"},
+    {s:"He is ___ fast runner.",a:"a",h:"fast - consonant sound /f/"},
+    {s:"She took ___ X-ray.",a:"an",h:"X-ray - say it: ex-ray - starts with vowel sound E"},
+    {s:"He is ___ European tourist.",a:"a",h:"TRICKY: European sounds like yoo-ro-pee-an - Y sound, use A"}
+  ];
+  var CONJOPTS = ['and', 'but', 'or', 'so', 'because', 'although', 'if', 'when', 'while', 'unless', 'so that'];
     var WA1 = {
       1: {
         tenses: [
@@ -12068,89 +12276,6 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   // ══════════════════════════════════════════════════════════════════
   //  EDITING TAB
   // ══════════════════════════════════════════════════════════════════
-  var EDIT_PASSAGES = [
-    {
-      title: 'Passage 1 — Everyday Life',
-      errors: [
-        { wrong: 'go', right: 'goes', type: 'SVA', explain: 'She → singular → goes (not go)' },
-        { wrong: 'a apple', right: 'an apple', type: 'Article', explain: '"an" before vowel sounds (a, e, i, o, u)' },
-        { wrong: 'was go', right: 'was going', type: 'Tense', explain: 'Past continuous = was + verb-ing' },
-        { wrong: 'more faster', right: 'faster', type: 'Comparison', explain: 'Faster is already comparative — no "more" needed' },
-        { wrong: 'at home', right: 'at home', correct: true, type:'OK' },
-        { wrong: 'she dont', right: 'she doesn\'t', type: 'SVA+Neg', explain: 'She → doesn\'t (not don\'t)' },
-        { wrong: 'listened careful', right: 'listened carefully', type: 'Adverb', explain: 'Listened = verb → needs adverb "carefully" not adjective "careful"' },
-        { wrong: 'has went', right: 'has gone', type: 'Tense', explain: 'Present perfect of "go" = has gone (not has went)' },
-        { wrong: 'a uniform', right: 'a uniform', correct: true, type: 'OK' },
-        { wrong: 'the childrens', right: 'the children', type: 'Plural', explain: '"Children" is already plural — no apostrophe or extra "s"' }
-      ],
-      text: 'Every morning, Maya go to school with her younger sister. She always eat a apple for breakfast. Yesterday, she was go to the library when she met her friend. Her friend walked more faster than her. Maya doesn\'t like to be late. At school, she dont understand the question, but she listened careful. She has went to the library many times before. All the childrens in her class wore a uniform.'
-    },
-    {
-      title: 'Passage 2 — Nature & Animals',
-      errors: [
-        { wrong: 'lives', right: 'live', type: 'SVA', explain: 'Otters (plural) → live' },
-        { wrong: 'a hour', right: 'an hour', type: 'Article', explain: '"Hour" starts with a vowel sound → an' },
-        { wrong: 'swimed', right: 'swam', type: 'Tense', explain: 'Past tense of swim = swam (irregular verb)' },
-        { wrong: 'more quieter', right: 'quieter', type: 'Comparison', explain: '"Quieter" is already comparative — no "more"' },
-        { wrong: 'was catched', right: 'was caught', type: 'Tense', explain: 'Passive past of catch = was caught (irregular)' },
-        { wrong: 'informations', right: 'information', type: 'Uncountable', explain: '"Information" is uncountable — no plural "s"' },
-        { wrong: 'a owl', right: 'an owl', type: 'Article', explain: '"Owl" starts with vowel sound → an owl' },
-        { wrong: 'seen', right: 'saw', type: 'Tense', explain: 'Simple past = saw (not seen — that needs "have")' },
-        { wrong: 'beautifuly', right: 'beautifully', type: 'Spelling', explain: 'beautifully — double "l" before "y"' },
-        { wrong: 'is run', right: 'is running', type: 'Tense', explain: 'Present continuous = is + verb-ing' }
-      ],
-      text: 'Otters lives near rivers and lakes. They spend a hour each day searching for food. Last week, the researchers swimed alongside them to observe their habits. The river was more quieter in the evening. One young otter was catched on camera for the first time. The team gathered many informations about their behaviour. A owl watched from a nearby tree. The researchers seen the otter dive beautifly into the water. Now a conservation programme is run to protect these animals.'
-    },
-    {
-      title: 'Passage 3 — School & Friends',
-      errors: [
-        { wrong: 'was gave', right: 'was given', type: 'Passive', explain: 'Passive of give = was given' },
-        { wrong: 'alot', right: 'a lot', type: 'Spelling', explain: '"A lot" is two words, always' },
-        { wrong: 'more better', right: 'better', type: 'Comparison', explain: '"Better" is already comparative' },
-        { wrong: 'have forgot', right: 'had forgotten', type: 'Tense', explain: 'Past perfect = had + past participle → forgotten' },
-        { wrong: 'the students was', right: 'the students were', type: 'SVA', explain: 'Students (plural) → were' },
-        { wrong: 'an useful', right: 'a useful', type: 'Article', explain: '"Useful" starts with a "y" sound → a useful' },
-        { wrong: 'teached', right: 'taught', type: 'Tense', explain: 'Past tense of teach = taught (irregular)' },
-        { wrong: 'brang', right: 'brought', type: 'Tense', explain: 'Past tense of bring = brought (irregular)' },
-        { wrong: 'to went', right: 'to go', type: 'Infinitive', explain: 'After "to" → use base form of verb' },
-        { wrong: 'they was', right: 'they were', type: 'SVA', explain: 'They → were (not was)' }
-      ],
-      text: 'Last year, our class was gave a project about the environment. We worked alot together. Some students were more better at research. By the time we presented, we have forgot some of our notes. However, the students was confident. Our teacher gave us an useful tip: always practise aloud. She teached us many techniques over the term. On the last day, everyone brang something to share. We decided to went to the hall together. In the end, they was proud of what they had done.'
-    },
-    {
-      title: 'Passage 4 — Travel & Culture',
-      errors: [
-        { wrong: 'visited', right: 'will visit', type: 'Tense', explain: 'Future plan → will visit or are going to visit' },
-        { wrong: 'is planning', right: 'are planning', type: 'SVA', explain: 'We → are planning' },
-        { wrong: 'a exciting', right: 'an exciting', type: 'Article', explain: '"Exciting" starts with vowel sound → an' },
-        { wrong: 'have never went', right: 'have never been', type: 'Tense', explain: '"Have been" is correct for experience (not went)' },
-        { wrong: 'look forward to see', right: 'look forward to seeing', type: 'Gerund', explain: 'After "look forward to" → verb + ing' },
-        { wrong: 'more cheaper', right: 'cheaper', type: 'Comparison', explain: '"Cheaper" already comparative' },
-        { wrong: 'informations', right: 'information', type: 'Uncountable', explain: '"Information" = uncountable, no plural' },
-        { wrong: 'will arrived', right: 'will arrive', type: 'Tense', explain: 'After "will" → base form of verb' },
-        { wrong: 'a umbrella', right: 'an umbrella', type: 'Article', explain: '"Umbrella" starts with vowel → an' },
-        { wrong: 'equipments', right: 'equipment', type: 'Uncountable', explain: '"Equipment" is uncountable — no plural' }
-      ],
-      text: 'Next month, my family visited Japan for the first time. We is planning a an exciting itinerary. I have never went to Japan before and I look forward to see Mount Fuji. We found a more cheaper hotel near the station. We gathered many informations about local transport. The plane will arrived at midnight. I have packed a umbrella and all the necessary equipments for the trip.'
-    },
-    {
-      title: 'Passage 5 — Mixed Challenge',
-      errors: [
-        { wrong: 'dont', right: 'doesn\'t', type: 'SVA+Neg', explain: 'She → doesn\'t' },
-        { wrong: 'have saw', right: 'have seen', type: 'Tense', explain: 'Present perfect of see = have seen' },
-        { wrong: 'a hour', right: 'an hour', type: 'Article', explain: '"Hour" has vowel sound → an' },
-        { wrong: 'more noisier', right: 'noisier', type: 'Comparison', explain: '"Noisier" already comparative' },
-        { wrong: 'was ate', right: 'was eaten', type: 'Passive', explain: 'Passive of eat = was eaten' },
-        { wrong: 'advices', right: 'advice', type: 'Uncountable', explain: '"Advice" is uncountable — no plural s' },
-        { wrong: 'go to school everyday', right: 'go to school every day', type: 'Spelling', explain: '"Every day" (adverb phrase) = two words' },
-        { wrong: 'had wrote', right: 'had written', type: 'Tense', explain: 'Past perfect of write = had written' },
-        { wrong: 'an university', right: 'a university', type: 'Article', explain: '"University" starts with "y" sound → a' },
-        { wrong: 'is study', right: 'is studying', type: 'Tense', explain: 'Present continuous = is + verb-ing' }
-      ],
-      text: 'She dont enjoy crowded places. I have saw that film three times. It took a hour to finish the task. The classroom was more noisier after recess. All the food was ate quickly. He gave me many advices about the exam. Most students go to school everyday without fail. By then, she had wrote five paragraphs. He hopes to enter an university next year. Currently, she is study hard for her exams.'
-    }
-  ];
-
   var editState = { passage: null, inputs: {}, checked: false };
 
   function loadEditPassage() {
@@ -12246,69 +12371,6 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   // ══════════════════════════════════════════════════════════════════
   //  COMPREHENSION TAB
   // ══════════════════════════════════════════════════════════════════
-  var COMP_PASSAGES = [
-    {
-      title: 'School Canteen Waste',
-      text: 'Every day, tonnes of food are wasted in school canteens across Singapore. Students often buy more food than they can finish, and uneaten portions end up in the bin. According to a recent survey, each student wastes an average of 150 grams of food daily. This adds up to hundreds of kilograms across the whole school each week.\n\nThe school has introduced several measures to tackle this problem. A "Clean Plate Campaign" encourages students to take only what they can finish. Posters showing the environmental cost of food waste have been put up around the canteen. Some schools have also introduced composting programmes, turning food scraps into fertiliser for school gardens.\n\nDespite these efforts, many students remain unaware of the impact of their actions. Teachers believe that education is the key. When students understand where food comes from and how much effort goes into producing it, they are more likely to appreciate what is on their plate.',
-      tfqs: [
-        { q:'Students waste an average of 150 grams of food daily.', ans:'T', line:'each student wastes an average of 150 grams of food daily' },
-        { q:'The school composting programme has been in place for five years.', ans:'NS', line:null },
-        { q:'Posters about environmental cost have been placed in classrooms.', ans:'F', line:'Posters...have been put up around the canteen' },
-        { q:'Teachers think education can help reduce food waste.', ans:'T', line:'Teachers believe that education is the key' }
-      ],
-      oeqs: [
-        { q:'Why do students waste food according to the passage?', marks:2, model:'Students waste food because they often buy more food than they can finish, and uneaten portions are thrown away.' },
-        { q:'What does the "Clean Plate Campaign" encourage students to do?', marks:1, model:'The campaign encourages students to take only the amount of food they can finish.' },
-        { q:'In your own words, explain why students who understand how food is produced are less likely to waste it.', marks:2, model:'When students realise the effort required to produce food, they value it more and are less likely to discard it.' }
-      ]
-    },
-    {
-      title: "Singapore's Green Spaces",
-      text: "Singapore is often called a 'City in a Garden'. Despite being one of the world's most densely populated cities, it has managed to preserve and even expand its green spaces. The government's commitment to greenery is evident in projects like the Gardens by the Bay, which attracts millions of visitors each year.\n\nParks and nature reserves cover about 47% of Singapore's land area. These spaces are not only beautiful but also serve important ecological functions. They help to cool the urban environment, reduce flooding by absorbing rainwater, and provide habitats for native wildlife.\n\nHowever, rapid urbanisation poses a threat to these green areas. As the population grows, the demand for housing and infrastructure increases. Urban planners must balance the need for development with the preservation of nature. One solution is the concept of 'biophilic design' — incorporating plants and natural features directly into buildings and urban spaces.",
-      tfqs: [
-        { q:'Gardens by the Bay is visited by millions of people every year.', ans:'T', line:'Gardens by the Bay, which attracts millions of visitors each year' },
-        { q:'Green spaces cover more than half of Singapore\'s land area.', ans:'F', line:'Parks and nature reserves cover about 47% of Singapore\'s land area' },
-        { q:'Singapore plans to build ten new nature reserves by 2030.', ans:'NS', line:null },
-        { q:'Green spaces help to reduce flooding in urban areas.', ans:'T', line:'reduce flooding by absorbing rainwater' }
-      ],
-      oeqs: [
-        { q:'Give TWO benefits of green spaces mentioned in the passage.', marks:2, model:'Green spaces help cool the urban environment and reduce flooding by absorbing rainwater. They also provide habitats for native wildlife.' },
-        { q:'What problem does rapid urbanisation cause for green spaces?', marks:2, model:'Rapid urbanisation increases the demand for housing and infrastructure, which threatens existing green areas.' },
-        { q:'In your own words, explain what "biophilic design" means.', marks:1, model:'Biophilic design means including plants and natural features as part of buildings and city spaces.' }
-      ]
-    },
-    {
-      title: 'Technology and Young People',
-      text: "Smartphones and social media have become an inseparable part of teenagers' lives. A survey conducted in 2024 found that young people in Singapore spend an average of six hours a day on their devices. While technology offers many benefits — from instant communication to access to educational resources — experts are increasingly concerned about its impact on mental health.\n\nResearch suggests that excessive screen time is linked to higher rates of anxiety and depression among teenagers. Constant exposure to carefully curated images on social media can lead young people to compare themselves unfavourably with others. This phenomenon, known as 'social comparison', can damage self-esteem and lead to feelings of inadequacy.\n\nHowever, not all screen time is equal. Educational videos, online tutoring, and creative applications can be genuinely beneficial. Experts recommend that parents help children develop 'digital literacy' — the ability to use technology critically and responsibly. Setting boundaries around screen time and encouraging offline activities are also seen as important steps.",
-      tfqs: [
-        { q:'Teenagers in Singapore spend an average of six hours daily on devices.', ans:'T', line:'young people in Singapore spend an average of six hours a day on their devices' },
-        { q:'All forms of screen time are harmful to teenagers.', ans:'F', line:'not all screen time is equal' },
-        { q:'The government plans to ban social media for children under 16.', ans:'NS', line:null },
-        { q:'"Social comparison" can lower a teenager\'s self-esteem.', ans:'T', line:'can damage self-esteem and lead to feelings of inadequacy' }
-      ],
-      oeqs: [
-        { q:'What is "social comparison" and how does it affect teenagers?', marks:2, model:'Social comparison is when teenagers compare themselves unfavourably with the idealised images they see on social media. This can damage their self-esteem and make them feel inadequate.' },
-        { q:'Give ONE benefit of technology mentioned in the passage.', marks:1, model:'Technology gives young people access to educational resources and instant communication.' },
-        { q:'In your own words, explain what "digital literacy" means.', marks:1, model:'Digital literacy means having the skills to use technology in a thoughtful and responsible way.' }
-      ]
-    },
-    {
-      title: 'Community Service',
-      text: "Community service has long been encouraged in Singapore schools as a way to build character and foster a sense of social responsibility among young people. Students are often required to complete a minimum number of service hours each year, volunteering at places such as elderly care homes, food banks, and environmental clean-up events.\n\nMany students find these experiences transformative. Seventeen-year-old Rachel shares: 'Before I started volunteering at the care home, I never really thought about the challenges faced by the elderly. Now I make it a point to spend time with my grandparents whenever I can.'\n\nDespite the benefits, some students admit they initially see community service as a chore — something to be ticked off a list. Educators argue that the key to changing this attitude is personal connection. When students are matched to causes they genuinely care about, the experience becomes meaningful rather than obligatory. Schools are now moving towards giving students more choice in how they fulfil their service requirements.",
-      tfqs: [
-        { q:'Students in Singapore schools are required to complete service hours each year.', ans:'T', line:'Students are often required to complete a minimum number of service hours each year' },
-        { q:'Rachel volunteers at a food bank.', ans:'F', line:'volunteering at the care home' },
-        { q:'Community service requirements will be removed from schools by 2026.', ans:'NS', line:null },
-        { q:'Some students initially view community service as an obligation rather than a privilege.', ans:'T', line:'some students admit they initially see community service as a chore' }
-      ],
-      oeqs: [
-        { q:'How did volunteering change Rachel\'s attitude?', marks:2, model:'Volunteering made Rachel more aware of the difficulties faced by elderly people. As a result, she now makes an effort to spend time with her own grandparents.' },
-        { q:'According to the passage, what makes community service meaningful rather than obligatory?', marks:2, model:'Community service becomes meaningful when students are matched to causes they genuinely care about, creating a personal connection to the work.' },
-        { q:'In your own words, what change are schools making to community service requirements?', marks:1, model:'Schools are now allowing students more choice in selecting how they complete their community service hours.' }
-      ]
-    }
-  ];
-
   var compState = { passage: null, tfAnswers: {}, oeAnswers: {} };
 
   function loadCompPassage() {
@@ -12409,15 +12471,6 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   // ══════════════════════════════════════════════════════════════════
   //  CONTINUOUS WRITING TAB
   // ══════════════════════════════════════════════════════════════════
-  var CW_PROMPTS = [
-    { title:'A time you helped someone', tips:'Show how you felt before, during, and after. Use Show Don\'t Tell for emotions. End with what you learnt.', structure:'Opening: set the scene → Problem: someone needed help → Your action → Outcome → Reflection' },
-    { title:'An unforgettable school event', tips:'Describe sights, sounds, smells. Include dialogue. Show your feelings at the climax of the event.', structure:'Opening hook (a moment from the event) → Background → Build-up → Climax → Aftermath + feelings' },
-    { title:'A challenge you overcame', tips:'The reader should feel your struggle. Use short sentences at the most intense moment. End with growth.', structure:'Introduce the challenge → Your attempts → Lowest point → Turning point → Success + lesson learnt' },
-    { title:'Your favourite place and why', tips:'Use all five senses. Compare it to somewhere ordinary. Include a personal memory connected to the place.', structure:'Vivid description of the place → Why it matters to you → A specific memory → What it means to you' },
-    { title:'A mistake that taught you a lesson', tips:'Be honest — examiners reward authenticity. Show regret, then show growth. Avoid blaming others.', structure:'The mistake → Immediate consequences → How you felt → What you did to fix it → The lesson' },
-    { title:'A person who inspires you', tips:'Choose specific examples — not just "she is kind". Show a moment when you saw their qualities in action.', structure:'Introduce the person → One key quality with example → Another quality with example → How they changed you' }
-  ];
-
   var cwActive = null;
 
   function loadCWPrompt() {
@@ -12500,59 +12553,6 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
 
   // ==== A/AN DRILL ====
-  var _aanQ = [
-    {s:"She ate ___ apple.",a:"an",h:"apple - vowel sound"},
-    {s:"He wore ___ orange shirt.",a:"an",h:"orange - vowel sound"},
-    {s:"I need ___ umbrella.",a:"an",h:"umbrella - vowel sound"},
-    {s:"There was ___ egg in the fridge.",a:"an",h:"egg - vowel sound"},
-    {s:"She is ___ honest person.",a:"an",h:"honest - H is silent, sounds like /on/"},
-    {s:"We waited for ___ hour.",a:"an",h:"hour - H is silent, sounds like /ow/"},
-    {s:"He is ___ old man.",a:"an",h:"old - vowel sound"},
-    {s:"It was ___ interesting film.",a:"an",h:"interesting - vowel sound"},
-    {s:"She gave ___ excellent speech.",a:"an",h:"excellent - vowel sound"},
-    {s:"He found ___ unusual solution.",a:"an",h:"unusual - vowel sound"},
-    {s:"He bought ___ new bicycle.",a:"a",h:"new - consonant sound /n/"},
-    {s:"She has ___ beautiful voice.",a:"a",h:"beautiful - consonant sound /b/"},
-    {s:"He is ___ doctor.",a:"a",h:"doctor - consonant sound /d/"},
-    {s:"We saw ___ dog in the park.",a:"a",h:"dog - consonant sound /d/"},
-    {s:"She brought ___ gift.",a:"a",h:"gift - consonant sound /g/"},
-    {s:"He made ___ mistake.",a:"a",h:"mistake - consonant sound /m/"},
-    {s:"It is ___ cold day.",a:"a",h:"cold - consonant sound /k/"},
-    {s:"She is ___ wonderful friend.",a:"a",h:"wonderful - consonant sound /w/"},
-    {s:"There was ___ long queue.",a:"a",h:"long - consonant sound /l/"},
-    {s:"He wrote ___ thank-you note.",a:"a",h:"thank - consonant sound /th/"},
-    {s:"She attended ___ university.",a:"a",h:"TRICKY: university sounds like yoo-ni - starts with Y sound, so use A"},
-    {s:"It was ___ unique design.",a:"a",h:"TRICKY: unique sounds like yoo-neek - Y sound, use A"},
-    {s:"He showed ___ useful skill.",a:"a",h:"TRICKY: useful sounds like yoose-ful - Y sound, use A"},
-    {s:"She gave ___ uniform answer.",a:"a",h:"TRICKY: uniform sounds like yoo-ni-form - Y sound, use A"},
-    {s:"It was ___ unanimous decision.",a:"a",h:"TRICKY: unanimous sounds like yoo-nan - Y sound, use A"},
-    {s:"She is ___ heroic person.",a:"a",h:"heroic - H IS pronounced here, consonant sound"},
-    {s:"He gave ___ honest answer.",a:"an",h:"honest - H is SILENT, vowel sound /on/"},
-    {s:"She has ___ habit of being late.",a:"a",h:"habit - H IS pronounced, consonant sound"},
-    {s:"It was ___ honour to receive the award.",a:"an",h:"honour - H is SILENT, vowel sound /on/"},
-    {s:"He wore ___ helmet.",a:"a",h:"helmet - H IS pronounced, consonant sound"},
-    {s:"She drives ___ SUV.",a:"an",h:"SUV - say the letters: ess-you-vee - starts with vowel sound E"},
-    {s:"He is ___ NBA player.",a:"an",h:"NBA - say the letters: en-bee-ay - starts with vowel sound E"},
-    {s:"She used ___ ATM.",a:"an",h:"ATM - say the letters: ay-tee-em - starts with vowel sound A"},
-    {s:"He sent ___ SMS.",a:"an",h:"SMS - say the letters: ess-em-ess - starts with vowel sound E"},
-    {s:"She read ___ FAQ.",a:"an",h:"FAQ - say the letters: eff-ay-kyoo - starts with vowel sound E"},
-    {s:"He made ___ effort.",a:"an",h:"effort - vowel sound /e/"},
-    {s:"She carried ___ heavy bag.",a:"a",h:"heavy - consonant sound /h/"},
-    {s:"It was ___ unforgettable experience.",a:"an",h:"unforgettable - vowel sound /u/"},
-    {s:"She is studying to be ___ engineer.",a:"an",h:"engineer - vowel sound /e/"},
-    {s:"It was ___ easy question.",a:"an",h:"easy - vowel sound /ee/"},
-    {s:"She had ___ great time.",a:"a",h:"great - consonant sound /g/"},
-    {s:"Mokshith wrote ___ essay.",a:"an",h:"essay - vowel sound /e/"},
-    {s:"He is ___ active student.",a:"an",h:"active - vowel sound /a/"},
-    {s:"He scored ___ A for English!",a:"an",h:"the letter A sounds like /ay/ - vowel sound"},
-    {s:"It was ___ once-in-a-lifetime chance.",a:"a",h:"TRICKY: once sounds like wunce - starts with W sound, use A"},
-    {s:"She is ___ PE teacher.",a:"a",h:"PE - say the letters: pee-ee - starts with consonant sound P"},
-    {s:"He found ___ answer.",a:"an",h:"answer - vowel sound /an/"},
-    {s:"She bought ___ eraser.",a:"an",h:"eraser - vowel sound /e/"},
-    {s:"He is ___ fast runner.",a:"a",h:"fast - consonant sound /f/"},
-    {s:"She took ___ X-ray.",a:"an",h:"X-ray - say it: ex-ray - starts with vowel sound E"},
-    {s:"He is ___ European tourist.",a:"a",h:"TRICKY: European sounds like yoo-ro-pee-an - Y sound, use A"}
-  ];
   var _aanSt = {active:false,idx:0,score:0,streak:0,best:0,answered:false,qs:[]};
 
   function _aanShuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
