@@ -5254,6 +5254,18 @@ https://brdmochi13.github.io/sec1-english/
   </div>
 
   <script>
+
+  var EOY_SCHEDULE = {
+    0: { label:'Sunday — Rest & Review',   tasks:[ {id:'review',   label:'Review last week\'s mistakes (10 min)', tab:null}, {id:'oral', label:'Read aloud any passage (5 min)', tab:null} ] },
+    1: { label:'Monday — Situational Writing', tasks:[ {id:'email',  label:'Write 1 timed email (20 min)', tab:'emailTab'}, {id:'tense', label:'Tense drill: rewrite 3 past sentences as future', tab:'qfTab'}, {id:'oral1', label:'Read aloud (5 min)', tab:null} ] },
+    2: { label:'Tuesday — Comprehension',  tasks:[ {id:'comp',    label:'Complete 1 comprehension passage', tab:'compTab'}, {id:'tfns',  label:'Check all True/False/Not Stated with quotes', tab:'compTab'}, {id:'oral2', label:'Read aloud (5 min)', tab:null} ] },
+    3: { label:'Wednesday — Continuous Writing', tasks:[ {id:'cw',  label:'Write a story opening (10 sentences)', tab:'cwTab'}, {id:'sdt',  label:'Replace 3 "telling" sentences with "showing"', tab:'cwTab'}, {id:'oral3', label:'Read aloud (5 min)', tab:null} ] },
+    4: { label:'Thursday — Editing + Vocab', tasks:[ {id:'edit',  label:'Complete 1 editing passage (10 errors)', tab:'editTab'}, {id:'vocab', label:'Learn 5 new words and use each in a sentence', tab:null}, {id:'oral4', label:'Read aloud (5 min)', tab:null} ] },
+    5: { label:'Friday — Grammar Quick Fire', tasks:[ {id:'qf',   label:'Quick Fire — 20 questions (Personalised mode)', tab:'qfTab'}, {id:'edit2', label:'Spot errors in your own past essay', tab:'histTab'}, {id:'oral5', label:'Read aloud (5 min)', tab:null} ] },
+    6: { label:'Saturday — Full Practice', tasks:[ {id:'fullsit', label:'Full timed email (25 min, self-mark)', tab:'emailTab'}, {id:'fullcomp', label:'1 comprehension passage + all questions', tab:'compTab'}, {id:'review2', label:'Review week\'s scores on dashboard', tab:'dashTab'} ] }
+  };
+
+
     // ══════════════════════════════════════════════════════
     //  FIREBASE CONFIG & AUTH INIT
     // ══════════════════════════════════════════════════════
@@ -10560,17 +10572,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     //  Keyed by: topic_subtype (matched to question data)
     // ══════════════════════════════════════════════════════
 
-    var EOY_SCHEDULE = {
-    0: { label:'Sunday — Rest & Review',   tasks:[ {id:'review',   label:'Review last week\'s mistakes (10 min)', tab:null}, {id:'oral', label:'Read aloud any passage (5 min)', tab:null} ] },
-    1: { label:'Monday — Situational Writing', tasks:[ {id:'email',  label:'Write 1 timed email (20 min)', tab:'emailTab'}, {id:'tense', label:'Tense drill: rewrite 3 past sentences as future', tab:'qfTab'}, {id:'oral1', label:'Read aloud (5 min)', tab:null} ] },
-    2: { label:'Tuesday — Comprehension',  tasks:[ {id:'comp',    label:'Complete 1 comprehension passage', tab:'compTab'}, {id:'tfns',  label:'Check all True/False/Not Stated with quotes', tab:'compTab'}, {id:'oral2', label:'Read aloud (5 min)', tab:null} ] },
-    3: { label:'Wednesday — Continuous Writing', tasks:[ {id:'cw',  label:'Write a story opening (10 sentences)', tab:'cwTab'}, {id:'sdt',  label:'Replace 3 "telling" sentences with "showing"', tab:'cwTab'}, {id:'oral3', label:'Read aloud (5 min)', tab:null} ] },
-    4: { label:'Thursday — Editing + Vocab', tasks:[ {id:'edit',  label:'Complete 1 editing passage (10 errors)', tab:'editTab'}, {id:'vocab', label:'Learn 5 new words and use each in a sentence', tab:null}, {id:'oral4', label:'Read aloud (5 min)', tab:null} ] },
-    5: { label:'Friday — Grammar Quick Fire', tasks:[ {id:'qf',   label:'Quick Fire — 20 questions (Personalised mode)', tab:'qfTab'}, {id:'edit2', label:'Spot errors in your own past essay', tab:'histTab'}, {id:'oral5', label:'Read aloud (5 min)', tab:null} ] },
-    6: { label:'Saturday — Full Practice', tasks:[ {id:'fullsit', label:'Full timed email (25 min, self-mark)', tab:'emailTab'}, {id:'fullcomp', label:'1 comprehension passage + all questions', tab:'compTab'}, {id:'review2', label:'Review week\'s scores on dashboard', tab:'dashTab'} ] }
-  };
-
-  var EOY_COMPONENTS = [
+    var EOY_COMPONENTS = [
     { key:'email', label:'✉️ Email /30',        max:30,
       ideal:[22,23,24,24,25,25,26,26,27,28] },
     { key:'edit',  label:'✏️ Editing /10',       max:10,
@@ -12211,17 +12213,17 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   function saveEOYScores() {
     var scores = getEOYScores();
-    // Which week are we in? (week 1 = 17 Aug 2026)
-    var weekStart = new Date(2026, 7, 17); // 17 Aug
+    var weekStart = new Date(2026, 7, 17);
     var now = new Date();
     var diffDays = Math.floor((now - weekStart) / (1000*60*60*24));
     var weekNum = Math.min(10, Math.max(1, Math.floor(diffDays / 7) + 1));
 
     if (!scores[weekNum]) scores[weekNum] = {};
-    EOY_COMPONENTS.forEach(function(c) {
-      var inp = document.getElementById('eoyIn_' + c.key);
+    // Read each input directly - no dependency on EOY_COMPONENTS global
+    ['email','edit','comp','cw'].forEach(function(key) {
+      var inp = document.getElementById('eoyIn_' + key);
       if (inp && inp.value !== '') {
-        scores[weekNum][c.key] = parseFloat(inp.value);
+        scores[weekNum][key] = parseFloat(inp.value);
         inp.value = '';
       }
     });
@@ -12230,10 +12232,13 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       scores[weekNum]['days'] = parseFloat(daysInp.value);
       daysInp.value = '';
     }
-    var _esd=loadData(); _esd.eoyWeeklyScores=scores; saveData(_esd);
+    var _esd = loadData();
+    _esd.eoyWeeklyScores = scores;
+    saveData(_esd);
     var saved = document.getElementById('eoyScoreSaved');
     if (saved) { saved.style.display='block'; setTimeout(function(){ saved.style.display='none'; },2000); }
     renderEOYProgressBars();
+    renderAdaptivePanel();
   }
 
   function renderEOYProgressBars() {
@@ -12248,7 +12253,14 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var currentWeek = Math.min(10, Math.max(1, Math.floor(diffDays / 7) + 1));
 
     var html = '';
-    EOY_COMPONENTS.forEach(function(c) {
+    var _eoyComps = [
+      { key:'email', label:'✉️ Email /30',       max:30, ideal:[22,23,24,24,25,25,26,26,27,28] },
+      { key:'edit',  label:'✏️ Editing /10',      max:10, ideal:[5,6,6,7,7,8,8,8,9,10] },
+      { key:'comp',  label:'📖 Comp T/F /4',      max:4,  ideal:[2,2,3,3,3,3,4,4,4,4] },
+      { key:'cw',    label:'📝 Writing /30',       max:30, ideal:[14,15,16,17,18,20,21,22,23,25] },
+      { key:'days',  label:'📅 Days practiced /6', max:6,  ideal:[4,4,5,5,5,5,6,6,6,6] },
+    ];
+    _eoyComps.forEach(function(c) {
       // Ideal for current week
       var idealNow = c.ideal[currentWeek - 1];
       var idealPct = Math.round(idealNow / c.max * 100);
@@ -12684,7 +12696,6 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   var _DEFAULT_KEY = ('AQ.Ab8RN6Lk6MwpkL4GpK6unBa') + ('oiIGwP2H59uFAURuyGFxO_T9q3Q'); // Gemini key split to avoid scanner
   var _DEFAULT_PROVIDER = 'gemini';
-
   function _getAIConfig() {
     var d = loadData ? loadData() : {};
     // Always ensure defaults are present
