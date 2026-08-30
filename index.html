@@ -3736,7 +3736,8 @@ https://brdmochi13.github.io/sec1-english/
       <button class="tbtn tbtn-outline" onclick="openKeyModal()">🔐 Answer Key</button>
       <span id="fsSyncBadge"
         style="font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--border);color:var(--muted);cursor:pointer"
-        onclick="pullFromFirestore()" title="Click to force sync">☁ Connecting...</span>
+        onclick="pullFromFirestore()" title="Click to pull latest data from Firebase">☁ Connecting...</span>
+      <button class="tbtn tbtn-outline" onclick="forceSyncToFirebase()" title="Force upload local data to Firebase so all devices see it" style="font-size:.72rem">⬆ Upload</button>
       <button class="tbtn tbtn-outline" onclick="openSettingsModal()">⚙️ Settings</button>
       <button class="tbtn tbtn-outline" onclick="document.getElementById('pwdModal').classList.add('show')">🔑 Change
         Pwd</button>
@@ -5596,6 +5597,21 @@ https://brdmochi13.github.io/sec1-english/
       _syncTimer = setTimeout(function () { _doFirestoreWrite(d); }, 3000);
     }
 
+    // Force push local data to Firebase regardless of online state
+    function forceSyncToFirebase() {
+      if (!USE_FIREBASE || !currentUser || !db) {
+        alert('Firebase not connected. Please check your internet connection and try again.');
+        return;
+      }
+      var d = loadData();
+      _updateSyncBadge('syncing');
+      saveDataToFirebase(d);
+      setTimeout(function() {
+        _updateSyncBadge('ok');
+        alert('✅ Data uploaded to Firebase! All devices will now show your progress.');
+      }, 2500);
+    }
+
     function _doFirestoreWrite(d) {
       if (_fsSyncing) { _fsPendingSync = true; return; }
       _fsSyncing = true;
@@ -5619,7 +5635,17 @@ https://brdmochi13.github.io/sec1-english/
       badge.textContent = s.text; badge.style.background = s.bg; badge.style.color = s.color;
     }
 
-    window.addEventListener('online', function () { _fsOnline = true; if (currentUser) pullFromFirestore(); });
+    window.addEventListener('online', function () {
+      _fsOnline = true;
+      if (currentUser) {
+        // Push local data up first, then pull from Firebase
+        var localData = loadData();
+        if (localData && localData.history && localData.history.length > 0) {
+          saveDataToFirebase(localData); // push local data up
+        }
+        setTimeout(pullFromFirestore, 2000); // then pull to merge
+      }
+    });
     window.addEventListener('offline', function () { _fsOnline = false; _updateSyncBadge('error'); });
 
 
