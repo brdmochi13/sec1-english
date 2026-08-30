@@ -5704,7 +5704,9 @@ https://brdmochi13.github.io/sec1-english/
         cwHistory: [],
         eoyWeeklyScores: {},
         eoyDailyTicks: {},
-        mokshithNotes: ''
+        mokshithNotes: '',
+        aanHistory: [],
+        peelHistory: []
       };
     }
 
@@ -12416,9 +12418,47 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     scoreEl.style.color = pct>=80?'#166534':pct>=50?'#854d0e':'#991b1b';
     scoreEl.innerHTML = '✏️ Score: ' + score + '/' + total + ' (' + pct + '%)  — ' + (pct===100?'Perfect! 🎉':pct>=80?'Great work!':pct>=50?'Keep practising':'Review the explanations below');
     document.getElementById('editExplain').innerHTML = explain;
-    // Save to history
-    var _ed = loadData(); if(!_ed.editHistory)_ed.editHistory=[]; _ed.editHistory.unshift({ date: new Date().toLocaleDateString(), passage: p.title, score: score, total: total, pct: pct });
+    // Save to history with wrong error types for pattern analysis
+    var wrongErrors = [];
+    p.errors.forEach(function(e, i) {
+      if (e.correct) return;
+      var given = (editState.inputs[i] || '').toLowerCase().trim();
+      var correct = e.right.toLowerCase().trim();
+      if (given !== correct) {
+        wrongErrors.push({ type: e.type, wrong: e.wrong, right: e.right, given: given });
+      }
+    });
+    var _ed = loadData();
+    if(!_ed.editHistory) _ed.editHistory = [];
+    _ed.editHistory.unshift({
+      date: new Date().toLocaleDateString(),
+      ts: Date.now(),
+      passage: p.title,
+      score: score,
+      total: total,
+      pct: pct,
+      wrongErrors: wrongErrors,
+      errorTypes: wrongErrors.map(function(e){ return e.type; })
+    });
     if (_ed.editHistory.length > 20) _ed.editHistory = _ed.editHistory.slice(0,20);
+    // Also update skills for editing error types
+    wrongErrors.forEach(function(e) {
+      var sk = 'edit_' + (e.type||'misc').toLowerCase().replace(/[^a-z]/g,'_');
+      if (!_ed.skills) _ed.skills = {};
+      if (!_ed.skills[sk]) _ed.skills[sk] = [0,0];
+      _ed.skills[sk][0] += 1; // total
+      // correct = 0 (it was wrong)
+    });
+    // Also credit correct answers per error type
+    p.errors.forEach(function(e, i) {
+      if (e.correct) return;
+      var given = (editState.inputs[i] || '').toLowerCase().trim();
+      if (given === e.right.toLowerCase().trim()) {
+        var sk = 'edit_' + (e.type||'misc').toLowerCase().replace(/[^a-z]/g,'_');
+        if (!_ed.skills[sk]) _ed.skills[sk] = [0,0];
+        _ed.skills[sk][1] += 1; // correct
+      }
+    });
     saveData(_ed);
     renderEditHistory();
   }
@@ -12716,6 +12756,29 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       d('aan_done_wrongs').innerHTML='<div style="font-weight:700;color:#991b1b;margin-bottom:4px">Review these '+wrongs.length+':</div>'+wrongs.map(function(q){return '<div style="padding:3px 6px;background:white;border:1px solid #fca5a5;border-radius:4px;margin-bottom:3px;font-size:.75rem">'+q.s.replace('___','<strong style=color:#dc2626>'+q.a+'</strong>')+'<br><span style="color:#64748b">'+q.h+'</span></div>';}).join('');
     }
     d('aan_bar').style.width='100%';
+
+    // ── Save to Firebase via saveData ──────────────────────────────
+    try {
+      var sd = loadData();
+      if (!sd.aanHistory) sd.aanHistory = [];
+      sd.aanHistory.unshift({
+        date: new Date().toLocaleDateString(),
+        ts: Date.now(),
+        score: _aanSt.score,
+        total: total,
+        pct: pct,
+        bestStreak: _aanSt.best,
+        wrongCount: wrongs.length,
+        wrongSentences: wrongs.map(function(q){ return q.s; }).slice(0,10)
+      });
+      if (sd.aanHistory.length > 20) sd.aanHistory = sd.aanHistory.slice(0,20);
+      // Also update skills tracking for articles_a_an
+      if (!sd.skills) sd.skills = {};
+      if (!sd.skills['articles_a_an']) sd.skills['articles_a_an'] = [0,0];
+      sd.skills['articles_a_an'][0] += total;
+      sd.skills['articles_a_an'][1] += _aanSt.score;
+      saveData(sd);
+    } catch(e) { console.warn('aanDone save error:', e); }
   }
   // ==== END A/AN DRILL ====
 
@@ -12848,6 +12911,28 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var prompt = 'You are an experienced Singapore Secondary 1 English teacher marking a PEEL paragraph.\n\nQuestion: ' + question + '\nStudent stand: ' + (_peelStand || 'not stated') + '\n\nStudent PEEL:\nP (Point): ' + p + '\nE (Explanation): ' + e1 + '\nE (Example): ' + e2 + '\nL (Link): ' + l + '\n\nMark each component out of 3 and give specific, encouraging feedback. Focus on:\n1. Does the Point directly answer the question within 15 words?\n2. Does the Explanation answer WHY and CONSEQUENCE?\n3. Is the Example a real fact from a credible source?\n4. Does the Link connect back using DIFFERENT words?\n5. Are sentences short and clear (not run-on)?\n\nAlso flag: any "a lot" written as "alot", any repetition, any grammar errors.\n\nFormat:\nP: X/3 — [feedback]\nE (Explanation): X/3 — [feedback]\nE (Example): X/3 — [feedback]\nL: X/3 — [feedback]\nTotal: X/12\n\nKey improvement: [one most important thing to fix]\nStrong point: [what was done well]';
     _callAI(prompt, 1000, function(txt) {
       fb.innerHTML = '<div style="padding:.65rem .8rem;border-radius:9px;background:#f8fafc;border:1.5px solid var(--border);font-size:.82rem;white-space:pre-wrap">' + txt + '</div>';
+      // ── Save to Firebase ──────────────────────────────────────
+      try {
+        var sd = loadData();
+        if (!sd.peelHistory) sd.peelHistory = [];
+        // Extract total score from AI response
+        var scoreMatch = txt.match(/Total:\s*(\d+)\/12/);
+        var totalScore = scoreMatch ? parseInt(scoreMatch[1]) : null;
+        sd.peelHistory.unshift({
+          date: new Date().toLocaleDateString(),
+          ts: Date.now(),
+          question: question,
+          stand: _peelStand || '',
+          point: p,
+          explanation: e1,
+          example: e2,
+          link: l,
+          aiScore: totalScore,
+          aiFeedback: txt.substring(0, 500)
+        });
+        if (sd.peelHistory.length > 20) sd.peelHistory = sd.peelHistory.slice(0,20);
+        saveData(sd);
+      } catch(e) { console.warn('peelMark save error:', e); }
     }, function(err) {
       fb.innerHTML = '<div style="color:#991b1b;font-size:.8rem;padding:.5rem;background:#fee2e2;border-radius:7px">❌ ' + err + '</div>';
     });
@@ -13179,6 +13264,8 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var cwHist    = d.cwHistory    || [];
     var emailHist = d.emailHistory || [];
     var eoyScores = d.eoyWeeklyScores || {};
+    var aanHist   = d.aanHistory   || [];
+    var peelHist  = d.peelHistory  || [];
 
     // ── Build component scores ─────────────────────────────────────
     var components = [];
@@ -13202,6 +13289,21 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         components.push({ name: skillMap[sk]||sk, pct: pct, attempts: arr[0], source: 'Quick Fire' });
       }
     });
+
+    // a/an drill
+    if (aanHist.length > 0) {
+      var avgAan = Math.round(aanHist.reduce(function(s,h){ return s+h.pct; },0) / aanHist.length);
+      components.push({ name: 'a/an Articles', pct: avgAan, attempts: aanHist.length, source: 'a/an Drill' });
+    }
+
+    // PEEL writing
+    if (peelHist.length > 0) {
+      var scoredPeel = peelHist.filter(function(h){ return h.aiScore !== null && h.aiScore !== undefined; });
+      if (scoredPeel.length > 0) {
+        var avgPeel = Math.round(scoredPeel.reduce(function(s,h){ return s+h.aiScore; },0) / scoredPeel.length / 12 * 100);
+        components.push({ name: 'PEEL Writing', pct: avgPeel, attempts: peelHist.length, source: 'PEEL Builder' });
+      }
+    }
 
     // Email writing
     if (emailHist.length > 0) {
