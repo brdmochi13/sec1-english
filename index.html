@@ -5340,8 +5340,29 @@ https://brdmochi13.github.io/sec1-english/
       var demoCheck = DEMO_ACCOUNTS[email];
       if (demoCheck && demoCheck.password === pwd) {
         currentRole = demoCheck.role;
-        currentUser = { email: email, displayName: demoCheck.name, uid: 'demo_' + email };
-        onAuthSuccess();
+        // Try Firebase Anonymous Auth for demo accounts so Firestore works
+        if (USE_FIREBASE && auth) {
+          // Check if we have a persisted anon uid for this email
+          var persistedUid = localStorage.getItem('demo_uid_' + email);
+          auth.signInAnonymously()
+            .then(function(uc) {
+              currentUser = uc.user;
+              currentUser.displayName = demoCheck.name;
+              currentUser.demoEmail = email;
+              // Persist the uid so it's consistent across sessions
+              localStorage.setItem('demo_uid_' + email, uc.user.uid);
+              onAuthSuccess();
+            })
+            .catch(function(e) {
+              // Anonymous auth failed - fall back to fake uid
+              console.warn('Anon auth failed, using local mode:', e.message);
+              currentUser = { email: email, displayName: demoCheck.name, uid: 'demo_' + email };
+              onAuthSuccess();
+            });
+        } else {
+          currentUser = { email: email, displayName: demoCheck.name, uid: 'demo_' + email };
+          onAuthSuccess();
+        }
         return;
       }
 
@@ -5571,9 +5592,19 @@ https://brdmochi13.github.io/sec1-english/
           if (doc.exists) {
             var fsData = doc.data();
             var localData = loadData();
-            var merged = (fsData.history || []).length >= (localData.history || []).length ? fsData : localData;
-            merged.standaloneUploads = localData.standaloneUploads || [];
-            localStorage.setItem(STORE_KEY, JSON.stringify(merged));
+            // Smart merge: pick whichever has more data overall, never wipe local with empty Firebase
+          var fsScore = (fsData.history || []).length + Object.keys(fsData.skills || {}).length + (fsData.emailHistory || []).length;
+          var localScore = (localData.history || []).length + Object.keys(localData.skills || {}).length + (localData.emailHistory || []).length;
+          var merged = fsScore >= localScore ? fsData : localData;
+          // Always keep local standalone uploads
+          merged.standaloneUploads = localData.standaloneUploads || [];
+          // If Firebase had more data, push local-only fields to merged
+          if (fsScore >= localScore) {
+            // Keep local API keys if Firebase doesn't have them
+            if (!merged.apiKey && localData.apiKey) merged.apiKey = localData.apiKey;
+            if (!merged.apiProvider && localData.apiProvider) merged.apiProvider = localData.apiProvider;
+          }
+          localStorage.setItem(STORE_KEY, JSON.stringify(merged));
           }
           _updateSyncBadge('ok');
           renderDashboard();
