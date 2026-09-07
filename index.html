@@ -5496,29 +5496,16 @@ https://brdmochi13.github.io/sec1-english/
       var demoCheck = DEMO_ACCOUNTS[email];
       if (demoCheck && demoCheck.password === pwd) {
         currentRole = demoCheck.role;
-        // Try Firebase Anonymous Auth for demo accounts so Firestore works
-        if (USE_FIREBASE && auth) {
-          // Check if we have a persisted anon uid for this email
-          var persistedUid = localStorage.getItem('demo_uid_' + email);
-          auth.signInAnonymously()
-            .then(function(uc) {
-              currentUser = uc.user;
-              currentUser.displayName = demoCheck.name;
-              currentUser.demoEmail = email;
-              // Persist the uid so it's consistent across sessions
-              localStorage.setItem('demo_uid_' + email, uc.user.uid);
-              onAuthSuccess();
-            })
-            .catch(function(e) {
-              // Anonymous auth failed - fall back to fake uid
-              console.warn('Anon auth failed, using local mode:', e.message);
-              currentUser = { email: email, displayName: demoCheck.name, uid: 'demo_' + email };
-              onAuthSuccess();
-            });
-        } else {
-          currentUser = { email: email, displayName: demoCheck.name, uid: 'demo_' + email };
-          onAuthSuccess();
+        // Use persisted uid for consistency across sessions, no Firebase auth needed
+        var persistedUid = localStorage.getItem('demo_uid_' + email);
+        if (!persistedUid) {
+          persistedUid = 'demo_' + email.replace('@','_').replace('.','_') + '_' + Math.random().toString(36).slice(2,8);
+          localStorage.setItem('demo_uid_' + email, persistedUid);
         }
+        currentUser = { email: email, displayName: demoCheck.name, uid: persistedUid, isDemo: true };
+        document.getElementById('authSubmitBtn').disabled = false;
+        document.getElementById('authSubmitBtn').textContent = 'Sign In';
+        onAuthSuccess();
         return;
       }
 
