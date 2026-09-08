@@ -4303,7 +4303,7 @@ https://brdmochi13.github.io/sec1-english/
     </div>
 
     <!-- Progress bar -->
-    <div class="card" style="margin-bottom:.75rem;padding:.6rem .9rem">
+    <div id="storyProgressCard" class="card" style="margin-bottom:.75rem;padding:.6rem .9rem">
       <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.3rem">
         <span style="font-weight:700">📚 Reading Progress</span>
         <span id="storyProgress" style="color:var(--muted)">0 of 30 read</span>
@@ -4383,7 +4383,7 @@ https://brdmochi13.github.io/sec1-english/
     </div>
 
     <!-- AI Tutor — Add Custom Story -->
-    <div class="card" style="margin-top:.9rem;border:2px dashed #a855f7">
+    <div id="aiTutorCard" class="card" style="margin-top:.9rem;border:2px dashed #a855f7">
       <div class="card-head" style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <div class="card-title">🤖 AI Tutor — Generate a New Story</div>
@@ -13518,7 +13518,13 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     if (!s) return;
     _currentStory = s;
 
-    document.getElementById('storyGrid').parentElement.style.display = 'none';
+    // Hide list view elements individually (not parent — that hides the reader too)
+    var hideIds = ['storyLevelFilter','storyProgressCard','storyGrid','aiTutorCard'];
+    hideIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    // Also hide the header gradient div (first child of storiesTab)
+    var tab = document.getElementById('storiesTab');
+    if (tab && tab.firstElementChild) tab.firstElementChild.style.display = 'none';
+
     var reader = document.getElementById('storyReader');
     reader.style.display = 'block';
     reader.scrollIntoView({behavior:'smooth',block:'start'});
@@ -13585,8 +13591,17 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   function closeStory() {
     _currentStory = null;
     document.getElementById('storyReader').style.display = 'none';
-    var grid = document.getElementById('storyGrid');
-    if (grid && grid.parentElement) grid.parentElement.style.display = 'block';
+    // Restore list view elements
+    var showIds = ['storyGrid','aiTutorCard'];
+    showIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display=''; });
+    var showGridIds = ['storyProgressCard'];
+    showGridIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display=''; });
+    // Restore header
+    var tab = document.getElementById('storiesTab');
+    if (tab && tab.firstElementChild) tab.firstElementChild.style.display = '';
+    // Restore filter buttons
+    var filter = document.getElementById('storyLevelFilter');
+    if (filter) filter.style.display = '';
     renderStoryGrid();
     updateStoryProgress();
   }
