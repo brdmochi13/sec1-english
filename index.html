@@ -5732,8 +5732,17 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     function loadDataFromFirebase() {
-      if (!db || !currentUser) return;
+      if (!db || !currentUser) { renderDashboard(); initWA1(); setTimeout(renderAdaptivePanel,300); return; }
       _updateSyncBadge('syncing');
+      // Safety: if Firestore never responds (unauthorized domain etc), render after 4s
+      var _ldfbDone = false;
+      setTimeout(function() {
+        if (!_ldfbDone) {
+          _ldfbDone = true;
+          _updateSyncBadge('error');
+          renderDashboard(); initWA1(); setTimeout(renderAdaptivePanel,300);
+        }
+      }, 4000);
       db.collection('progress').doc(getUID()).get()
         .then(function (doc) {
           if (doc.exists) {
