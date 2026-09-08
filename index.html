@@ -9521,13 +9521,13 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
           // Inject the saved data as an inline script that runs before everything else
           // We replace the existing STORE_KEY init or inject after <head>
-          const injectScript = '<script id="injectedData">window.__INJECTED_DATA__ = ' + dataJson + ';<\/script>';
+          const injectScript = '\x3cscript id="injectedData">window.__INJECTED_DATA__ = ' + dataJson + ';<\/script>';
 
           // Find where to inject - right after <head>
           let finalHtml = htmlSource;
           if (finalHtml.indexOf('id="injectedData"') >= 0) {
             // Replace existing injection
-            finalHtml = finalHtml.replace(/<script id="injectedData">[\s\S]*?<\/script>/, injectScript);
+            finalHtml = finalHtml.replace(/\x3cscript id="injectedData">[\s\S]*?<\/script>/, injectScript);
           } else {
             finalHtml = finalHtml.replace('<head>', '<head>\n' + injectScript);
           }
