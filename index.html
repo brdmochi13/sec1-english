@@ -5587,7 +5587,7 @@ https://brdmochi13.github.io/sec1-english/
       // Timeout: if Firestore hangs for 3s (e.g. unauthorized domain), proceed anyway
       var _cbFired = false;
       var _cbOnce = function() { if (!_cbFired) { _cbFired = true; callback(); } };
-      setTimeout(_cbOnce, 3000);
+      setTimeout(_cbOnce, 500);
       db.collection('config').doc('app').get()
         .then(function(doc) {
           if (doc.exists) _APP_CONFIG = doc.data();
@@ -5753,12 +5753,14 @@ https://brdmochi13.github.io/sec1-english/
           }
           localStorage.setItem(STORE_KEY, JSON.stringify(merged));
           }
+          if (_ldfbDone) return; _ldfbDone = true;
           _updateSyncBadge('ok');
           renderDashboard();
           initWA1();
           setTimeout(renderAdaptivePanel, 300);
         })
         .catch(function (e) {
+          if (_ldfbDone) return; _ldfbDone = true;
           console.warn('Firebase load error:', e);
           _updateSyncBadge('error');
           renderDashboard();
