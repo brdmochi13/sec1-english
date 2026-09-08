@@ -5584,12 +5584,16 @@ https://brdmochi13.github.io/sec1-english/
     var _APP_CONFIG = {};
     function loadAppConfig(callback) {
       if (!db) { callback(); return; }
+      // Timeout: if Firestore hangs for 3s (e.g. unauthorized domain), proceed anyway
+      var _cbFired = false;
+      var _cbOnce = function() { if (!_cbFired) { _cbFired = true; callback(); } };
+      setTimeout(_cbOnce, 3000);
       db.collection('config').doc('app').get()
         .then(function(doc) {
           if (doc.exists) _APP_CONFIG = doc.data();
-          callback();
+          _cbOnce();
         })
-        .catch(function() { callback(); });
+        .catch(function() { _cbOnce(); });
     }
 
     function onAuthSuccess() {
