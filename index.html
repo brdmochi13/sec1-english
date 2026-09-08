@@ -5483,8 +5483,10 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     function doAuth() {
+      console.log('[LOGIN] doAuth() called');
       var email = document.getElementById('authEmail').value.trim().toLowerCase();
       var pwd = document.getElementById('authPwd').value;
+      console.log('[LOGIN] email:', email, '| pwd length:', pwd.length);
       var errEl = document.getElementById('authErr');
       errEl.textContent = '';
       if (!email || !pwd) { errEl.textContent = 'Please enter email and password.'; return; }
@@ -5494,6 +5496,7 @@ https://brdmochi13.github.io/sec1-english/
 
       // Always check demo accounts FIRST — instant, no Firebase round-trip
       var demoCheck = DEMO_ACCOUNTS[email];
+      console.log('[LOGIN] demoCheck:', !!demoCheck, '| password match:', demoCheck && demoCheck.password === pwd);
       if (demoCheck && demoCheck.password === pwd) {
         currentRole = demoCheck.role;
         // Use persisted uid for consistency across sessions, no Firebase auth needed
@@ -5503,8 +5506,10 @@ https://brdmochi13.github.io/sec1-english/
           localStorage.setItem('demo_uid_' + email, persistedUid);
         }
         currentUser = { email: email, displayName: demoCheck.name, uid: persistedUid, isDemo: true };
+        console.log('[LOGIN] currentUser set:', currentUser.uid);
         document.getElementById('authSubmitBtn').disabled = false;
         document.getElementById('authSubmitBtn').textContent = 'Sign In';
+        console.log('[LOGIN] calling onAuthSuccess()');
         onAuthSuccess();
         return;
       }
@@ -5597,7 +5602,9 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     function onAuthSuccess() {
+      console.log('[LOGIN] onAuthSuccess() called');
       loadAppConfig(function() {
+      console.log('[LOGIN] loadAppConfig callback fired');
       // Ensure default AI key is always set for new/blank profiles
       var _ad = loadData();
       if (!_ad.apiKey || _ad.apiKey.length < 8) {
@@ -5606,6 +5613,7 @@ https://brdmochi13.github.io/sec1-english/
         _ad.geminiKey = _APP_CONFIG.geminiKey || _DEFAULT_KEY;
         saveData(_ad);
       }
+      console.log('[LOGIN] hiding authOverlay');
       document.getElementById('authOverlay').style.display = 'none';
       var role = currentRole || 'student';
       var name = currentUser.displayName || currentUser.email;
@@ -5732,13 +5740,15 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     function loadDataFromFirebase() {
-      if (!db || !currentUser) { renderDashboard(); initWA1(); setTimeout(renderAdaptivePanel,300); return; }
+      console.log('[LOGIN] loadDataFromFirebase() called | db:', !!db, '| currentUser:', !!currentUser);
+      if (!db || !currentUser) { console.log('[LOGIN] no db/user — rendering from local'); renderDashboard(); initWA1(); setTimeout(renderAdaptivePanel,300); return; }
       _updateSyncBadge('syncing');
       // Safety: if Firestore never responds (unauthorized domain etc), render after 4s
       var _ldfbDone = false;
       setTimeout(function() {
         if (!_ldfbDone) {
           _ldfbDone = true;
+          console.log('[LOGIN] 4s safety timeout fired — rendering from localStorage');
           _updateSyncBadge('error');
           renderDashboard(); initWA1(); setTimeout(renderAdaptivePanel,300);
         }
@@ -6103,6 +6113,7 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     function renderDashboard() {
+      console.log('[LOGIN] renderDashboard() called');
       const d = loadData();
       const hasData = d.history.length > 0;
       const wa1History = d.history.filter(h => h.type === 'WA');
