@@ -13805,6 +13805,26 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     return d.toLocaleDateString('en-SG',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
   }
 
+  function _getTs(h) {
+    // Return timestamp from history item — use ts if present, else parse date string
+    if (h.ts && h.ts > 1000000) return h.ts;
+    if (h.date) {
+      var parsed = new Date(h.date);
+      if (!isNaN(parsed.getTime())) {
+        // Set to noon to avoid timezone edge cases
+        parsed.setHours(12, 0, 0, 0);
+        return parsed.getTime();
+      }
+    }
+    // storyHistory uses cqDate / readDate / writeDate
+    var dateStr = h.cqDate || h.readDate || h.writeDate;
+    if (dateStr) {
+      var p2 = new Date(dateStr);
+      if (!isNaN(p2.getTime())) { p2.setHours(12,0,0,0); return p2.getTime(); }
+    }
+    return 0;
+  }
+
   function renderActivityPanel() {
     var d = loadData();
     var bounds = _activityPeriodBounds();
@@ -13824,37 +13844,37 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
     // Email
     (d.emailHistory||[]).forEach(function(h) {
-      var ts = h.ts || (h.date ? new Date(h.date).getTime() : 0);
+      var ts = _getTs(h);
       if (ts >= from && ts < to) events.push({ ts:ts, type:'email', icon:'✉️', label:'Email Writing', detail: h.promptTitle||'', score: h.totalScore||null, max: 30, scoreLabel: (h.totalScore||'?')+'/30' });
     });
 
     // Editing
     (d.editHistory||[]).forEach(function(h) {
-      var ts = h.ts || 0;
+      var ts = _getTs(h);
       if (ts >= from && ts < to) events.push({ ts:ts, type:'edit', icon:'✏️', label:'Editing', detail: h.passage||'', score: h.pct, max:100, scoreLabel: h.score+'/'+h.total+' ('+h.pct+'%)', wrongs: (h.wrongErrors||[]).map(function(e){return e.type;}).filter(Boolean) });
     });
 
     // Comprehension
     (d.compHistory||[]).forEach(function(h) {
-      var ts = h.ts || 0;
+      var ts = _getTs(h);
       if (ts >= from && ts < to) events.push({ ts:ts, type:'comp', icon:'📖', label:'Comprehension', detail: h.passage||'', score: Math.round(h.tfScore/h.tfTotal*100), max:100, scoreLabel: h.tfScore+'/'+h.tfTotal+' T/F' });
     });
 
     // Continuous Writing
     (d.cwHistory||[]).forEach(function(h) {
-      var ts = h.ts || 0;
+      var ts = _getTs(h);
       if (ts >= from && ts < to) events.push({ ts:ts, type:'cw', icon:'📝', label:'Cont. Writing', detail: h.prompt||'', score: null, scoreLabel: 'AI marked' });
     });
 
     // a/an drill
     (d.aanHistory||[]).forEach(function(h) {
-      var ts = h.ts || 0;
+      var ts = _getTs(h);
       if (ts >= from && ts < to) events.push({ ts:ts, type:'aan', icon:'⚡', label:'a/an Drill', detail:'', score: h.pct, max:100, scoreLabel: h.score+'/'+h.total+' ('+h.pct+'%)' });
     });
 
     // PEEL
     (d.peelHistory||[]).forEach(function(h) {
-      var ts = h.ts || 0;
+      var ts = _getTs(h);
       if (ts >= from && ts < to) events.push({ ts:ts, type:'peel', icon:'🔗', label:'PEEL Writing', detail: (h.question||'').substring(0,40), score: h.aiScore ? Math.round(h.aiScore/12*100) : null, max:100, scoreLabel: h.aiScore ? h.aiScore+'/12' : 'AI marked' });
     });
 
@@ -13864,15 +13884,19 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       var h = sh[n];
       var story = (typeof STORIES_DATA !== 'undefined') ? STORIES_DATA.find(function(s){return s.n==n;}) : null;
       var storyTitle = story ? story.title : 'Story '+n;
-      if (h.readTs && h.readTs >= from && h.readTs < to)
-        events.push({ ts:h.readTs, type:'story', icon:'📚', label:'Story Read', detail:storyTitle, score: h.cqScore!=null ? Math.round(h.cqScore/(h.cqTotal||3)*100):null, max:100, scoreLabel: h.cqScore!=null ? h.cqScore+'/'+(h.cqTotal||3)+' CQ' : 'Read' });
-      if (h.writeTs && h.writeTs >= from && h.writeTs < to)
-        events.push({ ts:h.writeTs, type:'story_write', icon:'✍️', label:'Story Writing', detail:storyTitle, score:null, scoreLabel:'AI feedback' });
+      // Use readTs or fall back to cqDate/readDate string
+      var readTs = h.readTs || _getTs(h);
+      var writeTs = h.writeTs || (h.writeDate ? (function(){ var p=new Date(h.writeDate); if(!isNaN(p.getTime())){p.setHours(13,0,0,0);return p.getTime();} return 0; })() : 0);
+      var cqTs = h.cqTs || (h.cqDate ? (function(){ var p=new Date(h.cqDate); if(!isNaN(p.getTime())){p.setHours(11,0,0,0);return p.getTime();} return 0; })() : 0);
+      if (readTs >= from && readTs < to)
+        events.push({ ts:readTs, type:'story', icon:'📚', label:'Story Read', detail:storyTitle, score: h.cqScore!=null ? Math.round(h.cqScore/(h.cqTotal||3)*100):null, max:100, scoreLabel: h.cqScore!=null ? h.cqScore+'/'+(h.cqTotal||3)+' CQ' : 'Read' });
+      if (writeTs >= from && writeTs < to)
+        events.push({ ts:writeTs, type:'story_write', icon:'✍️', label:'Story Writing', detail:storyTitle, score:null, scoreLabel:'AI feedback' });
     });
 
     // WA Papers
     (d.history||[]).forEach(function(h) {
-      var ts = h.ts || 0;
+      var ts = _getTs(h);
       if (ts >= from && ts < to) events.push({ ts:ts, type:'wa', icon:'📋', label:'WA Paper', detail: h.paper||'', score: h.pct, max:100, scoreLabel: h.score ? h.score+'% overall' : '' });
     });
 
