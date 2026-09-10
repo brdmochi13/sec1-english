@@ -5541,11 +5541,9 @@ https://brdmochi13.github.io/sec1-english/
       if (demoCheck && demoCheck.password === pwd) {
         currentRole = demoCheck.role;
         // Use persisted uid for consistency across sessions, no Firebase auth needed
-        var persistedUid = localStorage.getItem('demo_uid_' + email);
-        if (!persistedUid) {
-          persistedUid = 'demo_' + email.replace('@','_').replace('.','_') + '_' + Math.random().toString(36).slice(2,8);
-          localStorage.setItem('demo_uid_' + email, persistedUid);
-        }
+        // Fixed deterministic uid — same on every device for the same email
+        var persistedUid = 'demo_' + email.replace(/[@.]/g,'_');
+        localStorage.setItem('demo_uid_' + email, persistedUid);
         currentUser = { email: email, displayName: demoCheck.name, uid: persistedUid, isDemo: true };
         console.log('[LOGIN] currentUser set:', currentUser.uid);
         document.getElementById('authSubmitBtn').disabled = false;
