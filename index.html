@@ -3947,6 +3947,11 @@ https://brdmochi13.github.io/sec1-english/
         <div id="adaptiveToday" style="padding:.55rem .7rem;border-radius:8px;background:#eff6ff;border:1.5px solid #93c5fd;font-size:.8rem"></div>
         <!-- Progress bars for each component -->
         <div style="margin-top:.65rem" id="adaptiveBars"></div>
+
+        <!-- Radar chart -->
+        <div style="margin-top:.75rem;position:relative;height:240px">
+          <canvas id="skillRadarChart"></canvas>
+        </div>
       </div>
     </div>
 
@@ -13774,6 +13779,177 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     });
   }
 
+  // ==== ADAPTIVE PANEL + RADAR CHART ====
+  function renderAdaptivePanel() {
+    var d = loadData();
+    var skills = d.skills || {};
+
+    // Define all scoreable components
+    var components = [
+      { key:'articles_a_an', name:'a / an Articles' },
+      { key:'tenses',        name:'Tenses' },
+      { key:'sva',           name:'SVA' },
+      { key:'passive',       name:'Passive Voice' },
+      { key:'comparatives',  name:'Comparatives' },
+      { key:'prepositions',  name:'Prepositions' },
+      { key:'conjunctions',  name:'Conjunctions' },
+      { key:'uncountable',   name:'Uncountable Nouns' },
+      { key:'edit_sva',      name:'Edit: SVA' },
+      { key:'edit_article',  name:'Edit: Article' },
+      { key:'edit_tense',    name:'Edit: Tense' },
+      { key:'edit_spelling', name:'Edit: Spelling' },
+      { key:'edit_punct',    name:'Edit: Punctuation' }
+    ];
+
+    // Score each component
+    var scored = [];
+    components.forEach(function(c) {
+      var arr = skills[c.key];
+      if (arr && arr[0] >= 2) {
+        scored.push({ name: c.name, pct: Math.round(arr[1]/arr[0]*100), attempts: arr[0] });
+      }
+    });
+
+    // Also factor in activity history averages
+    var emailAttempts = (d.emailHistory||[]).slice(0,10);
+    if (emailAttempts.length >= 2) {
+      var emailAvg = Math.round(emailAttempts.reduce(function(s,h){ return s+(h.totalScore||h.score||0); },0)/emailAttempts.length/30*100);
+      scored.push({ name:'Email Writing', pct: emailAvg, attempts: emailAttempts.length });
+    }
+    var editAttempts = (d.editHistory||[]).slice(0,10);
+    if (editAttempts.length >= 2) {
+      var editAvg = Math.round(editAttempts.reduce(function(s,h){ return s+h.pct; },0)/editAttempts.length);
+      scored.push({ name:'Editing', pct: editAvg, attempts: editAttempts.length });
+    }
+    var compAttempts = (d.compHistory||[]).slice(0,10);
+    if (compAttempts.length >= 2) {
+      var compAvg = Math.round(compAttempts.reduce(function(s,h){ return s+h.tfScore/h.tfTotal*100; },0)/compAttempts.length);
+      scored.push({ name:'Comprehension', pct: compAvg, attempts: compAttempts.length });
+    }
+    var aanAttempts = (d.aanHistory||[]).slice(0,10);
+    if (aanAttempts.length >= 2) {
+      var aanAvg = Math.round(aanAttempts.reduce(function(s,h){ return s+h.pct; },0)/aanAttempts.length);
+      scored.push({ name:'a/an Drill', pct: aanAvg, attempts: aanAttempts.length });
+    }
+
+    scored.sort(function(a,b){ return a.pct - b.pct; });
+
+    var strong = scored.filter(function(c){ return c.pct >= 75; });
+    var weak   = scored.filter(function(c){ return c.pct < 70; });
+
+    // ── Populate HTML elements ─────────────────────────────────────
+    var strongEl = document.getElementById('adaptiveStrong');
+    var weakEl   = document.getElementById('adaptiveWeak');
+    var barsEl   = document.getElementById('adaptiveBars');
+
+    if (strongEl) {
+      strongEl.innerHTML = strong.length === 0
+        ? '<span style="color:var(--muted)">Keep practising — strong areas will appear here</span>'
+        : strong.map(function(c){ return '<div style="padding:2px 0">✅ ' + c.name + ' <span style="color:#16a34a;font-weight:700">' + c.pct + '%</span></div>'; }).join('');
+    }
+    if (weakEl) {
+      weakEl.innerHTML = weak.length === 0
+        ? '<span style="color:#16a34a">Looking good — no major weak areas!</span>'
+        : weak.map(function(c){ return '<div style="padding:2px 0">⚠️ ' + c.name + ' <span style="color:#dc2626;font-weight:700">' + c.pct + '%</span></div>'; }).join('');
+    }
+    if (barsEl) {
+      barsEl.innerHTML = scored.length === 0
+        ? '<div style="color:var(--muted);font-size:.8rem">Complete some practice to see your skill breakdown</div>'
+        : scored.map(function(c) {
+          var col = c.pct >= 75 ? '#16a34a' : c.pct >= 55 ? '#d97706' : '#dc2626';
+          return '<div style="margin-bottom:.45rem">' +
+            '<div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:2px">' +
+              '<span style="color:#374151">' + c.name + '</span>' +
+              '<span style="font-weight:700;color:' + col + '">' + c.pct + '%</span>' +
+            '</div>' +
+            '<div style="background:#e5e7eb;border-radius:99px;height:7px">' +
+              '<div style="width:' + c.pct + '%;background:' + col + ';height:7px;border-radius:99px;transition:width .5s"></div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+    }
+
+    // ── Radar chart ───────────────────────────────────────────────
+    var radarCanvas = document.getElementById('skillRadarChart');
+    if (!radarCanvas) return;
+    if (window._skillRadar) { try { window._skillRadar.destroy(); } catch(e){} window._skillRadar = null; }
+
+    // Use up to 8 components for radar (avoid clutter)
+    var radarData = scored.slice(0, 8);
+    if (radarData.length < 3) {
+      var ctx2d = radarCanvas.getContext('2d');
+      radarCanvas.height = 200;
+      ctx2d.clearRect(0, 0, radarCanvas.width, radarCanvas.height);
+      ctx2d.font = '13px sans-serif'; ctx2d.fillStyle = '#9ca3af'; ctx2d.textAlign = 'center';
+      ctx2d.fillText('Complete more practice to unlock your skill radar', radarCanvas.width/2, 100);
+      return;
+    }
+
+    var labels  = radarData.map(function(c){ return c.name; });
+    var values  = radarData.map(function(c){ return c.pct; });
+    var ptColors = values.map(function(v){
+      return v >= 75 ? 'rgba(22,163,74,1)' : v >= 55 ? 'rgba(245,158,11,1)' : 'rgba(220,38,38,1)';
+    });
+
+    window._skillRadar = new Chart(radarCanvas, {
+      type: 'radar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Mokshith',
+          data: values,
+          backgroundColor: 'rgba(37,99,235,0.12)',
+          borderColor: 'rgba(37,99,235,0.85)',
+          borderWidth: 2.5,
+          pointBackgroundColor: ptColors,
+          pointBorderColor: ptColors,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }, {
+          label: 'Target 75%',
+          data: labels.map(function(){ return 75; }),
+          backgroundColor: 'rgba(134,239,172,0.07)',
+          borderColor: 'rgba(134,239,172,0.7)',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          borderDash: [5, 4]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            min: 0, max: 100,
+            ticks: { stepSize: 25, font: { size: 9 }, color: '#9ca3af', backdropColor: 'transparent' },
+            grid: { color: 'rgba(0,0,0,0.07)' },
+            angleLines: { color: 'rgba(0,0,0,0.07)' },
+            pointLabels: {
+              font: { size: 10, weight: '600' },
+              color: function(ctx) {
+                var v = values[ctx.index];
+                return v >= 75 ? '#166534' : v >= 55 ? '#92400e' : '#991b1b';
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 12, padding: 10 } },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                var item = radarData[ctx.dataIndex];
+                if (!item) return ctx.dataset.label + ': ' + ctx.parsed.r + '%';
+                return ctx.dataset.label + ': ' + ctx.parsed.r + '% (' + item.attempts + ' attempts)';
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  // ==== END ADAPTIVE PANEL + RADAR CHART ====
+
   // ==== ACTIVITY OVERVIEW PANEL ====
   var _activityPeriod = '2d';
 
@@ -14189,4 +14365,4 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   </script>
 </body>
-</html>
+<</html>
