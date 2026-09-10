@@ -3853,6 +3853,33 @@ https://brdmochi13.github.io/sec1-english/
     <!-- 1. STAT CARDS -->
     <div class="dash-grid" id="dashStats"></div>
 
+    <!-- PARENT INTELLIGENCE PANEL -->
+    <div class="card" style="margin-bottom:.9rem;border:2px solid #7c3aed">
+      <div class="card-head" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:8px 8px 0 0;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="card-title" style="color:white">🧠 Parent Intelligence — AI Analysis</div>
+          <div style="font-size:.7rem;color:rgba(255,255,255,.75)">Ask anything about Mokshith's progress</div>
+        </div>
+        <button onclick="toggleParentIntelligence()" id="piToggleBtn" style="padding:4px 12px;border-radius:7px;border:none;background:rgba(255,255,255,.2);color:white;font-size:.75rem;cursor:pointer">Show</button>
+      </div>
+      <div id="piPanel" style="display:none">
+        <!-- Quick question buttons -->
+        <div style="padding:.6rem .9rem .3rem;display:flex;gap:.4rem;flex-wrap:wrap">
+          <button onclick="askParentIntelligence('quick_improve')" class="pi-quick-btn" style="padding:5px 12px;border-radius:20px;border:1.5px solid #7c3aed;background:#f5f3ff;color:#4c1d95;font-size:.75rem;cursor:pointer;font-weight:600">📈 Where can he gain 10-15 marks?</button>
+          <button onclick="askParentIntelligence('quick_weak')"    class="pi-quick-btn" style="padding:5px 12px;border-radius:20px;border:1.5px solid #7c3aed;background:#f5f3ff;color:#4c1d95;font-size:.75rem;cursor:pointer;font-weight:600">⚠️ What are his weakest areas?</button>
+          <button onclick="askParentIntelligence('quick_thisweek')" class="pi-quick-btn" style="padding:5px 12px;border-radius:20px;border:1.5px solid #7c3aed;background:#f5f3ff;color:#4c1d95;font-size:.75rem;cursor:pointer;font-weight:600">📅 How was this week?</button>
+          <button onclick="askParentIntelligence('quick_plan')"    class="pi-quick-btn" style="padding:5px 12px;border-radius:20px;border:1.5px solid #7c3aed;background:#f5f3ff;color:#4c1d95;font-size:.75rem;cursor:pointer;font-weight:600">🎯 Give me a 2-week plan</button>
+        </div>
+        <!-- Custom question input -->
+        <div style="padding:.4rem .9rem .6rem;display:flex;gap:.5rem">
+          <input type="text" id="piCustomQ" placeholder="Ask anything... e.g. Is Mokshith ready for the EOY exam?" style="flex:1;padding:7px 12px;border-radius:8px;border:1.5px solid #d1d5db;font-size:.83rem;font-family:inherit">
+          <button onclick="askParentIntelligence('custom')" style="padding:7px 16px;border-radius:8px;border:none;background:#7c3aed;color:white;font-size:.83rem;font-weight:700;cursor:pointer">Ask</button>
+        </div>
+        <!-- AI response -->
+        <div id="piResponse" style="margin:.2rem .9rem .75rem;display:none"></div>
+      </div>
+    </div>
+
     <!-- ACTIVITY OVERVIEW PANEL -->
     <div class="card" style="margin-bottom:.9rem;border:2px solid #0ea5e9">
       <div class="card-head" style="background:linear-gradient(135deg,#0c4a6e,#0ea5e9);border-radius:8px 8px 0 0;padding:.6rem 1rem">
@@ -5751,8 +5778,12 @@ https://brdmochi13.github.io/sec1-english/
     var _fsOnline = true;
 
     function saveData(d) {
+      // 1. Write to localStorage immediately for instant UI
       localStorage.setItem(STORE_KEY, JSON.stringify(d));
-      if (USE_FIREBASE && currentUser) _syncToFirestore(d);
+      // 2. Write to Firestore immediately (no debounce) — Firestore is primary
+      if (USE_FIREBASE && currentUser && db) {
+        _doFirestoreWrite(d);
+      }
     }
 
     function loadData() {
@@ -5833,9 +5864,8 @@ https://brdmochi13.github.io/sec1-english/
     // ── Push to Firestore (debounced) ──
     var _syncTimer = null;
     function _syncToFirestore(d) {
-      if (!_fsOnline) return;
-      clearTimeout(_syncTimer);
-      _syncTimer = setTimeout(function () { _doFirestoreWrite(d); }, 3000);
+      // Kept for backward compatibility — saveData now writes directly
+      if (USE_FIREBASE && currentUser && db) _doFirestoreWrite(d);
     }
 
     // Force push local data to Firebase regardless of online state
@@ -5854,11 +5884,11 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     function _doFirestoreWrite(d) {
+      if (!db || !currentUser) return;
       if (_fsSyncing) { _fsPendingSync = true; return; }
       _fsSyncing = true;
       _updateSyncBadge('syncing');
       saveDataToFirebase(d);
-      // Mark done after a short delay (saveDataToFirebase is async)
       setTimeout(function () {
         _fsSyncing = false;
         _updateSyncBadge('ok');
@@ -5878,13 +5908,11 @@ https://brdmochi13.github.io/sec1-english/
 
     window.addEventListener('online', function () {
       _fsOnline = true;
-      if (currentUser) {
-        // Push local data up first, then pull from Firebase
+      if (currentUser && db) {
+        // On reconnect: push local first, then pull and merge
         var localData = loadData();
-        if (localData && localData.history && localData.history.length > 0) {
-          saveDataToFirebase(localData); // push local data up
-        }
-        setTimeout(pullFromFirestore, 2000); // then pull to merge
+        saveDataToFirebase(localData);
+        setTimeout(pullFromFirestore, 2000);
       }
     });
     window.addEventListener('offline', function () { _fsOnline = false; _updateSyncBadge('error'); });
@@ -13999,6 +14027,165 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     feedEl.innerHTML = html;
   }
   // ==== END ACTIVITY OVERVIEW PANEL ====
+
+  // ==== PARENT INTELLIGENCE ====
+  function toggleParentIntelligence() {
+    var panel = document.getElementById('piPanel');
+    var btn   = document.getElementById('piToggleBtn');
+    if (!panel) return;
+    var showing = panel.style.display !== 'none';
+    panel.style.display = showing ? 'none' : 'block';
+    if (btn) btn.textContent = showing ? 'Show' : 'Hide';
+  }
+
+  function _buildMokshithContext() {
+    var d = loadData();
+    var ctx = {};
+
+    // Skills accuracy
+    ctx.skills = {};
+    var skillLabels = { articles_a_an:'a/an Articles', tenses:'Tenses', sva:'Subject-Verb Agreement',
+      passive:'Passive Voice', comparatives:'Comparatives', prepositions:'Prepositions',
+      conjunctions:'Conjunctions', uncountable:'Uncountable Nouns' };
+    Object.keys(d.skills||{}).forEach(function(sk) {
+      var arr = d.skills[sk];
+      if (arr && arr[0] >= 2) {
+        ctx.skills[skillLabels[sk]||sk] = {
+          attempts: arr[0],
+          pct: Math.round(arr[1]/arr[0]*100)
+        };
+      }
+    });
+
+    // Email history summary
+    var emails = (d.emailHistory||[]).slice(0,10);
+    ctx.emailWriting = {
+      attempts: emails.length,
+      avgScore: emails.length ? Math.round(emails.reduce(function(s,h){return s+(h.totalScore||h.score||0);},0)/emails.length) : null,
+      recentScores: emails.slice(0,5).map(function(h){return h.totalScore||h.score||'?';})
+    };
+
+    // Editing history
+    var edits = (d.editHistory||[]).slice(0,10);
+    var errorTypes = {};
+    edits.forEach(function(h){ (h.errorTypes||[]).forEach(function(t){ errorTypes[t]=(errorTypes[t]||0)+1; }); });
+    ctx.editing = {
+      attempts: edits.length,
+      avgPct: edits.length ? Math.round(edits.reduce(function(s,h){return s+h.pct;},0)/edits.length) : null,
+      topErrors: Object.keys(errorTypes).sort(function(a,b){return errorTypes[b]-errorTypes[a];}).slice(0,5)
+    };
+
+    // Comprehension
+    var comps = (d.compHistory||[]).slice(0,10);
+    ctx.comprehension = {
+      attempts: comps.length,
+      avgTF: comps.length ? Math.round(comps.reduce(function(s,h){return s+h.tfScore/h.tfTotal*100;},0)/comps.length) : null
+    };
+
+    // a/an drill
+    var aans = (d.aanHistory||[]).slice(0,10);
+    ctx.aanDrill = {
+      attempts: aans.length,
+      avgPct: aans.length ? Math.round(aans.reduce(function(s,h){return s+h.pct;},0)/aans.length) : null,
+      bestStreak: aans.length ? Math.max.apply(null, aans.map(function(h){return h.bestStreak||0;})) : 0
+    };
+
+    // Stories
+    var sh = d.storyHistory||{};
+    var storiesRead = Object.keys(sh).filter(function(n){return sh[n]&&sh[n].read;}).length;
+    var storyCQScores = Object.values(sh).filter(function(h){return h.cqScore!=null;})
+      .map(function(h){return Math.round(h.cqScore/(h.cqTotal||3)*100);});
+    ctx.stories = {
+      read: storiesRead,
+      totalAvailable: 30,
+      avgCQPct: storyCQScores.length ? Math.round(storyCQScores.reduce(function(a,b){return a+b;},0)/storyCQScores.length) : null
+    };
+
+    // EOY weekly scores
+    var eoy = d.eoyWeeklyScores||{};
+    var weeks = Object.keys(eoy).sort();
+    ctx.eoyProgress = weeks.map(function(w){ return { week: w, scores: eoy[w] }; });
+
+    // WA Papers
+    var papers = (d.history||[]).slice(0,20);
+    ctx.waPapers = {
+      total: papers.length,
+      avgPct: papers.length ? Math.round(papers.reduce(function(s,h){return s+(h.pct||0);},0)/papers.length) : null,
+      trend: papers.slice(0,5).map(function(h){return h.pct||0;}).reverse()
+    };
+
+    // Daily habit compliance
+    var ticks = d.eoyDailyTicks||{};
+    var recentDays = Object.keys(ticks).filter(function(k){return k.startsWith('eoy_');}).sort().slice(-14);
+    var totalTasks = 0, doneTasks = 0;
+    recentDays.forEach(function(k){
+      var day = ticks[k];
+      if (typeof day === 'object') {
+        Object.keys(day).forEach(function(task){ totalTasks++; if(day[task]) doneTasks++; });
+      }
+    });
+    ctx.habitCompliance = totalTasks > 0 ? { pct: Math.round(doneTasks/totalTasks*100), days: recentDays.length } : null;
+
+    return ctx;
+  }
+
+  function askParentIntelligence(type) {
+    var responseEl = document.getElementById('piResponse');
+    if (!responseEl) return;
+    responseEl.style.display = 'block';
+    responseEl.innerHTML = '<div style="padding:.75rem;background:#f5f3ff;border-radius:9px;border:1.5px solid #c4b5fd;font-size:.82rem;color:#4c1d95">🧠 Analysing Mokshith\'s data...</div>';
+
+    var ctx = _buildMokshithContext();
+    var ctxStr = JSON.stringify(ctx, null, 2);
+
+    var questions = {
+      quick_improve: 'Based on the data, where can Mokshith realistically gain 10-15 marks in his EOY English exam? Be specific about which paper sections and what he needs to fix. Prioritise by mark impact.',
+      quick_weak:    'What are Mokshith\'s top 3 weakest areas based on his practice data? For each, explain exactly what he is doing wrong and give one concrete thing he should do to fix it.',
+      quick_thisweek:'Summarise how Mokshith performed this week. Was he consistent? Did his scores improve or decline? What should he focus on next week?',
+      quick_plan:    'Create a specific 2-week study plan for Mokshith to maximise his EOY exam marks. Base it on his actual weak areas from the data. Include what to practise each day and why.',
+      custom:        (document.getElementById('piCustomQ')||{}).value || 'Give me an overall assessment of Mokshith\'s English progress.'
+    };
+
+    var question = questions[type] || questions.custom;
+
+    var prompt = 'You are an experienced Singapore Secondary 1 English teacher and data analyst.' +
+      ' A parent is asking you about their son Mokshith Bharadwaj Musalaboina,' +
+      ' a Sec 1 Normal Academic student preparing for his EOY English examination.' +
+      ' You have access to all of his practice data from his learning app.\n\n' +
+      'MOKSHITH\'S PRACTICE DATA:\n' + ctxStr + '\n\n' +
+      'SINGAPORE EOY ENGLISH PAPER STRUCTURE:\n' +
+      '- Paper 1A: Editing (/10) — find grammar errors in a passage\n' +
+      '- Paper 1B: Situational Writing — informal email (/30)\n' +
+      '- Paper 1C: Continuous Writing — composition (/30)\n' +
+      '- Paper 2: Comprehension — T/F/NS + open-ended (/40)\n' +
+      '- Total: 110 marks\n\n' +
+      'PARENT\'S QUESTION: ' + question + '\n\n' +
+      'Guidelines:\n' +
+      '- Be specific and data-driven. Reference his actual scores and error patterns.\n' +
+      '- Give actionable advice, not generic tips.\n' +
+      '- Where you mention marks, be specific (e.g. "this could gain him 3-4 marks in Paper 1A").\n' +
+      '- Keep it clear and readable for a parent. Use bullet points where helpful.\n' +
+      '- Max 350 words.';
+
+    _callAI(prompt, 1200, function(res) {
+      responseEl.innerHTML =
+        '<div style="padding:.75rem .9rem;background:white;border-radius:9px;border:1.5px solid #c4b5fd">' +
+          '<div style="font-size:.7rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">🧠 AI Analysis</div>' +
+          '<div style="font-size:.83rem;line-height:1.7;color:#1e1b4b;white-space:pre-wrap">' + res + '</div>' +
+          '<div style="margin-top:.6rem;font-size:.7rem;color:var(--muted)">Based on ' +
+            Object.keys(_buildMokshithContext().skills||{}).length + ' skill categories · ' +
+            ((loadData().emailHistory||[]).length) + ' email attempts · ' +
+            ((loadData().editHistory||[]).length) + ' editing sessions' +
+          '</div>' +
+        '</div>';
+      // Clear custom input
+      var inp = document.getElementById('piCustomQ');
+      if (inp && type === 'custom') inp.value = '';
+    }, function(err) {
+      responseEl.innerHTML = '<div style="color:#991b1b;font-size:.8rem;padding:.5rem;background:#fee2e2;border-radius:7px">❌ ' + err + '</div>';
+    });
+  }
+  // ==== END PARENT INTELLIGENCE ====
 
   </script>
 </body>
