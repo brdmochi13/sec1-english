@@ -3853,6 +3853,47 @@ https://brdmochi13.github.io/sec1-english/
     <!-- 1. STAT CARDS -->
     <div class="dash-grid" id="dashStats"></div>
 
+    <!-- ACTIVITY OVERVIEW PANEL -->
+    <div class="card" style="margin-bottom:.9rem;border:2px solid #0ea5e9">
+      <div class="card-head" style="background:linear-gradient(135deg,#0c4a6e,#0ea5e9);border-radius:8px 8px 0 0;padding:.6rem 1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem">
+          <div>
+            <div class="card-title" style="color:white">📊 Activity Overview</div>
+            <div style="font-size:.7rem;color:rgba(255,255,255,.75)" id="activityPeriodLabel">Today &amp; Yesterday</div>
+          </div>
+          <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+            <button onclick="setActivityPeriod('2d')"   class="act-period-btn active" style="padding:3px 9px;border-radius:6px;border:1.5px solid rgba(255,255,255,.5);background:rgba(255,255,255,.25);color:white;font-size:.7rem;cursor:pointer;font-weight:700">Today+Yesterday</button>
+            <button onclick="setActivityPeriod('week')" class="act-period-btn" style="padding:3px 9px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:white;font-size:.7rem;cursor:pointer">This Week</button>
+            <button onclick="setActivityPeriod('month')"class="act-period-btn" style="padding:3px 9px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:white;font-size:.7rem;cursor:pointer">This Month</button>
+            <button onclick="setActivityPeriod('custom')"class="act-period-btn" style="padding:3px 9px;border-radius:6px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:white;font-size:.7rem;cursor:pointer">Custom</button>
+          </div>
+        </div>
+        <!-- Custom date range picker (hidden by default) -->
+        <div id="activityCustomRange" style="display:none;margin-top:.5rem;display:none;gap:.4rem;align-items:center;flex-wrap:wrap">
+          <input type="date" id="activityFrom" style="padding:3px 7px;border-radius:6px;border:none;font-size:.75rem">
+          <span style="color:white;font-size:.75rem">to</span>
+          <input type="date" id="activityTo" style="padding:3px 7px;border-radius:6px;border:none;font-size:.75rem">
+          <button onclick="renderActivityPanel()" style="padding:3px 10px;border-radius:6px;border:none;background:white;color:#0c4a6e;font-size:.75rem;font-weight:700;cursor:pointer">Go</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:.75rem">
+
+        <!-- Effort vs Expected summary -->
+        <div id="activitySummary" style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem"></div>
+
+        <!-- What missed vs what did well -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem">
+          <div id="activityMissed" style="padding:.5rem .7rem;border-radius:8px;background:#fef2f2;border:1px solid #fca5a5"></div>
+          <div id="activityWell"   style="padding:.5rem .7rem;border-radius:8px;background:#f0fdf4;border:1px solid #86efac"></div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Activity Feed</div>
+        <div id="activityFeed" style="max-height:380px;overflow-y:auto"></div>
+
+      </div>
+    </div>
+
     <!-- 2. ADAPTIVE LEARNING PANEL -->
     <div class="card" style="margin-bottom:.9rem;border:2px solid #2563eb">
       <div class="card-head" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:8px 8px 0 0;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center">
@@ -5777,6 +5818,7 @@ https://brdmochi13.github.io/sec1-english/
           renderDashboard();
           initWA1();
           setTimeout(renderAdaptivePanel, 300);
+          setTimeout(renderActivityPanel, 500);
         })
         .catch(function (e) {
           if (_ldfbDone) return; _ldfbDone = true;
@@ -6977,6 +7019,7 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
         var _kd = loadData(); var _kw = document.getElementById('noKeyWarning');
         if (_kw) _kw.style.display = 'none'; // Key always pre-configured
         setTimeout(renderAdaptivePanel, 200);
+        setTimeout(renderActivityPanel, 400);
       }
       if (id === 'storiesTab') { initStoriesTab(); }
       if (id === 'tipsTab' || id === 'notesTab') {
@@ -10721,6 +10764,8 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       if (!d.emailHistory) d.emailHistory = [];
       var wc = getEmailBodyWordCount();
       d.emailHistory.unshift({
+        ts: Date.now(),
+        date: new Date().toLocaleDateString(),
         promptId: currentEmailPrompt ? currentEmailPrompt.id : '',
         promptTitle: currentEmailPrompt ? currentEmailPrompt.title : '',
         difficulty: document.getElementById('emailDifficulty').value,
@@ -12790,7 +12835,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       var result = document.getElementById('compResult');
       result.innerHTML = '<div style="font-weight:700;font-size:.85rem;margin-bottom:.4rem">📊 True/False Score: '+tfScore+'/'+p.tfqs.length+'</div>' + oeHtml;
       // Save history
-      var _cp = loadData(); if(!_cp.compHistory)_cp.compHistory=[]; _cp.compHistory.unshift({date:new Date().toLocaleDateString(),passage:p.title,tfScore:tfScore,tfTotal:p.tfqs.length,aiResult:txt});
+      var _cp = loadData(); if(!_cp.compHistory)_cp.compHistory=[]; _cp.compHistory.unshift({ts:Date.now(),date:new Date().toLocaleDateString(),passage:p.title,tfScore:tfScore,tfTotal:p.tfqs.length,aiResult:txt});
       if(_cp.compHistory.length>15)_cp.compHistory=_cp.compHistory.slice(0,15);
       saveData(_cp);
       renderCompHistory();
@@ -12868,7 +12913,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('cwResult').innerHTML='<div style="padding:.6rem;border-radius:8px;background:#eff6ff;font-size:.8rem;color:var(--blue)">🤖 Marking your composition...</div>';
     _callAI(prompt, 1200, function(res) {
       document.getElementById('cwResult').innerHTML='<div style="padding:.65rem .8rem;border-radius:8px;background:#f8fafc;border:1.5px solid var(--border);font-size:.82rem;white-space:pre-wrap">'+res+'</div>';
-      var _cw=loadData(); if(!_cw.cwHistory)_cw.cwHistory=[]; _cw.cwHistory.unshift({date:new Date().toLocaleDateString(),prompt:cwActive.title,text:txt.substring(0,200),result:res});
+      var _cw=loadData(); if(!_cw.cwHistory)_cw.cwHistory=[]; _cw.cwHistory.unshift({ts:Date.now(),date:new Date().toLocaleDateString(),prompt:cwActive.title,text:txt.substring(0,200),result:res});
       if(_cw.cwHistory.length>10)_cw.cwHistory=_cw.cwHistory.slice(0,10);
       saveData(_cw);
       renderCWHistory();
@@ -13642,6 +13687,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       d.storyHistory[s.n].cqScore = correct;
       d.storyHistory[s.n].cqTotal = total;
       d.storyHistory[s.n].cqDate = new Date().toLocaleDateString();
+      d.storyHistory[s.n].cqTs = Date.now();
       saveData(d);
     } catch(e) { console.warn('story CQ save error:', e); }
   }
@@ -13654,6 +13700,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       if (!d.storyHistory[_currentStory.n]) d.storyHistory[_currentStory.n] = {};
       d.storyHistory[_currentStory.n].read = true;
       d.storyHistory[_currentStory.n].readDate = new Date().toLocaleDateString();
+      d.storyHistory[_currentStory.n].readTs = Date.now();
       saveData(d);
       // Move to next story
       var nextN = _currentStory.n + 1;
@@ -13691,12 +13738,267 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         d.storyHistory[s.n].writeResponse = text.substring(0,300);
         d.storyHistory[s.n].writeFeedback = res.substring(0,500);
         d.storyHistory[s.n].writeDate = new Date().toLocaleDateString();
+        d.storyHistory[s.n].writeTs = Date.now();
         saveData(d);
       } catch(e) {}
     }, function(err) {
       fb.innerHTML = '<div style="color:#991b1b;font-size:.8rem;padding:.4rem;background:#fee2e2;border-radius:7px">Error: ' + err + '</div>';
     });
   }
+
+  // ==== ACTIVITY OVERVIEW PANEL ====
+  var _activityPeriod = '2d';
+
+  function setActivityPeriod(period) {
+    _activityPeriod = period;
+    document.querySelectorAll('.act-period-btn').forEach(function(btn) {
+      var isActive = btn.getAttribute('onclick') === "setActivityPeriod('" + period + "')";
+      btn.style.background = isActive ? 'rgba(255,255,255,.25)' : 'transparent';
+      btn.style.borderColor = isActive ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.3)';
+      btn.style.fontWeight = isActive ? '700' : '400';
+    });
+    var customRange = document.getElementById('activityCustomRange');
+    if (customRange) customRange.style.display = period === 'custom' ? 'flex' : 'none';
+    if (period !== 'custom') renderActivityPanel();
+  }
+
+  function _activityPeriodBounds() {
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var from, to;
+    if (_activityPeriod === '2d') {
+      from = new Date(today); from.setDate(from.getDate() - 1);
+      to = new Date(today); to.setDate(to.getDate() + 1);
+    } else if (_activityPeriod === 'week') {
+      var dow = today.getDay();
+      from = new Date(today); from.setDate(from.getDate() - dow);
+      to = new Date(today); to.setDate(to.getDate() + 1);
+    } else if (_activityPeriod === 'month') {
+      from = new Date(today.getFullYear(), today.getMonth(), 1);
+      to = new Date(today); to.setDate(to.getDate() + 1);
+    } else if (_activityPeriod === 'custom') {
+      var fEl = document.getElementById('activityFrom');
+      var tEl = document.getElementById('activityTo');
+      from = fEl && fEl.value ? new Date(fEl.value) : new Date(today);
+      to = tEl && tEl.value ? new Date(tEl.value) : new Date(today);
+      to.setDate(to.getDate() + 1);
+    }
+    return { from: from.getTime(), to: to.getTime() };
+  }
+
+  function _fmtTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    var h = d.getHours().toString().padStart(2,'0');
+    var m = d.getMinutes().toString().padStart(2,'0');
+    return h + ':' + m;
+  }
+
+  function _fmtDay(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    var today = new Date(); today.setHours(0,0,0,0);
+    var yesterday = new Date(today); yesterday.setDate(yesterday.getDate()-1);
+    var day = new Date(d); day.setHours(0,0,0,0);
+    if (day.getTime() === today.getTime()) return 'Today — ' + d.toLocaleDateString('en-SG',{weekday:'long',day:'numeric',month:'short'});
+    if (day.getTime() === yesterday.getTime()) return 'Yesterday — ' + d.toLocaleDateString('en-SG',{weekday:'long',day:'numeric',month:'short'});
+    return d.toLocaleDateString('en-SG',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
+  }
+
+  function _getTs(h) {
+    // Return timestamp from history item — use ts if present, else parse date string
+    if (h.ts && h.ts > 1000000) return h.ts;
+    if (h.date) {
+      var parsed = new Date(h.date);
+      if (!isNaN(parsed.getTime())) {
+        // Set to noon to avoid timezone edge cases
+        parsed.setHours(12, 0, 0, 0);
+        return parsed.getTime();
+      }
+    }
+    // storyHistory uses cqDate / readDate / writeDate
+    var dateStr = h.cqDate || h.readDate || h.writeDate;
+    if (dateStr) {
+      var p2 = new Date(dateStr);
+      if (!isNaN(p2.getTime())) { p2.setHours(12,0,0,0); return p2.getTime(); }
+    }
+    return 0;
+  }
+
+  function renderActivityPanel() {
+    var d = loadData();
+    var bounds = _activityPeriodBounds();
+    var from = bounds.from, to = bounds.to;
+
+    // Label
+    var labelEl = document.getElementById('activityPeriodLabel');
+    if (labelEl) {
+      if (_activityPeriod === '2d') labelEl.textContent = 'Today & Yesterday';
+      else if (_activityPeriod === 'week') labelEl.textContent = 'This Week (Mon–Today)';
+      else if (_activityPeriod === 'month') labelEl.textContent = 'This Month';
+      else labelEl.textContent = 'Custom Range';
+    }
+
+    // ── Collect all events in period ───────────────────────────────────
+    var events = [];
+
+    // Email
+    (d.emailHistory||[]).forEach(function(h) {
+      var ts = _getTs(h);
+      if (ts >= from && ts < to) events.push({ ts:ts, type:'email', icon:'✉️', label:'Email Writing', detail: h.promptTitle||'', score: h.totalScore||null, max: 30, scoreLabel: (h.totalScore||'?')+'/30' });
+    });
+
+    // Editing
+    (d.editHistory||[]).forEach(function(h) {
+      var ts = _getTs(h);
+      if (ts >= from && ts < to) events.push({ ts:ts, type:'edit', icon:'✏️', label:'Editing', detail: h.passage||'', score: h.pct, max:100, scoreLabel: h.score+'/'+h.total+' ('+h.pct+'%)', wrongs: (h.wrongErrors||[]).map(function(e){return e.type;}).filter(Boolean) });
+    });
+
+    // Comprehension
+    (d.compHistory||[]).forEach(function(h) {
+      var ts = _getTs(h);
+      if (ts >= from && ts < to) events.push({ ts:ts, type:'comp', icon:'📖', label:'Comprehension', detail: h.passage||'', score: Math.round(h.tfScore/h.tfTotal*100), max:100, scoreLabel: h.tfScore+'/'+h.tfTotal+' T/F' });
+    });
+
+    // Continuous Writing
+    (d.cwHistory||[]).forEach(function(h) {
+      var ts = _getTs(h);
+      if (ts >= from && ts < to) events.push({ ts:ts, type:'cw', icon:'📝', label:'Cont. Writing', detail: h.prompt||'', score: null, scoreLabel: 'AI marked' });
+    });
+
+    // a/an drill
+    (d.aanHistory||[]).forEach(function(h) {
+      var ts = _getTs(h);
+      if (ts >= from && ts < to) events.push({ ts:ts, type:'aan', icon:'⚡', label:'a/an Drill', detail:'', score: h.pct, max:100, scoreLabel: h.score+'/'+h.total+' ('+h.pct+'%)' });
+    });
+
+    // PEEL
+    (d.peelHistory||[]).forEach(function(h) {
+      var ts = _getTs(h);
+      if (ts >= from && ts < to) events.push({ ts:ts, type:'peel', icon:'🔗', label:'PEEL Writing', detail: (h.question||'').substring(0,40), score: h.aiScore ? Math.round(h.aiScore/12*100) : null, max:100, scoreLabel: h.aiScore ? h.aiScore+'/12' : 'AI marked' });
+    });
+
+    // Stories
+    var sh = d.storyHistory || {};
+    Object.keys(sh).forEach(function(n) {
+      var h = sh[n];
+      var story = (typeof STORIES_DATA !== 'undefined') ? STORIES_DATA.find(function(s){return s.n==n;}) : null;
+      var storyTitle = story ? story.title : 'Story '+n;
+      // Use readTs or fall back to cqDate/readDate string
+      var readTs = h.readTs || _getTs(h);
+      var writeTs = h.writeTs || (h.writeDate ? (function(){ var p=new Date(h.writeDate); if(!isNaN(p.getTime())){p.setHours(13,0,0,0);return p.getTime();} return 0; })() : 0);
+      var cqTs = h.cqTs || (h.cqDate ? (function(){ var p=new Date(h.cqDate); if(!isNaN(p.getTime())){p.setHours(11,0,0,0);return p.getTime();} return 0; })() : 0);
+      if (readTs >= from && readTs < to)
+        events.push({ ts:readTs, type:'story', icon:'📚', label:'Story Read', detail:storyTitle, score: h.cqScore!=null ? Math.round(h.cqScore/(h.cqTotal||3)*100):null, max:100, scoreLabel: h.cqScore!=null ? h.cqScore+'/'+(h.cqTotal||3)+' CQ' : 'Read' });
+      if (writeTs >= from && writeTs < to)
+        events.push({ ts:writeTs, type:'story_write', icon:'✍️', label:'Story Writing', detail:storyTitle, score:null, scoreLabel:'AI feedback' });
+    });
+
+    // WA Papers
+    (d.history||[]).forEach(function(h) {
+      var ts = _getTs(h);
+      if (ts >= from && ts < to) events.push({ ts:ts, type:'wa', icon:'📋', label:'WA Paper', detail: h.paper||'', score: h.pct, max:100, scoreLabel: h.score ? h.score+'% overall' : '' });
+    });
+
+    // Sort newest first
+    events.sort(function(a,b){ return b.ts - a.ts; });
+
+    // ── SUMMARY CARD ──────────────────────────────────────────────────
+    var totalDays = Math.ceil((to - from) / 86400000);
+    var activeDaySet = {};
+    events.forEach(function(e) { if(e.ts) activeDaySet[new Date(e.ts).toDateString()] = 1; });
+    var activeDays = Object.keys(activeDaySet).length;
+
+    // Expected: 4 tasks per active day (Mon-Sat), 0 on Sunday
+    var expectedActivities = 0;
+    for (var t = from; t < to; t += 86400000) {
+      var dow = new Date(t).getDay();
+      if (dow !== 0) expectedActivities += 4; // not Sunday
+    }
+    var pct = expectedActivities > 0 ? Math.round(events.length / expectedActivities * 100) : 0;
+    var pctColor = pct >= 80 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626';
+    var avgScore = 0, scoredCount = 0;
+    events.forEach(function(e){ if(e.score!=null){ avgScore+=e.score; scoredCount++; } });
+    if (scoredCount > 0) avgScore = Math.round(avgScore/scoredCount);
+
+    var summaryEl = document.getElementById('activitySummary');
+    if (summaryEl) summaryEl.innerHTML =
+      '<div style="padding:.6rem .8rem;border-radius:9px;background:#f0f9ff;border:1px solid #bae6fd">' +
+        '<div style="font-size:.7rem;font-weight:700;color:#0369a1;text-transform:uppercase;margin-bottom:.3rem">Effort</div>' +
+        '<div style="font-size:1.3rem;font-weight:800;color:#0c4a6e">' + events.length + ' <span style="font-size:.75rem;font-weight:400">activities</span></div>' +
+        '<div style="font-size:.75rem;color:#0369a1">' + activeDays + ' of ' + (totalDays===1?'1 day':totalDays+' days') + ' practiced</div>' +
+        (scoredCount > 0 ? '<div style="font-size:.75rem;color:#0369a1">Avg score: <strong>' + avgScore + '%</strong></div>' : '') +
+      '</div>' +
+      '<div style="padding:.6rem .8rem;border-radius:9px;background:' + (pct>=80?'#f0fdf4':pct>=50?'#fefce8':'#fef2f2') + ';border:1px solid ' + (pct>=80?'#86efac':pct>=50?'#fde047':'#fca5a5') + '">' +
+        '<div style="font-size:.7rem;font-weight:700;color:' + pctColor + ';text-transform:uppercase;margin-bottom:.3rem">vs Expected</div>' +
+        '<div style="font-size:1.3rem;font-weight:800;color:' + pctColor + '">' + pct + '%</div>' +
+        '<div style="background:#e5e7eb;border-radius:99px;height:6px;margin:.3rem 0"><div style="width:' + Math.min(100,pct) + '%;background:' + pctColor + ';height:6px;border-radius:99px"></div></div>' +
+        '<div style="font-size:.72rem;color:' + pctColor + '">' + events.length + ' done · ' + expectedActivities + ' expected</div>' +
+        (events.length < expectedActivities ? '<div style="font-size:.7rem;color:#991b1b;margin-top:.2rem">Gap: ' + (expectedActivities-events.length) + ' activities</div>' : '<div style="font-size:.7rem;color:#166534;margin-top:.2rem">On track! 🎉</div>') +
+      '</div>';
+
+    // ── What missed / what did well ───────────────────────────────────
+    var typeCount = {};
+    events.forEach(function(e){ typeCount[e.type] = (typeCount[e.type]||0)+1; });
+    var allTypes = ['email','edit','comp','cw','aan','peel','story','wa'];
+    var typeLabels = {email:'✉️ Email',edit:'✏️ Editing',comp:'📖 Comprehension',cw:'📝 Writing',aan:'⚡ a/an Drill',peel:'🔗 PEEL',story:'📚 Stories',wa:'📋 WA Papers'};
+    var missed = allTypes.filter(function(t){ return !typeCount[t]; });
+    var done = allTypes.filter(function(t){ return typeCount[t]>0; });
+
+    // Best and worst scored
+    var scoreByType = {};
+    events.forEach(function(e){ if(e.score!=null){ if(!scoreByType[e.type]) scoreByType[e.type]=[]; scoreByType[e.type].push(e.score); } });
+    var bestType = null, bestAvg = 0;
+    Object.keys(scoreByType).forEach(function(t){ var avg=scoreByType[t].reduce(function(a,b){return a+b;},0)/scoreByType[t].length; if(avg>bestAvg){bestAvg=avg;bestType=t;} });
+
+    var missedEl = document.getElementById('activityMissed');
+    var wellEl = document.getElementById('activityWell');
+    if (missedEl) missedEl.innerHTML = '<div style="font-size:.72rem;font-weight:700;color:#991b1b;margin-bottom:.3rem">⚠️ Not attempted</div>' +
+      (missed.length === 0 ? '<div style="font-size:.78rem;color:#166534">Everything covered! 🎉</div>' :
+      missed.map(function(t){ return '<div style="font-size:.75rem;color:#7f1d1d;padding:1px 0">' + typeLabels[t] + '</div>'; }).join(''));
+    if (wellEl) wellEl.innerHTML = '<div style="font-size:.72rem;font-weight:700;color:#166534;margin-bottom:.3rem">💪 Strong this period</div>' +
+      (done.length === 0 ? '<div style="font-size:.78rem;color:var(--muted)">No activity yet</div>' :
+      done.slice(0,4).map(function(t){ return '<div style="font-size:.75rem;color:#14532d;padding:1px 0">' + typeLabels[t] + ' ×' + typeCount[t] + '</div>'; }).join('') +
+      (bestType ? '<div style="font-size:.72rem;color:#166534;margin-top:.3rem">Best: ' + typeLabels[bestType] + ' avg ' + Math.round(bestAvg) + '%</div>' : ''));
+
+    // ── Activity Feed ─────────────────────────────────────────────────
+    var feedEl = document.getElementById('activityFeed');
+    if (!feedEl) return;
+
+    if (events.length === 0) {
+      feedEl.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.83rem">No activity in this period.</div>';
+      return;
+    }
+
+    // Group by day
+    var byDay = {};
+    events.forEach(function(e) {
+      var dayKey = e.ts ? new Date(e.ts).toDateString() : 'Unknown';
+      if (!byDay[dayKey]) byDay[dayKey] = { ts: e.ts, items: [] };
+      byDay[dayKey].items.push(e);
+    });
+
+    var html = '';
+    Object.keys(byDay).sort(function(a,b){ return byDay[b].ts - byDay[a].ts; }).forEach(function(dayKey) {
+      var group = byDay[dayKey];
+      html += '<div style="font-size:.75rem;font-weight:700;color:#0369a1;padding:.4rem 0 .25rem;border-bottom:1px solid #e0f2fe;margin-bottom:.35rem">' + _fmtDay(group.ts) + '</div>';
+      group.items.forEach(function(e) {
+        var scoreCol = e.score != null ? (e.score >= 80 ? '#166534' : e.score >= 60 ? '#92400e' : '#991b1b') : '#64748b';
+        var scoreBg  = e.score != null ? (e.score >= 80 ? '#dcfce7' : e.score >= 60 ? '#fef3c7' : '#fee2e2') : '#f1f5f9';
+        html += '<div style="display:flex;align-items:center;gap:.5rem;padding:.35rem .4rem;border-radius:7px;margin-bottom:.2rem;background:white;border:1px solid #f1f5f9">' +
+          '<span style="font-size:.95rem;min-width:22px">' + e.icon + '</span>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + e.label + (e.detail ? ' — <span style="font-weight:400;color:var(--muted)">' + e.detail.substring(0,35) + '</span>' : '') + '</div>' +
+            (e.wrongs && e.wrongs.length ? '<div style="font-size:.68rem;color:#991b1b">Errors: ' + e.wrongs.slice(0,3).join(', ') + '</div>' : '') +
+          '</div>' +
+          '<div style="font-size:.72rem;font-weight:700;padding:2px 7px;border-radius:20px;background:' + scoreBg + ';color:' + scoreCol + ';white-space:nowrap">' + e.scoreLabel + '</div>' +
+          '<div style="font-size:.68rem;color:var(--muted);min-width:32px;text-align:right">' + _fmtTime(e.ts) + '</div>' +
+        '</div>';
+      });
+    });
+    feedEl.innerHTML = html;
+  }
+  // ==== END ACTIVITY OVERVIEW PANEL ====
 
   </script>
 </body>
