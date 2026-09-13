@@ -13541,8 +13541,36 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   var _storyFilter = 0;
 
   function initStoriesTab() {
-    renderStoryGrid();
-    updateStoryProgress();
+    // Always reset filter to All when tab opens
+    _storyFilter = 0;
+    document.querySelectorAll('.story-lvl-btn').forEach(function(btn, i) {
+      btn.style.background = i === 0 ? 'rgba(255,255,255,.3)' : 'transparent';
+      btn.classList.toggle('active', i === 0);
+    });
+    // Pull latest from Firestore first, then render
+    if (USE_FIREBASE && db && currentUser) {
+      db.collection('progress').doc(getUID()).get()
+        .then(function(doc) {
+          if (doc.exists) {
+            var fbData = doc.data();
+            var local = loadData();
+            // Merge storyHistory — Firebase wins (it's the primary store)
+            if (fbData.storyHistory) {
+              local.storyHistory = fbData.storyHistory;
+              localStorage.setItem(STORE_KEY, JSON.stringify(local));
+            }
+          }
+          renderStoryGrid();
+          updateStoryProgress();
+        })
+        .catch(function() {
+          renderStoryGrid();
+          updateStoryProgress();
+        });
+    } else {
+      renderStoryGrid();
+      updateStoryProgress();
+    }
   }
 
   function getStoryHistory() {
