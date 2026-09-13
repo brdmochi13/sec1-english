@@ -5697,6 +5697,8 @@ https://brdmochi13.github.io/sec1-english/
       console.log('[LOGIN] onAuthSuccess() called');
       loadAppConfig(function() {
       console.log('[LOGIN] loadAppConfig callback fired');
+      // One-time migration: check old fake uids for story data
+      _migrateOldStoryData();
       // Ensure default AI key is always set for new/blank profiles
       var _ad = loadData();
       if (!_ad.apiKey || _ad.apiKey.length < 8) {
@@ -14430,6 +14432,74 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     });
   }
   // ==== END PARENT INTELLIGENCE ====
+
+
+  // ==== ONE-TIME STORY MIGRATION ====
+  // Checks known old uid patterns for storyHistory and merges into current uid
+  function _migrateOldStoryData() {
+    if (!db || !currentUser) return;
+    var currentUid = currentUser.uid;
+    var email = currentUser.demoEmail || currentUser.email || '';
+    
+    // Build list of old uids to check
+    // The old uid was stored in localStorage as 'demo_uid_' + email
+    var oldUids = [];
+    
+    // Check localStorage for any saved old uid
+    var savedOld = localStorage.getItem('demo_uid_' + email);
+    if (savedOld && savedOld !== currentUid) oldUids.push(savedOld);
+    
+    // Also check common patterns
+    var base = 'demo_' + email.replace(/[@.]/g, '_');
+    if (base !== currentUid) oldUids.push(base);
+    
+    if (oldUids.length === 0) return;
+    
+    console.log('[MIGRATE] Checking old uids for story data:', oldUids);
+    
+    // Try each old uid
+    var tried = 0;
+    oldUids.forEach(function(oldUid) {
+      db.collection('progress').doc(oldUid).get()
+        .then(function(doc) {
+          tried++;
+          if (doc.exists) {
+            var oldData = doc.data();
+            var oldStories = oldData.storyHistory || {};
+            var storyCount = Object.keys(oldStories).length;
+            console.log('[MIGRATE] Found old doc ' + oldUid + ' with ' + storyCount + ' stories');
+            
+            if (storyCount > 0) {
+              // Merge into current document
+              var local = loadData();
+              var currentStories = local.storyHistory || {};
+              var merged = Object.assign({}, oldStories, currentStories);
+              local.storyHistory = merged;
+              localStorage.setItem(STORE_KEY, JSON.stringify(local));
+              
+              // Write merged data to current Firestore uid
+              db.collection('progress').doc(currentUid).update({
+                storyHistory: merged
+              }).then(function() {
+                console.log('[MIGRATE] Stories merged to current uid!');
+                _showToast('📚 Restored ' + storyCount + ' stories from previous session!', false);
+                // Clear old uid from localStorage so we don't try again
+                localStorage.removeItem('demo_uid_' + email);
+              }).catch(function(e) {
+                console.warn('[MIGRATE] Could not write merged stories:', e.message);
+              });
+            }
+          } else {
+            console.log('[MIGRATE] No doc found for old uid:', oldUid);
+          }
+        })
+        .catch(function(e) {
+          // Old uid doc may not be readable (different auth) — that's ok
+          console.log('[MIGRATE] Cannot read old uid ' + oldUid + ':', e.message);
+        });
+    });
+  }
+  // ==== END ONE-TIME STORY MIGRATION ====
 
   // ==== DIAGNOSTIC ====
   function runDiagnostic() {
