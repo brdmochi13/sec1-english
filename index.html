@@ -3738,6 +3738,7 @@ https://brdmochi13.github.io/sec1-english/
         style="font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--border);color:var(--muted);cursor:pointer"
         onclick="pullFromFirestore()" title="Click to pull latest data from Firebase">☁ Connecting...</span>
       <button class="tbtn tbtn-outline" onclick="forceSyncToFirebase()" title="Force upload local data to Firebase so all devices see it" style="font-size:.72rem">⬆ Upload</button>
+      <button class="tbtn tbtn-outline" onclick="runDiagnostic()" title="Check data status" style="font-size:.72rem">🔍 Diag</button>
       <button class="tbtn tbtn-outline" onclick="openSettingsModal()">⚙️ Settings</button>
       <button class="tbtn tbtn-outline" onclick="document.getElementById('pwdModal').classList.add('show')">🔑 Change
         Pwd</button>
@@ -14413,6 +14414,40 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     });
   }
   // ==== END PARENT INTELLIGENCE ====
+
+  // ==== DIAGNOSTIC ====
+  function runDiagnostic() {
+    var d = loadData();
+    var uid = getUID();
+    var msg = 'UID: ' + uid + '\n' +
+      'Stories in localStorage: ' + Object.keys(d.storyHistory||{}).length + '\n' +
+      'Stories read: ' + Object.keys(d.storyHistory||{}).filter(function(k){return d.storyHistory[k]&&d.storyHistory[k].read;}).length + '\n' +
+      'WA Papers: ' + (d.history||[]).length + '\n' +
+      'Email: ' + (d.emailHistory||[]).length + '\n' +
+      'Editing: ' + (d.editHistory||[]).length + '\n' +
+      'a/an: ' + (d.aanHistory||[]).length + '\n' +
+      'Firebase connected: ' + (!!db) + '\n' +
+      'User logged in: ' + (!!currentUser);
+
+    // Also try to read directly from Firestore
+    if (db && currentUser) {
+      db.collection('progress').doc(uid).get().then(function(doc) {
+        var fsMsg = doc.exists ? (
+          'FIRESTORE DOCUMENT EXISTS\n' +
+          'FS Stories: ' + Object.keys((doc.data().storyHistory)||{}).length + '\n' +
+          'FS Stories read: ' + Object.keys((doc.data().storyHistory)||{}).filter(function(k){var sh=doc.data().storyHistory; return sh[k]&&sh[k].read;}).length + '\n' +
+          'FS WA Papers: ' + ((doc.data().history)||[]).length + '\n' +
+          'FS Email: ' + ((doc.data().emailHistory)||[]).length
+        ) : 'NO FIRESTORE DOCUMENT FOUND FOR THIS UID';
+        alert('=== LOCAL DATA ===\n' + msg + '\n\n=== FIRESTORE DATA ===\n' + fsMsg);
+      }).catch(function(e) {
+        alert('=== LOCAL DATA ===\n' + msg + '\n\n=== FIRESTORE ERROR ===\n' + e.message);
+      });
+    } else {
+      alert('=== LOCAL DATA ===\n' + msg + '\n\nFirebase not connected');
+    }
+  }
+  // ==== END DIAGNOSTIC ====
 
   </script>
 </body>
