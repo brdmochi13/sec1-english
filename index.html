@@ -13923,39 +13923,32 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   // ==== ADAPTIVE PANEL + RADAR CHART ====
   function _debugAdaptive() {
-    try {
-      var d = loadData();
-      var uid = typeof getUID === 'function' ? getUID() : 'unknown';
-      var localMsg = 'UID: ' + uid + '\n' +
-        'STORE_KEY: ' + (typeof STORE_KEY !== 'undefined' ? STORE_KEY : 'undefined') + '\n' +
-        'db connected: ' + (!!db) + '\n' +
-        'currentUser: ' + (currentUser ? currentUser.uid : 'null') + '\n' +
-        'history: ' + (d.history||[]).length + '\n' +
-        'emailHistory: ' + (d.emailHistory||[]).length + '\n' +
-        'skills keys: ' + Object.keys(d.skills||{}).length + '\n' +
-        'Chart.js: ' + (typeof Chart !== 'undefined') + '\n\n';
+    // The real data is under old uid 'demo_mokshith_eng_sg'
+    // Copy it to current uid and save to localStorage
+    var newUid = typeof getUID === 'function' ? getUID() : '';
+    var oldUid = 'demo_mokshith_eng_sg';
+    if (!db || !currentUser) { alert('Not logged in yet — wait a moment and try again'); return; }
 
-      if (db && currentUser) {
-        db.collection('progress').doc(uid).get().then(function(doc) {
-          var fsMsg = doc.exists ? (
-            'FIRESTORE: EXISTS\n' +
-            'FS history: ' + ((doc.data().history)||[]).length + '\n' +
-            'FS emailHistory: ' + ((doc.data().emailHistory)||[]).length + '\n' +
-            'FS skills keys: ' + Object.keys((doc.data().skills)||{}).length
-          ) : 'FIRESTORE: NO DOCUMENT';
-          // Force save FS data to localStorage
-          if (doc.exists) {
-            localStorage.setItem(STORE_KEY, JSON.stringify(doc.data()));
-            fsMsg += '\n\n✅ FORCE SAVED to localStorage!\nNow click 🔄 to reload panel.';
-          }
-          alert(localMsg + fsMsg);
-        }).catch(function(e){ alert(localMsg + 'FIRESTORE ERROR: ' + e.message); });
-      } else {
-        alert(localMsg + 'db or currentUser not ready');
+    document.getElementById('adaptiveStrong') && (document.getElementById('adaptiveStrong').innerHTML = '<span style="color:#6b7280">⏳ Migrating data...</span>');
+
+    db.collection('progress').doc(oldUid).get().then(function(oldDoc) {
+      if (!oldDoc.exists || !(oldDoc.data().history||[]).length) {
+        alert('Old document empty or not found. Data may already be migrated.\nNew UID: ' + newUid + '\nOld UID: ' + oldUid);
+        return;
       }
-    } catch(e) {
-      alert('DEBUG ERROR: ' + e.message);
-    }
+      var oldData = oldDoc.data();
+      var hist = (oldData.history||[]).length;
+      var email = (oldData.emailHistory||[]).length;
+
+      // Write old data to new uid
+      db.collection('progress').doc(newUid).set(oldData, {merge: true}).then(function() {
+        // Save to localStorage too
+        localStorage.setItem(STORE_KEY, JSON.stringify(oldData));
+        alert('✅ DATA MIGRATED SUCCESSFULLY!\n\nCopied from: ' + oldUid + '\nCopied to: ' + newUid + '\n\nWA Papers: ' + hist + '\nEmail: ' + email + '\n\nNow click 🔄 to reload the panel!');
+        renderAdaptivePanel();
+        renderDashboard();
+      }).catch(function(e){ alert('Write failed: ' + e.message); });
+    }).catch(function(e){ alert('Read old doc failed: ' + e.message); });
   }
 
   function renderAdaptivePanel() {
