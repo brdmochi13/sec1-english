@@ -13921,10 +13921,12 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   // ==== ADAPTIVE PANEL + RADAR CHART ====
   function renderAdaptivePanel() {
+    try {
     var d = loadData();
     var skills = d.skills || {};
+    var scored = [];
 
-    // Define all scoreable components
+    // Grammar skills (Quick Fire)
     var components = [
       { key:'articles_a_an', name:'a / an Articles' },
       { key:'tenses',        name:'Tenses' },
@@ -13940,37 +13942,68 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       { key:'edit_spelling', name:'Edit: Spelling' },
       { key:'edit_punct',    name:'Edit: Punctuation' }
     ];
-
-    // Score each component
-    var scored = [];
     components.forEach(function(c) {
-      var arr = skills[c.key];
-      if (arr && arr[0] >= 2) {
-        scored.push({ name: c.name, pct: Math.round(arr[1]/arr[0]*100), attempts: arr[0] });
-      }
+      try {
+        var arr = skills[c.key];
+        if (arr && arr[0] >= 2) scored.push({ name:c.name, pct:Math.round(arr[1]/arr[0]*100), attempts:arr[0] });
+      } catch(e){}
     });
 
-    // Also factor in activity history averages
-    var emailAttempts = (d.emailHistory||[]).slice(0,10);
-    if (emailAttempts.length >= 2) {
-      var emailAvg = Math.round(emailAttempts.reduce(function(s,h){ return s+(h.totalScore||h.score||0); },0)/emailAttempts.length/30*100);
-      scored.push({ name:'Email Writing', pct: emailAvg, attempts: emailAttempts.length });
-    }
-    var editAttempts = (d.editHistory||[]).slice(0,10);
-    if (editAttempts.length >= 2) {
-      var editAvg = Math.round(editAttempts.reduce(function(s,h){ return s+h.pct; },0)/editAttempts.length);
-      scored.push({ name:'Editing', pct: editAvg, attempts: editAttempts.length });
-    }
-    var compAttempts = (d.compHistory||[]).slice(0,10);
-    if (compAttempts.length >= 2) {
-      var compAvg = Math.round(compAttempts.reduce(function(s,h){ return s+h.tfScore/h.tfTotal*100; },0)/compAttempts.length);
-      scored.push({ name:'Comprehension', pct: compAvg, attempts: compAttempts.length });
-    }
-    var aanAttempts = (d.aanHistory||[]).slice(0,10);
-    if (aanAttempts.length >= 2) {
-      var aanAvg = Math.round(aanAttempts.reduce(function(s,h){ return s+h.pct; },0)/aanAttempts.length);
-      scored.push({ name:'a/an Drill', pct: aanAvg, attempts: aanAttempts.length });
-    }
+    // WA Papers overall average
+    try {
+      var waHist = (d.history||[]).filter(function(h){ return h && (h.pct||h.score); }).slice(0,20);
+      if (waHist.length >= 1) {
+        var waAvg = Math.round(waHist.reduce(function(s,h){ return s+(h.pct||h.score||0); },0)/waHist.length);
+        scored.push({ name:'WA Papers (Overall)', pct: waAvg, attempts: waHist.length });
+      }
+    } catch(e){}
+
+    // Email Writing
+    try {
+      var emailArr = (d.emailHistory||[]).filter(function(h){ return h && (h.totalScore||h.score); }).slice(0,10);
+      if (emailArr.length >= 1) {
+        var emailAvg = Math.round(emailArr.reduce(function(s,h){ return s+(h.totalScore||h.score||0); },0)/emailArr.length/30*100);
+        scored.push({ name:'Email Writing', pct: emailAvg, attempts: emailArr.length });
+      }
+    } catch(e){}
+
+    // Editing
+    try {
+      var editArr = (d.editHistory||[]).filter(function(h){ return h && h.pct; }).slice(0,10);
+      if (editArr.length >= 1) {
+        var editAvg = Math.round(editArr.reduce(function(s,h){ return s+(h.pct||0); },0)/editArr.length);
+        scored.push({ name:'Editing (P1C)', pct: editAvg, attempts: editArr.length });
+      }
+    } catch(e){}
+
+    // Comprehension
+    try {
+      var compArr = (d.compHistory||[]).filter(function(h){ return h && h.tfTotal > 0; }).slice(0,10);
+      if (compArr.length >= 1) {
+        var compAvg = Math.round(compArr.reduce(function(s,h){ return s+Math.round((h.tfScore||0)/(h.tfTotal||1)*100); },0)/compArr.length);
+        scored.push({ name:'Comprehension (P2)', pct: compAvg, attempts: compArr.length });
+      }
+    } catch(e){}
+
+    // a/an drill
+    try {
+      var aanArr = (d.aanHistory||[]).filter(function(h){ return h && h.pct; }).slice(0,10);
+      if (aanArr.length >= 1) {
+        var aanAvg = Math.round(aanArr.reduce(function(s,h){ return s+(h.pct||0); },0)/aanArr.length);
+        scored.push({ name:'a/an Drill', pct: aanAvg, attempts: aanArr.length });
+      }
+    } catch(e){}
+
+    // Story vocabulary MCQs
+    try {
+      var stH = d.storyHistory || {};
+      var vScores = [];
+      Object.keys(stH).forEach(function(k){ try { var sh=stH[k]; if(sh&&sh.cqTotal>0) vScores.push(Math.round((sh.cqScore||0)/(sh.cqTotal||1)*100)); } catch(e){} });
+      if (vScores.length >= 1) {
+        var vocabAvg = Math.round(vScores.reduce(function(a,b){return a+b;},0)/vScores.length);
+        scored.push({ name:'Vocabulary (Stories)', pct: vocabAvg, attempts: vScores.length });
+      }
+    } catch(e){}
 
     scored.sort(function(a,b){ return a.pct - b.pct; });
 
@@ -14089,6 +14122,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         }
       }
     });
+  } catch(e) { console.error('[AdaptivePanel]', e); }
   }
   // ==== END ADAPTIVE PANEL + RADAR CHART ====
 
