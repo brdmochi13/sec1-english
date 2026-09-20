@@ -13923,34 +13923,36 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   // ==== ADAPTIVE PANEL + RADAR CHART ====
   function _debugAdaptive() {
-    // The real data is under old uid 'demo_mokshith_eng_sg'
-    // Copy it to current uid and save to localStorage
     var newUid = typeof getUID === 'function' ? getUID() : '';
-    var oldUid = 'demo_mokshith_eng_sg';
-    if (!db || !currentUser) { alert('Not logged in yet — wait a moment and try again'); return; }
-
-    document.getElementById('adaptiveStrong') && (document.getElementById('adaptiveStrong').innerHTML = '<span style="color:#6b7280">⏳ Migrating data...</span>');
-
-    db.collection('progress').doc(oldUid).get().then(function(oldDoc) {
-      if (!oldDoc.exists || !(oldDoc.data().history||[]).length) {
-        alert('Old document empty or not found. Data may already be migrated.\nNew UID: ' + newUid + '\nOld UID: ' + oldUid);
+    if (!db || !currentUser) { alert('Not logged in yet'); return; }
+    var el = document.getElementById('adaptiveStrong');
+    if (el) el.innerHTML = '<span style="color:#6b7280">⏳ Migrating...</span>';
+    var demoEmail = 'mokshith@eng.sg';
+    var savedAnon = localStorage.getItem('anon_uid_' + demoEmail);
+    var oldUids = ['0kZ5MjsYsaann1Ardb8RYi4ZsW02', 'demo_mokshith_eng_sg'];
+    if (savedAnon && savedAnon !== newUid) oldUids.unshift(savedAnon);
+    function tryUid(idx) {
+      if (idx >= oldUids.length) {
+        alert('No old data found in Firestore.\nTried: ' + oldUids.join(', ') + '\n\nData may only exist on the original device. Use that device and click Upload button.');
         return;
       }
-      var oldData = oldDoc.data();
-      var hist = (oldData.history||[]).length;
-      var email = (oldData.emailHistory||[]).length;
-
-      // Write old data to new uid
-      db.collection('progress').doc(newUid).set(oldData, {merge: true}).then(function() {
-        // Save to localStorage too
-        localStorage.setItem(STORE_KEY, JSON.stringify(oldData));
-        alert('✅ DATA MIGRATED SUCCESSFULLY!\n\nCopied from: ' + oldUid + '\nCopied to: ' + newUid + '\n\nWA Papers: ' + hist + '\nEmail: ' + email + '\n\nNow click 🔄 to reload the panel!');
-        renderAdaptivePanel();
-        renderDashboard();
-      }).catch(function(e){ alert('Write failed: ' + e.message); });
-    }).catch(function(e){ alert('Read old doc failed: ' + e.message); });
+      db.collection('progress').doc(oldUids[idx]).get()
+        .then(function(doc) {
+          var data = doc.exists ? doc.data() : {};
+          var h = (data.history||[]).length;
+          if (!doc.exists || h === 0) { tryUid(idx + 1); return; }
+          db.collection('progress').doc(newUid).set(data, {merge:true})
+            .then(function() {
+              localStorage.setItem(STORE_KEY, JSON.stringify(data));
+              alert('✅ MIGRATED from ' + oldUids[idx] + '\nWA Papers: ' + h + '\nEmail: ' + (data.emailHistory||[]).length + '\n\nClick OK then 🔄 to reload');
+              setTimeout(function(){ renderDashboard(); renderAdaptivePanel(); }, 300);
+            })
+            .catch(function(e){ alert('Write failed: ' + e.message); });
+        })
+        .catch(function(e){ tryUid(idx + 1); });
+    }
+    tryUid(0);
   }
-
   function renderAdaptivePanel() {
     // If localStorage is empty but Firestore is connected, pull from Firestore first
     var _localD = loadData();
