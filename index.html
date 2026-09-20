@@ -3930,6 +3930,7 @@ https://brdmochi13.github.io/sec1-english/
           <div style="font-size:.7rem;color:rgba(255,255,255,.75)">Based on all your practice data</div>
         </div>
         <button onclick="renderAdaptivePanel()" style="padding:3px 10px;border-radius:6px;border:none;background:rgba(255,255,255,.2);color:white;font-size:.72rem;font-weight:700;cursor:pointer">🔄</button>
+        <button onclick="_debugAdaptive()" style="padding:3px 10px;border-radius:6px;border:none;background:rgba(255,100,100,.3);color:white;font-size:.72rem;font-weight:700;cursor:pointer">🐛</button>
       </div>
       <div class="card-body" style="padding:.7rem .9rem">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.7rem">
@@ -13920,6 +13921,34 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   }
 
   // ==== ADAPTIVE PANEL + RADAR CHART ====
+  function _debugAdaptive() {
+    try {
+      var d = loadData();
+      var uid = getUID ? getUID() : 'unknown';
+      var msg = 'UID: ' + uid + '\n' +
+        'STORE_KEY: ' + (typeof STORE_KEY !== 'undefined' ? STORE_KEY : 'undefined') + '\n' +
+        'loadData type: ' + typeof d + '\n' +
+        'history: ' + (d.history||[]).length + '\n' +
+        'emailHistory: ' + (d.emailHistory||[]).length + '\n' +
+        'editHistory: ' + (d.editHistory||[]).length + '\n' +
+        'compHistory: ' + (d.compHistory||[]).length + '\n' +
+        'aanHistory: ' + (d.aanHistory||[]).length + '\n' +
+        'skills keys: ' + Object.keys(d.skills||{}).length + '\n' +
+        'storyHistory keys: ' + Object.keys(d.storyHistory||{}).length + '\n\n' +
+        'adaptiveStrong el: ' + !!document.getElementById("adaptiveStrong") + '\n' +
+        'adaptiveWeak el: ' + !!document.getElementById("adaptiveWeak") + '\n' +
+        'adaptiveBars el: ' + !!document.getElementById("adaptiveBars") + '\n' +
+        'skillRadarChart el: ' + !!document.getElementById("skillRadarChart") + '\n' +
+        'Chart.js loaded: ' + (typeof Chart !== "undefined");
+      // Try running the panel
+      renderAdaptivePanel();
+      msg += '\n\nrenderAdaptivePanel() called — no crash';
+      alert(msg);
+    } catch(e) {
+      alert('DEBUG ERROR: ' + e.message + '\n' + e.stack);
+    }
+  }
+
   function renderAdaptivePanel() {
     try {
     var d = loadData();
