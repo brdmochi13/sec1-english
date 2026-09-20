@@ -3949,9 +3949,19 @@ https://brdmochi13.github.io/sec1-english/
         <!-- Progress bars for each component -->
         <div style="margin-top:.65rem" id="adaptiveBars"></div>
 
-        <!-- Radar chart -->
+        <!-- Radar chart — Grammar Skills -->
         <div style="margin-top:.75rem;position:relative;height:240px">
           <canvas id="skillRadarChart"></canvas>
+        </div>
+
+        <!-- English Paper Radar -->
+        <div style="margin-top:1rem">
+          <div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">📊 English Paper Performance Radar</div>
+          <div style="font-size:.75rem;color:#6b7280;margin-bottom:.5rem">Based on your actual practice scores across all paper components</div>
+          <div style="position:relative;height:260px">
+            <canvas id="engRadarChart"></canvas>
+          </div>
+          <div id="engRadarLegend" style="margin-top:.5rem;font-size:.72rem;color:#6b7280;text-align:center"></div>
         </div>
       </div>
     </div>
@@ -14003,6 +14013,8 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var radarCanvas = document.getElementById('skillRadarChart');
     if (!radarCanvas) return;
     if (window._skillRadar) { try { window._skillRadar.destroy(); } catch(e){} window._skillRadar = null; }
+    // Also render English paper radar
+    setTimeout(function(){ renderEngRadar(loadData()); }, 100);
 
     // Use up to 8 components for radar (avoid clutter)
     var radarData = scored.slice(0, 8);
@@ -14079,6 +14091,117 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     });
   }
   // ==== END ADAPTIVE PANEL + RADAR CHART ====
+
+  // ==== ENGLISH PAPER RADAR ====
+  function renderEngRadar(d) {
+    var canvas = document.getElementById('engRadarChart');
+    if (!canvas) return;
+    if (window._engRadar) { try { window._engRadar.destroy(); } catch(e){} window._engRadar = null; }
+
+    var skills = d.skills || {};
+    // P1A: Grammar drill average
+    var gKeys = ['articles_a_an','tenses','sva','edit_sva','edit_article','edit_tense','edit_spelling','edit_punct'];
+    var gScores = gKeys.map(function(k){ return skills[k]&&skills[k][0]>=1?Math.round(skills[k][1]/skills[k][0]*100):null; }).filter(function(v){return v!==null;});
+    var p1aScore = gScores.length>0 ? Math.round(gScores.reduce(function(a,b){return a+b;},0)/gScores.length) : null;
+
+    // P1B: Continuous Writing or Email (whichever has more data)
+    var cw = (d.cwHistory||[]).slice(0,10);
+    var email = (d.emailHistory||[]).slice(0,10);
+    var p1bSrc = cw.length >= email.length ? cw : email;
+    var p1bScore = p1bSrc.length>=1 ? Math.round(p1bSrc.reduce(function(s,h){return s+(h.totalScore||h.score||0);},0)/p1bSrc.length/30*100) : null;
+
+    // P1C: Editing
+    var edit = (d.editHistory||[]).slice(0,10);
+    var p1cScore = edit.length>=1 ? Math.round(edit.reduce(function(s,h){return s+(h.pct||0);},0)/edit.length) : null;
+
+    // P2: Comprehension
+    var comp = (d.compHistory||[]).slice(0,10);
+    var p2Score = comp.length>=1 ? Math.round(comp.reduce(function(s,h){var t=h.tfTotal||1;return s+(h.tfScore||0)/t*100;},0)/comp.length) : null;
+
+    // Vocabulary: MCQ scores from Stories
+    var stH = d.storyHistory||{};
+    var vScores = [];
+    Object.keys(stH).forEach(function(k){
+      var sh=stH[k];
+      if(sh&&sh.cqAnswers&&sh.cqTotal>0) vScores.push(Math.round((sh.cqScore||0)/sh.cqTotal*100));
+    });
+    var vocabScore = vScores.length>=1 ? Math.round(vScores.reduce(function(a,b){return a+b;},0)/vScores.length) : null;
+
+    // a/an drill
+    var aan = (d.aanHistory||[]).slice(0,10);
+    var aanScore = aan.length>=1 ? Math.round(aan.reduce(function(s,h){return s+(h.pct||0);},0)/aan.length) : null;
+
+    // WA Papers overall avg
+    var hist = (d.history||[]).slice(0,15);
+    var waScore = hist.length>=1 ? Math.round(hist.reduce(function(s,h){return s+(h.pct||h.score||0);},0)/hist.length) : null;
+
+    var pts = [
+      { label:'Grammar (P1A)', score:p1aScore, key:'P1A' },
+      { label:'Writing (P1B)', score:p1bScore, key:'P1B' },
+      { label:'Editing (P1C)', score:p1cScore, key:'P1C' },
+      { label:'Comprehension (P2)', score:p2Score, key:'P2' },
+      { label:'Vocabulary (Stories)', score:vocabScore, key:'Vocab' },
+      { label:'a/an Drill', score:aanScore, key:'a/an' },
+      { label:'WA Papers (Overall)', score:waScore, key:'WA' },
+    ].filter(function(p){return p.score!==null;});
+
+    var legend = document.getElementById('engRadarLegend');
+    if (pts.length < 3) {
+      var ctx2=canvas.getContext('2d'); canvas.height=180;
+      ctx2.clearRect(0,0,canvas.width,canvas.height);
+      ctx2.font='13px sans-serif'; ctx2.fillStyle='#9ca3af'; ctx2.textAlign='center';
+      ctx2.fillText('Complete practice across more paper components to unlock',canvas.width/2,80);
+      ctx2.fillText('the English Skills Radar',canvas.width/2,100);
+      if(legend) legend.textContent='Need data from at least 3 paper types';
+      return;
+    }
+
+    var labels=pts.map(function(p){return p.label;});
+    var values=pts.map(function(p){return p.score;});
+    var target=pts.map(function(){return 75;});
+    var ptColors=values.map(function(v){return v>=75?'rgba(22,163,74,1)':v>=55?'rgba(245,158,11,1)':'rgba(220,38,38,1)';});
+
+    function drawEngChart() {
+      window._engRadar = new Chart(canvas, {
+        type:'radar',
+        data:{
+          labels:labels,
+          datasets:[
+            { label:'Mokshith', data:values, backgroundColor:'rgba(124,58,237,0.13)', borderColor:'rgba(124,58,237,0.9)', borderWidth:2, pointBackgroundColor:ptColors, pointRadius:5, pointHoverRadius:7 },
+            { label:'75% Target', data:target, backgroundColor:'rgba(34,197,94,0.05)', borderColor:'rgba(34,197,94,0.55)', borderWidth:1.5, borderDash:[5,4], pointRadius:0 }
+          ]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{
+            legend:{ display:true, position:'bottom', labels:{ font:{size:11}, boxWidth:12, padding:8 } },
+            tooltip:{ callbacks:{ label:function(ctx){ return ctx.datasetIndex===1?'75% Target':'Score: '+ctx.parsed.r+'%'; } } }
+          },
+          scales:{
+            r:{
+              min:0, max:100,
+              ticks:{ stepSize:25, font:{size:10}, color:'#9ca3af', backdropColor:'transparent' },
+              pointLabels:{ font:{size:10}, color:'#374151' },
+              grid:{ color:'rgba(0,0,0,0.08)' },
+              angleLines:{ color:'rgba(0,0,0,0.08)' }
+            }
+          }
+        }
+      });
+      if(legend){
+        var avg=Math.round(values.reduce(function(a,b){return a+b;},0)/values.length);
+        var col=avg>=75?'#16a34a':avg>=55?'#d97706':'#dc2626';
+        var below=pts.filter(function(p){return p.score<75;}).map(function(p){return p.key;});
+        legend.innerHTML='Overall: <strong style="color:'+col+'">'+avg+'%</strong> · Target: <strong style="color:#16a34a">75%</strong>'+(below.length?' · <span style="color:#dc2626">Below target: '+below.join(', ')+'</span>':'');
+      }
+    }
+    if(typeof Chart!=='undefined'){ drawEngChart(); }
+    else {
+      var sc=document.createElement('script'); sc.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+      sc.onload=drawEngChart; document.head.appendChild(sc);
+    }
+  }
+  // ==== END ENGLISH PAPER RADAR ====
 
   // ==== ACTIVITY OVERVIEW PANEL ====
   var _activityPeriod = '2d';
