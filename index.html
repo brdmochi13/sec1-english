@@ -13925,28 +13925,36 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   function _debugAdaptive() {
     try {
       var d = loadData();
-      var uid = getUID ? getUID() : 'unknown';
-      var msg = 'UID: ' + uid + '\n' +
+      var uid = typeof getUID === 'function' ? getUID() : 'unknown';
+      var localMsg = 'UID: ' + uid + '\n' +
         'STORE_KEY: ' + (typeof STORE_KEY !== 'undefined' ? STORE_KEY : 'undefined') + '\n' +
-        'loadData type: ' + typeof d + '\n' +
+        'db connected: ' + (!!db) + '\n' +
+        'currentUser: ' + (currentUser ? currentUser.uid : 'null') + '\n' +
         'history: ' + (d.history||[]).length + '\n' +
         'emailHistory: ' + (d.emailHistory||[]).length + '\n' +
-        'editHistory: ' + (d.editHistory||[]).length + '\n' +
-        'compHistory: ' + (d.compHistory||[]).length + '\n' +
-        'aanHistory: ' + (d.aanHistory||[]).length + '\n' +
         'skills keys: ' + Object.keys(d.skills||{}).length + '\n' +
-        'storyHistory keys: ' + Object.keys(d.storyHistory||{}).length + '\n\n' +
-        'adaptiveStrong el: ' + !!document.getElementById("adaptiveStrong") + '\n' +
-        'adaptiveWeak el: ' + !!document.getElementById("adaptiveWeak") + '\n' +
-        'adaptiveBars el: ' + !!document.getElementById("adaptiveBars") + '\n' +
-        'skillRadarChart el: ' + !!document.getElementById("skillRadarChart") + '\n' +
-        'Chart.js loaded: ' + (typeof Chart !== "undefined");
-      // Try running the panel
-      renderAdaptivePanel();
-      msg += '\n\nrenderAdaptivePanel() called — no crash';
-      alert(msg);
+        'Chart.js: ' + (typeof Chart !== 'undefined') + '\n\n';
+
+      if (db && currentUser) {
+        db.collection('progress').doc(uid).get().then(function(doc) {
+          var fsMsg = doc.exists ? (
+            'FIRESTORE: EXISTS\n' +
+            'FS history: ' + ((doc.data().history)||[]).length + '\n' +
+            'FS emailHistory: ' + ((doc.data().emailHistory)||[]).length + '\n' +
+            'FS skills keys: ' + Object.keys((doc.data().skills)||{}).length
+          ) : 'FIRESTORE: NO DOCUMENT';
+          // Force save FS data to localStorage
+          if (doc.exists) {
+            localStorage.setItem(STORE_KEY, JSON.stringify(doc.data()));
+            fsMsg += '\n\n✅ FORCE SAVED to localStorage!\nNow click 🔄 to reload panel.';
+          }
+          alert(localMsg + fsMsg);
+        }).catch(function(e){ alert(localMsg + 'FIRESTORE ERROR: ' + e.message); });
+      } else {
+        alert(localMsg + 'db or currentUser not ready');
+      }
     } catch(e) {
-      alert('DEBUG ERROR: ' + e.message + '\n' + e.stack);
+      alert('DEBUG ERROR: ' + e.message);
     }
   }
 
