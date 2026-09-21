@@ -5735,6 +5735,8 @@ https://brdmochi13.github.io/sec1-english/
       console.log('[LOGIN] loadAppConfig callback fired');
       // One-time migration: check old fake uids for story data
       _migrateOldStoryData();
+      // Always pull fresh data from Firestore on login
+      _syncFromFirestoreOnLogin();
       // Ensure default AI key is always set for new/blank profiles
       var _ad = loadData();
       if (!_ad.apiKey || _ad.apiKey.length < 8) {
@@ -13934,6 +13936,46 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   }
 
   // ==== ADAPTIVE PANEL + RADAR CHART ====
+  // Sync data from Firestore into localStorage on every login
+  // so all devices and browsers always have current data
+  function _syncFromFirestoreOnLogin() {
+    if (!db || !currentUser) return;
+    var uid = getUID();
+    db.collection('progress').doc(uid).get()
+      .then(function(doc) {
+        if (!doc.exists) { console.log('[SYNC] No Firestore doc yet for', uid); return; }
+        var fsData = doc.data();
+        var fsHistLen = (fsData.history||[]).length + (fsData.emailHistory||[]).length;
+        if (fsHistLen === 0) { console.log('[SYNC] Firestore doc empty'); return; }
+        // Merge: take whichever has more data per field
+        var local = loadData();
+        var localHistLen = (local.history||[]).length + (local.emailHistory||[]).length;
+        var merged;
+        if (fsHistLen >= localHistLen) {
+          // Firestore has more — use FS as base, overlay local storyHistory
+          merged = fsData;
+          if (local.storyHistory && Object.keys(local.storyHistory).length > Object.keys(fsData.storyHistory||{}).length) {
+            merged.storyHistory = Object.assign({}, fsData.storyHistory||{}, local.storyHistory);
+          }
+        } else {
+          // Local has more — keep local but merge in FS storyHistory
+          merged = local;
+          if (fsData.storyHistory && Object.keys(fsData.storyHistory).length > Object.keys(local.storyHistory||{}).length) {
+            merged.storyHistory = Object.assign({}, local.storyHistory||{}, fsData.storyHistory);
+          }
+        }
+        localStorage.setItem(STORE_KEY, JSON.stringify(merged));
+        console.log('[SYNC] Synced from Firestore — history:', (merged.history||[]).length, 'email:', (merged.emailHistory||[]).length);
+        // Re-render dashboard panels with fresh data
+        setTimeout(function() {
+          if (typeof renderDashboard === 'function') renderDashboard();
+          if (typeof renderAdaptivePanel === 'function') renderAdaptivePanel();
+          if (typeof renderActivityPanel === 'function') renderActivityPanel();
+        }, 300);
+      })
+      .catch(function(e) { console.warn('[SYNC] Firestore sync failed:', e.message); });
+  }
+
   function _debugAdaptive() {
     var newUid = typeof getUID === 'function' ? getUID() : '';
     if (!db || !currentUser) { alert('Not logged in yet'); return; }
