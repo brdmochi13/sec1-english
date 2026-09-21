@@ -5748,7 +5748,7 @@ https://brdmochi13.github.io/sec1-english/
       console.log('[LOGIN] hiding authOverlay');
       document.getElementById('authOverlay').style.display = 'none';
       var role = currentRole || 'student';
-      var name = currentUser.displayName || currentUser.email;
+      var name = currentUser.displayName || currentUser.demoEmail || (currentUser.email && currentUser.email.split('@')[0]) || 'Student';
       var badge = document.getElementById('roleBadge');
       if (badge) { badge.textContent = role.charAt(0).toUpperCase() + role.slice(1); badge.className = 'role-badge role-' + role; badge.style.display = 'inline-flex'; }
       var nameEl = document.getElementById('userDisplayName');
@@ -5760,8 +5760,11 @@ https://brdmochi13.github.io/sec1-english/
       if (role === 'teacher') {
         document.querySelectorAll('.teacher-only').forEach(function (el) { el.style.display = 'block'; });
       }
-      if (USE_FIREBASE) loadDataFromFirebase();
-      else { renderDashboard(); initWA1(); }
+      if (USE_FIREBASE) {
+        // Sync Firestore → localStorage → render
+        _syncFromFirestoreOnLogin();
+        loadDataFromFirebase();
+      } else { renderDashboard(); initWA1(); }
       }); // end loadAppConfig
     }
 
@@ -13966,12 +13969,16 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         }
         localStorage.setItem(STORE_KEY, JSON.stringify(merged));
         console.log('[SYNC] Synced from Firestore — history:', (merged.history||[]).length, 'email:', (merged.emailHistory||[]).length);
-        // Re-render dashboard panels with fresh data
+        // Re-render ALL dashboard panels with fresh data
         setTimeout(function() {
-          if (typeof renderDashboard === 'function') renderDashboard();
-          if (typeof renderAdaptivePanel === 'function') renderAdaptivePanel();
-          if (typeof renderActivityPanel === 'function') renderActivityPanel();
-        }, 300);
+          try { renderDashboard(); } catch(e){}
+          setTimeout(function() {
+            try { renderAdaptivePanel(); } catch(e){}
+            try { renderEngRadar(loadData()); } catch(e){}
+            try { renderSkillsMasteryRadar(loadData()); } catch(e){}
+            try { renderActivityPanel(); } catch(e){}
+          }, 500);
+        }, 600);
       })
       .catch(function(e) { console.warn('[SYNC] Firestore sync failed:', e.message); });
   }
