@@ -3951,31 +3951,15 @@ https://brdmochi13.github.io/sec1-english/
         <!-- Progress bars for each component -->
         <div style="margin-top:.65rem" id="adaptiveBars"></div>
 
-        <!-- Radar chart — Grammar Skills -->
-        <div style="margin-top:.75rem;position:relative;height:240px">
-          <canvas id="skillRadarChart"></canvas>
-        </div>
-
-        <!-- English Paper Radar -->
-        <div style="margin-top:1rem">
-          <div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">📊 English Paper Performance Radar</div>
-          <div style="font-size:.75rem;color:#6b7280;margin-bottom:.5rem">Based on your actual practice scores across all paper components</div>
-          <div style="position:relative;height:260px">
-            <canvas id="engRadarChart"></canvas>
-          </div>
-          <div id="engRadarLegend" style="margin-top:.5rem;font-size:.72rem;color:#6b7280;text-align:center"></div>
-        </div>
-
-        <!-- Skills Mastery Radar -->
-        <div style="margin-top:1.2rem">
+        <!-- Unified Mastery Radar -->
+        <div style="margin-top:.75rem">
           <div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem">🎯 Skills Mastery Radar</div>
-          <div style="font-size:.75rem;color:#6b7280;margin-bottom:.5rem">Every skill Mokshith practises — grammar, writing, vocabulary, comprehension, EOY readiness</div>
-          <div style="position:relative;height:300px">
-            <canvas id="skillsMasteryRadar"></canvas>
+          <div style="font-size:.75rem;color:#6b7280;margin-bottom:.5rem">All skills in one view — grammar, vocabulary, editing, comprehension, writing</div>
+          <div style="position:relative;height:320px">
+            <canvas id="unifiedMasteryRadar"></canvas>
           </div>
-          <div id="skillsMasteryLegend" style="margin-top:.5rem;font-size:.72rem;color:#6b7280;text-align:center"></div>
-          <!-- Mastery breakdown bars -->
-          <div id="skillsMasteryBars" style="margin-top:.75rem"></div>
+          <div id="unifiedMasteryLegend" style="margin-top:.5rem;font-size:.72rem;color:#6b7280;text-align:center"></div>
+          <div id="unifiedMasteryBars" style="margin-top:.75rem"></div>
         </div>
       </div>
     </div>
@@ -14003,8 +13987,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
           setTimeout(function() {
             var d = loadData();
             try { renderAdaptivePanel(); } catch(e){}
-            try { renderEngRadar(d); } catch(e){}
-            try { renderSkillsMasteryRadar(d); } catch(e){}
+            try { renderUnifiedMasteryRadar(d); } catch(e){}
             try { renderActivityPanel(); } catch(e){}
           }, 500);
         }, 600);
@@ -14191,8 +14174,8 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var radarCanvas = document.getElementById('skillRadarChart');
     if (!radarCanvas) return;
     if (window._skillRadar) { try { window._skillRadar.destroy(); } catch(e){} window._skillRadar = null; }
-    // Also render English paper radar and Skills Mastery radar
-    setTimeout(function(){ var d=loadData(); renderEngRadar(d); renderSkillsMasteryRadar(d); }, 100);
+    // Render unified mastery radar
+    setTimeout(function(){ renderUnifiedMasteryRadar(loadData()); }, 100);
 
     // Use up to 8 components for radar (avoid clutter)
     var radarData = scored.slice(0, 8);
@@ -14270,6 +14253,168 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   } catch(e) { console.error('[AdaptivePanel]', e); }
   }
   // ==== END ADAPTIVE PANEL + RADAR CHART ====
+
+  // ==== UNIFIED MASTERY RADAR ====
+  function renderUnifiedMasteryRadar(d) {
+    var canvas = document.getElementById('unifiedMasteryRadar');
+    if (!canvas) return;
+    if (window._unifiedRadar) { try { window._unifiedRadar.destroy(); } catch(e){} window._unifiedRadar = null; }
+
+    var skills = d.skills || {};
+
+    // Helper: read a skill trying multiple key variants
+    function skillPct(keys, minAttempts) {
+      minAttempts = minAttempts || 1;
+      for (var i=0; i<keys.length; i++) {
+        var arr = skills[keys[i]];
+        if (arr && arr[0] >= minAttempts) return Math.round(arr[1]/arr[0]*100);
+      }
+      return null;
+    }
+
+    // ── Individual grammar skills ────────────────────────────────────────────
+    var svaPct    = skillPct(['sva','SVA'], 5);
+    var tensesPct = skillPct(['tenses','Tenses'], 5);
+    var articlesPct = skillPct(['articles_a_an','Articles','a/an'], 5);
+    var conjPct   = skillPct(['conjunctions','Conjunctions'], 5);
+    var prepPct   = skillPct(['prepositions','Prepositions'], 5);
+    var editQFPct = skillPct(['Editing','editing'], 5);
+
+    // ── Paper components ─────────────────────────────────────────────────────
+    try {
+      var editArr = (d.editHistory||[]).filter(function(h){return h&&h.pct;});
+      var editPct = editArr.length>=1 ? Math.round(editArr.reduce(function(s,h){return s+(h.pct||0);},0)/editArr.length) : null;
+    } catch(e){ var editPct=null; }
+
+    try {
+      var emailArr = (d.emailHistory||[]).filter(function(h){return h&&(h.totalScore||h.score);});
+      var emailPct = emailArr.length>=1 ? Math.round(emailArr.reduce(function(s,h){return s+(h.totalScore||h.score||0);},0)/emailArr.length/30*100) : null;
+    } catch(e){ var emailPct=null; }
+
+    try {
+      var compArr = (d.compHistory||[]).filter(function(h){return h&&h.tfTotal>0;});
+      var compPct = compArr.length>=1 ? Math.round(compArr.reduce(function(s,h){return s+Math.round((h.tfScore||0)/(h.tfTotal||1)*100);},0)/compArr.length) : null;
+    } catch(e){ var compPct=null; }
+
+    try {
+      var waArr = (d.history||[]).filter(function(h){return h&&(h.pct||h.score);});
+      var waPct = waArr.length>=1 ? Math.round(waArr.reduce(function(s,h){return s+(h.pct||h.score||0);},0)/waArr.length) : null;
+    } catch(e){ var waPct=null; }
+
+    // ── Vocabulary ───────────────────────────────────────────────────────────
+    try {
+      var stH = d.storyHistory||{};
+      var vScores = Object.values(stH).filter(function(s){return s&&s.cqTotal>0;}).map(function(s){return Math.round((s.cqScore||0)/(s.cqTotal||1)*100);});
+      var vocabPct = vScores.length>0 ? Math.round(vScores.reduce(function(a,b){return a+b;},0)/vScores.length) : null;
+    } catch(e){ var vocabPct=null; }
+
+    // ── Build axes — only include ones with data ──────────────────────────────
+    var axes = [
+      { label:'SVA',           score:svaPct,     icon:'📐', desc:'Subject-Verb Agreement' },
+      { label:'Tenses',        score:tensesPct,  icon:'⏱️', desc:'Tense usage accuracy' },
+      { label:'Articles (a/an)', score:articlesPct, icon:'🔡', desc:'a/an article drill' },
+      { label:'Conjunctions',  score:conjPct,    icon:'🔗', desc:'Conjunctions drill' },
+      { label:'Prepositions',  score:prepPct,    icon:'📍', desc:'Prepositions drill' },
+      { label:'Editing (Quick Fire)', score:editQFPct, icon:'✏️', desc:'Editing in Quick Fire' },
+      { label:'Editing (P1C)', score:editPct,   icon:'✂️', desc:'P1C editing practice' },
+      { label:'Email Writing (P1B)', score:emailPct, icon:'✉️', desc:'Email writing /30' },
+      { label:'Comprehension (P2)', score:compPct,  icon:'📖', desc:'Comprehension MCQ' },
+      { label:'WA Papers',     score:waPct,      icon:'📋', desc:'Overall WA paper avg' },
+      { label:'Vocabulary (Stories)', score:vocabPct, icon:'🔤', desc:'Story MCQ avg' },
+    ].filter(function(a){ return a.score !== null; });
+
+    var legend  = document.getElementById('unifiedMasteryLegend');
+    var barsEl  = document.getElementById('unifiedMasteryBars');
+
+    if (axes.length < 3) {
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.font='13px sans-serif'; ctx.fillStyle='#9ca3af'; ctx.textAlign='center';
+      ctx.fillText('Keep practising to unlock the Skills Mastery radar',canvas.width/2,100);
+      if(legend) legend.textContent='Need data from at least 3 skill areas';
+      return;
+    }
+
+    var labels  = axes.map(function(a){ return a.label; });
+    var values  = axes.map(function(a){ return a.score; });
+    var targets = axes.map(function(){ return 75; });
+    var ptColors = values.map(function(v){
+      return v>=75 ? 'rgba(22,163,74,1)' : v>=55 ? 'rgba(245,158,11,1)' : 'rgba(220,38,38,1)';
+    });
+
+    function drawRadar() {
+      window._unifiedRadar = new Chart(canvas, {
+        type:'radar',
+        data:{
+          labels:labels,
+          datasets:[
+            { label:'Mokshith', data:values,
+              backgroundColor:'rgba(124,58,237,0.1)', borderColor:'rgba(124,58,237,0.85)',
+              borderWidth:2.5, pointBackgroundColor:ptColors,
+              pointRadius:5, pointHoverRadius:8 },
+            { label:'75% Target', data:targets,
+              backgroundColor:'rgba(34,197,94,0.05)', borderColor:'rgba(34,197,94,0.5)',
+              borderWidth:1.5, borderDash:[5,4], pointRadius:0 }
+          ]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{
+            legend:{ display:true, position:'bottom', labels:{ font:{size:11}, boxWidth:12, padding:8 }},
+            tooltip:{ callbacks:{ label:function(ctx){
+              if(ctx.datasetIndex===1) return '75% Target';
+              var ax=axes[ctx.dataIndex];
+              return (ax?ax.icon+' ':'')+ctx.parsed.r+'% — '+(ax?ax.desc:'');
+            }}}
+          },
+          scales:{r:{
+            min:0, max:100,
+            ticks:{ stepSize:25, font:{size:10}, color:'#9ca3af', backdropColor:'transparent' },
+            pointLabels:{ font:{size:10}, color:'#374151' },
+            grid:{ color:'rgba(0,0,0,0.07)' },
+            angleLines:{ color:'rgba(0,0,0,0.07)' }
+          }}
+        }
+      });
+
+      // Render breakdown bars — sorted weakest first
+      if (barsEl) {
+        var sorted = axes.slice().sort(function(a,b){ return a.score-b.score; });
+        var html = '<div style="font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">Skill Breakdown — weakest first</div>';
+        sorted.forEach(function(ax) {
+          var col = ax.score>=75?'#16a34a':ax.score>=55?'#d97706':'#dc2626';
+          html += '<div style="margin-bottom:.4rem">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.12rem">' +
+            '<span style="font-size:.78rem;color:#374151">' + ax.icon + ' ' + ax.label.replace(/\n/g,' ') + '</span>' +
+            '<span style="font-size:.78rem;font-weight:700;color:'+col+'">' + ax.score + '%</span>' +
+            '</div>' +
+            '<div style="height:7px;background:#f3f4f6;border-radius:4px;overflow:hidden">' +
+            '<div style="height:100%;width:'+ax.score+'%;background:'+col+';border-radius:4px;transition:width .6s ease"></div>' +
+            '</div></div>';
+        });
+        barsEl.innerHTML = html;
+      }
+
+      // Legend
+      if (legend) {
+        var avg = Math.round(values.reduce(function(a,b){return a+b;},0)/values.length);
+        var col = avg>=75?'#16a34a':avg>=55?'#d97706':'#dc2626';
+        var weak = axes.filter(function(a){return a.score<55;}).map(function(a){return a.icon+' '+a.label.replace(/\n/g,' ');});
+        var strong = axes.filter(function(a){return a.score>=75;}).map(function(a){return a.icon;}).join(' ');
+        legend.innerHTML = 'Overall mastery: <strong style="color:'+col+'">'+avg+'%</strong>' +
+          (strong ? ' &nbsp;·&nbsp; Strong: '+strong : '') +
+          (weak.length ? ' &nbsp;·&nbsp; <span style="color:#dc2626">Needs work: '+weak.join(', ')+'</span>' : ' &nbsp;·&nbsp; <span style="color:#16a34a">All skills at target! ✅</span>');
+      }
+    }
+
+    if (typeof Chart !== 'undefined') { drawRadar(); }
+    else {
+      var sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+      sc.onload = drawRadar; document.head.appendChild(sc);
+    }
+  }
+  // ==== END UNIFIED MASTERY RADAR ====
 
   // ==== ENGLISH PAPER RADAR ====
   function renderEngRadar(d) {
