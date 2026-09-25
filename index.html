@@ -14068,24 +14068,29 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
     // Grammar skills (Quick Fire)
     var components = [
-      { key:'articles_a_an', name:'a / an Articles' },
-      { key:'tenses',        name:'Tenses' },
-      { key:'sva',           name:'SVA' },
-      { key:'passive',       name:'Passive Voice' },
-      { key:'comparatives',  name:'Comparatives' },
-      { key:'prepositions',  name:'Prepositions' },
-      { key:'conjunctions',  name:'Conjunctions' },
-      { key:'uncountable',   name:'Uncountable Nouns' },
-      { key:'edit_sva',      name:'Edit: SVA' },
-      { key:'edit_article',  name:'Edit: Article' },
-      { key:'edit_tense',    name:'Edit: Tense' },
-      { key:'edit_spelling', name:'Edit: Spelling' },
-      { key:'edit_punct',    name:'Edit: Punctuation' }
+      { keys:['articles_a_an','a/an'], name:'a / an Articles' },
+      { keys:['tenses','Tenses'],      name:'Tenses' },
+      { keys:['sva','SVA'],            name:'SVA' },
+      { keys:['passive','Passive'],    name:'Passive Voice' },
+      { keys:['prepositions','Prepositions'], name:'Prepositions' },
+      { keys:['conjunctions','Conjunctions'], name:'Conjunctions' },
+      { keys:['articles','Articles'],  name:'Articles (general)' },
+      { keys:['edit_sva','edit_sva_neg'], name:'Edit: SVA' },
+      { keys:['edit_article'],         name:'Edit: Article' },
+      { keys:['edit_tense'],           name:'Edit: Tense' },
+      { keys:['edit_spelling'],        name:'Edit: Spelling' },
+      { keys:['edit_punct'],           name:'Edit: Punctuation' },
+      { keys:['Editing'],              name:'Editing (Quick Fire)' },
     ];
     components.forEach(function(c) {
       try {
-        var arr = skills[c.key];
-        if (arr && arr[0] >= 2) scored.push({ name:c.name, pct:Math.round(arr[1]/arr[0]*100), attempts:arr[0] });
+        var arr = null;
+        for (var ki=0; ki<c.keys.length; ki++) {
+          if (skills[c.keys[ki]] && (skills[c.keys[ki]][0]||0) >= 2) {
+            arr = skills[c.keys[ki]]; break;
+          }
+        }
+        if (arr) scored.push({ name:c.name, pct:Math.round(arr[1]/arr[0]*100), attempts:arr[0] });
       } catch(e){}
     });
 
@@ -14274,9 +14279,16 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
     var skills = d.skills || {};
     // P1A: Grammar drill average
-    var gKeys = ['articles_a_an','tenses','sva','edit_sva','edit_article','edit_tense','edit_spelling','edit_punct'];
-    var gScores = gKeys.map(function(k){ return skills[k]&&skills[k][0]>=1?Math.round(skills[k][1]/skills[k][0]*100):null; }).filter(function(v){return v!==null;});
-    var p1aScore = gScores.length>0 ? Math.round(gScores.reduce(function(a,b){return a+b;},0)/gScores.length) : null;
+    var gKeyPairsEng = [['articles_a_an','Articles'],['tenses','Tenses'],['sva','SVA'],
+      ['edit_sva','edit_sva'],['edit_article','edit_article'],['edit_tense','edit_tense'],
+      ['edit_spelling','edit_spelling'],['edit_punct','edit_punct'],
+      ['conjunctions','Conjunctions'],['prepositions','Prepositions'],['Editing','Editing']];
+    var gScoresEng = [];
+    gKeyPairsEng.forEach(function(pair){
+      var arr = skills[pair[0]] || skills[pair[1]];
+      if (arr && arr[0]>=1) gScoresEng.push(Math.round(arr[1]/arr[0]*100));
+    });
+    var p1aScore = gScoresEng.length>0 ? Math.round(gScoresEng.reduce(function(a,b){return a+b;},0)/gScoresEng.length) : null;
 
     // P1B: Continuous Writing or Email (whichever has more data)
     var cw = (d.cwHistory||[]).slice(0,10);
@@ -14386,19 +14398,16 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var skills = d.skills || {};
 
     // ── 1. GRAMMAR MASTERY (Quick Fire drills) ─────────────────────────
-    var gKeys = {
-      'tenses': 'Tenses',
-      'sva': 'SVA',
-      'articles_a_an': 'a/an',
-      'edit_punct': 'Punctuation',
-      'edit_spelling': 'Spelling',
-      'passive': 'Passive Voice',
-      'conjunctions': 'Conjunctions',
-      'prepositions': 'Prepositions'
-    };
+    // Skills may be stored under capitalised OR lowercase keys — check both
+    var gKeyPairs = [
+      ['tenses','Tenses'], ['sva','SVA'], ['articles_a_an','Articles'],
+      ['conjunctions','Conjunctions'], ['prepositions','Prepositions'],
+      ['edit_punct','Punctuation'], ['edit_spelling','Spelling'],
+      ['passive','Passive'], ['Editing','Editing']
+    ];
     var gScores = [];
-    Object.keys(gKeys).forEach(function(k) {
-      var arr = skills[k];
+    gKeyPairs.forEach(function(pair) {
+      var arr = skills[pair[0]] || skills[pair[1]];
       if (arr && arr[0] >= 1) gScores.push(Math.round(arr[1]/arr[0]*100));
     });
     var grammarScore = gScores.length > 0 ? Math.round(gScores.reduce(function(a,b){return a+b;},0)/gScores.length) : null;
