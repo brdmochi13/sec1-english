@@ -13943,44 +13943,73 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   // so all devices and browsers always have current data
   function _syncFromFirestoreOnLogin() {
     if (!db || !currentUser) return;
-    var uid = getUID();
-    db.collection('progress').doc(uid).get()
-      .then(function(doc) {
-        if (!doc.exists) { console.log('[SYNC] No Firestore doc yet for', uid); return; }
-        var fsData = doc.data();
-        var fsHistLen = (fsData.history||[]).length + (fsData.emailHistory||[]).length;
-        if (fsHistLen === 0) { console.log('[SYNC] Firestore doc empty'); return; }
-        // Merge: take whichever has more data per field
+    var currentUid = getUID();
+
+    // Scan ALL documents in progress collection and pick the most recently updated one with data
+    db.collection('progress').get()
+      .then(function(snapshot) {
+        var bestDoc = null;
+        var bestScore = -1;
+        var bestUid = null;
+
+        snapshot.forEach(function(doc) {
+          var d = doc.data();
+          var score = (d.history||[]).length + (d.emailHistory||[]).length +
+                      (d.editHistory||[]).length + (d.aanHistory||[]).length +
+                      Object.keys(d.skills||{}).length * 10;
+          // Prefer current uid if it has data; otherwise pick highest score
+          if (doc.id === currentUid && score > 0) {
+            bestDoc = d; bestScore = score * 2; bestUid = doc.id; // boost current uid
+          } else if (score > bestScore) {
+            bestDoc = d; bestScore = score; bestUid = doc.id;
+          }
+        });
+
+        if (!bestDoc || bestScore <= 0) {
+          console.log('[SYNC] No data found in any Firestore document');
+          return;
+        }
+
+        console.log('[SYNC] Best document:', bestUid, 'score:', bestScore);
+
+        // Merge with localStorage — take whichever has more per field
         var local = loadData();
-        var localHistLen = (local.history||[]).length + (local.emailHistory||[]).length;
+        var localScore = (local.history||[]).length + (local.emailHistory||[]).length +
+                         Object.keys(local.skills||{}).length * 10;
+
         var merged;
-        if (fsHistLen >= localHistLen) {
-          // Firestore has more — use FS as base, overlay local storyHistory
-          merged = fsData;
-          if (local.storyHistory && Object.keys(local.storyHistory).length > Object.keys(fsData.storyHistory||{}).length) {
-            merged.storyHistory = Object.assign({}, fsData.storyHistory||{}, local.storyHistory);
+        if (bestScore >= localScore) {
+          merged = bestDoc;
+          // Overlay local storyHistory if it has more
+          if (Object.keys(local.storyHistory||{}).length > Object.keys(bestDoc.storyHistory||{}).length) {
+            merged.storyHistory = Object.assign({}, bestDoc.storyHistory||{}, local.storyHistory);
           }
         } else {
-          // Local has more — keep local but merge in FS storyHistory
           merged = local;
-          if (fsData.storyHistory && Object.keys(fsData.storyHistory).length > Object.keys(local.storyHistory||{}).length) {
-            merged.storyHistory = Object.assign({}, local.storyHistory||{}, fsData.storyHistory);
+          if (Object.keys(bestDoc.storyHistory||{}).length > Object.keys(local.storyHistory||{}).length) {
+            merged.storyHistory = Object.assign({}, local.storyHistory||{}, bestDoc.storyHistory);
           }
         }
+
         localStorage.setItem(STORE_KEY, JSON.stringify(merged));
-        console.log('[SYNC] Synced from Firestore — history:', (merged.history||[]).length, 'email:', (merged.emailHistory||[]).length);
-        // Re-render ALL dashboard panels with fresh data
+        console.log('[SYNC] Synced — WA:', (merged.history||[]).length,
+          '| Email:', (merged.emailHistory||[]).length,
+          '| Skills:', Object.keys(merged.skills||{}).length,
+          '| from uid:', bestUid);
+
+        // Re-render all panels with fresh data
         setTimeout(function() {
           try { renderDashboard(); } catch(e){}
           setTimeout(function() {
+            var d = loadData();
             try { renderAdaptivePanel(); } catch(e){}
-            try { renderEngRadar(loadData()); } catch(e){}
-            try { renderSkillsMasteryRadar(loadData()); } catch(e){}
+            try { renderEngRadar(d); } catch(e){}
+            try { renderSkillsMasteryRadar(d); } catch(e){}
             try { renderActivityPanel(); } catch(e){}
           }, 500);
         }, 600);
       })
-      .catch(function(e) { console.warn('[SYNC] Firestore sync failed:', e.message); });
+      .catch(function(e) { console.warn('[SYNC] Collection scan failed:', e.message); });
   }
 
   function _debugAdaptive() {
