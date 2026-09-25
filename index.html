@@ -3878,7 +3878,7 @@ https://brdmochi13.github.io/sec1-english/
           <button onclick="askParentIntelligence('custom')" style="padding:7px 16px;border-radius:8px;border:none;background:#7c3aed;color:white;font-size:.83rem;font-weight:700;cursor:pointer">Ask</button>
         </div>
         <!-- AI response -->
-        <div id="piResponse" style="margin:.2rem .9rem .75rem;display:none"></div>
+        <div id="piResponse" style="margin:.2rem .9rem .75rem;display:none;max-height:none;overflow:visible"></div>
       </div>
     </div>
 
@@ -13044,7 +13044,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var txt = ta.value.trim();
     var prompt = 'You are marking a Singapore Sec 1 NT English Continuous Writing composition.\n\nPrompt: '+cwActive.title+'\n\nStudent composition:\n'+txt+'\n\nMark out of 30 (Content 15, Language 15). For each:\n- Give a score\n- 2 specific strengths (quote from student text)\n- 2 specific improvements with examples\n- One "Show Don\'t Tell" rewrite of a weak sentence\n\nFormat:\nCONTENT: X/15\nLANGUAGE: Y/15\nTOTAL: Z/30\n\nStrengths:\n...\n\nImprovements:\n...\n\nRewrite example:\nOriginal: "..."\nBetter: "..."';
     document.getElementById('cwResult').innerHTML='<div style="padding:.6rem;border-radius:8px;background:#eff6ff;font-size:.8rem;color:var(--blue)">🤖 Marking your composition...</div>';
-    _callAI(prompt, 1200, function(res) {
+    _callAI(prompt, 3000, function(res) {
       document.getElementById('cwResult').innerHTML='<div style="padding:.65rem .8rem;border-radius:8px;background:#f8fafc;border:1.5px solid var(--border);font-size:.82rem;white-space:pre-wrap">'+res+'</div>';
       var _cw=loadData(); if(!_cw.cwHistory)_cw.cwHistory=[]; _cw.cwHistory.unshift({ts:Date.now(),date:new Date().toLocaleDateString(),prompt:cwActive.title,text:txt.substring(0,200),result:res});
       if(_cw.cwHistory.length>10)_cw.cwHistory=_cw.cwHistory.slice(0,10);
@@ -15123,11 +15123,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       '- Keep it clear and readable for a parent. Use bullet points where helpful.\n' +
       '- Max 350 words.';
 
-    _callAI(prompt, 1200, function(res) {
+    _callAI(prompt, 3000, function(res) {
       responseEl.innerHTML =
         '<div style="padding:.75rem .9rem;background:white;border-radius:9px;border:1.5px solid #c4b5fd">' +
           '<div style="font-size:.7rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">🧠 AI Analysis</div>' +
-          '<div style="font-size:.83rem;line-height:1.7;color:#1e1b4b;white-space:pre-wrap">' + res + '</div>' +
+          '<div style="font-size:.83rem;line-height:1.7;color:#1e1b4b;white-space:pre-wrap;overflow-wrap:break-word">' + res + '</div>' +
           '<div style="margin-top:.6rem;font-size:.7rem;color:var(--muted)">Based on ' +
             Object.keys(_buildMokshithContext().skills||{}).length + ' skill categories · ' +
             ((loadData().emailHistory||[]).length) + ' email attempts · ' +
