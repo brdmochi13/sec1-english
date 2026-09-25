@@ -13995,6 +13995,23 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       .catch(function(e) { console.warn('[SYNC] Collection scan failed:', e.message); });
   }
 
+  // Markdown to HTML for AI response rendering
+  function _mdToHtml(md) {
+    if (!md) return '';
+    return md
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*([^*\n]+)\*/g,'<em>$1</em>')
+      .replace(/^### (.+)$/gm,'<div style="font-size:.88rem;font-weight:700;color:#4c1d95;margin:.7rem 0 .15rem">$1</div>')
+      .replace(/^## (.+)$/gm,'<div style="font-size:.93rem;font-weight:700;color:#4c1d95;margin:.8rem 0 .2rem">$1</div>')
+      .replace(/^# (.+)$/gm,'<div style="font-size:.98rem;font-weight:700;color:#4c1d95;margin:.9rem 0 .25rem">$1</div>')
+      .replace(/^\* (.+)$/gm,'<div style="display:flex;gap:.35rem;margin:.1rem 0 .1rem .3rem"><span style="color:#7c3aed;flex-shrink:0;margin-top:.05rem">•</span><span>$1</span></div>')
+      .replace(/^- (.+)$/gm,'<div style="display:flex;gap:.35rem;margin:.1rem 0 .1rem .3rem"><span style="color:#7c3aed;flex-shrink:0;margin-top:.05rem">•</span><span>$1</span></div>')
+      .replace(/^(\d+)\. (.+)$/gm,'<div style="display:flex;gap:.35rem;margin:.15rem 0 .15rem .3rem"><span style="color:#7c3aed;font-weight:700;flex-shrink:0">$1.</span><span>$2</span></div>')
+      .replace(/\n\n/g,'<div style="margin:.4rem 0"></div>')
+      .replace(/\n/g,'<br>');
+  }
+
   function _debugAdaptive() {
     var newUid = typeof getUID === 'function' ? getUID() : '';
     if (!db || !currentUser) { alert('Not logged in yet'); return; }
@@ -15127,7 +15144,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       responseEl.innerHTML =
         '<div style="padding:.75rem .9rem;background:white;border-radius:9px;border:1.5px solid #c4b5fd">' +
           '<div style="font-size:.7rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">🧠 AI Analysis</div>' +
-          '<div style="font-size:.83rem;line-height:1.7;color:#1e1b4b;white-space:pre-wrap;overflow-wrap:break-word">' + res + '</div>' +
+          '<div style="font-size:.83rem;line-height:1.7;color:#1e1b4b;overflow-wrap:break-word">' + _mdToHtml(res) + '</div>' +
           '<div style="margin-top:.6rem;font-size:.7rem;color:var(--muted)">Based on ' +
             Object.keys(_buildMokshithContext().skills||{}).length + ' skill categories · ' +
             ((loadData().emailHistory||[]).length) + ' email attempts · ' +
