@@ -13991,6 +13991,10 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
             try { renderUnifiedMasteryRadar(d); } catch(e){}
             try { renderActivityPanel(); } catch(e){}
           }, 500);
+          // Extra retry for activity panel after all data settles
+          setTimeout(function() {
+            try { renderActivityPanel(); } catch(e){}
+          }, 2000);
         }, 600);
       })
       .catch(function(e) { console.warn('[SYNC] Collection scan failed:', e.message); });
@@ -14829,6 +14833,21 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   function renderActivityPanel() {
     var d = loadData();
+    // If no data yet, show loading and wait for Firestore sync
+    var totalItems = (d.history||[]).length + (d.emailHistory||[]).length +
+                     (d.editHistory||[]).length + Object.keys(d.skills||{}).length;
+    if (totalItems === 0) {
+      var feedEl = document.getElementById('activityFeed');
+      if (feedEl) feedEl.innerHTML = '<div style="text-align:center;padding:1.5rem;color:#6b7280;font-size:.83rem">⏳ Loading your activity from cloud...</div>';
+      // Retry after sync completes
+      setTimeout(function() {
+        var d2 = loadData();
+        var total2 = (d2.history||[]).length + (d2.emailHistory||[]).length +
+                     (d2.editHistory||[]).length + Object.keys(d2.skills||{}).length;
+        if (total2 > 0) renderActivityPanel();
+      }, 2500);
+      return;
+    }
     var bounds = _activityPeriodBounds();
     var from = bounds.from, to = bounds.to;
 
