@@ -12931,7 +12931,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var area = document.getElementById('editPassageArea');
     // Build passage with clickable blanks
     var html = '<div class="edit-passage">';
-    var text = p.text;
+    var text = p.text || p.passage || '';
     p.errors.forEach(function(e, i) {
       if (e.correct) return;
       // Replace first occurrence of wrong word/phrase
