@@ -5208,7 +5208,7 @@ https://brdmochi13.github.io/sec1-english/
     <div class="card" style="margin-bottom:.9rem">
       <div class="card-head"><div class="card-title">✏️ Editing Practice</div><div class="card-marks" style="background:var(--blue);color:white">Paper 1A — 10 marks</div></div>
       <div class="card-body">
-        <p style="font-size:.8rem;color:var(--muted);margin-bottom:.6rem">Find and correct the <strong>10 grammar errors</strong> hidden in the passage. Click any underlined blank to type your correction.</p>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:.6rem">Find and correct the <strong id="editErrorCount">10 grammar errors</strong> hidden in the passage. Click any underlined blank to type your correction.</p>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem">
           <select id="editDiffSelect" style="font-size:14px;padding:4px 8px;border-radius:6px;border:1.5px solid var(--border,#e5e7eb)">
             <option value="0">Passage 1 — Everyday Life (Basic)</option>
@@ -12971,6 +12971,10 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     html += '<div id="editInputArea" style="margin-top:.7rem"></div>';
     area.innerHTML = html;
     document.getElementById('editCheckBtn').disabled = false;
+    // Update error count in header
+    var errCount = p.errors ? p.errors.filter(function(e){return !e.correct;}).length : 0;
+    var countEl = document.getElementById('editErrorCount');
+    if (countEl) countEl.textContent = errCount + ' grammar error' + (errCount !== 1 ? 's' : '');
     document.getElementById('editScore').style.display = 'none';
     document.getElementById('editExplain').innerHTML = '';
     setTimeout(function(){ var el=document.getElementById('editPassageArea'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },100);
