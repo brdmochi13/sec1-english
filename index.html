@@ -5035,6 +5035,7 @@ https://brdmochi13.github.io/sec1-english/
             <option value="basic">🟢 Basic (Week 1–2)</option>
             <option value="standard">🟡 Standard (Week 3)</option>
             <option value="challenge">🔴 Challenge (Week 4)</option>
+            <option value="exam">⭐ Exam Prep (29 Sep)</option>
           </select>
           <button onclick="randomEmailPrompt()"
             style="padding:.4rem .8rem;border-radius:6px;background:var(--ink);color:var(--gold);border:none;cursor:pointer;font-size:.82rem;font-weight:700">🎲
@@ -5215,6 +5216,11 @@ https://brdmochi13.github.io/sec1-english/
             <option value="2">Passage 3 — School & Friends</option>
             <option value="3">Passage 4 — Travel & Culture</option>
             <option value="4">Passage 5 — Mixed Challenge</option>
+            <option value="5">📝 Exam: Hawker Centre</option>
+            <option value="6">📝 Exam: Social Media</option>
+            <option value="7">📝 Exam: National Service</option>
+            <option value="8">📝 Exam: Environment</option>
+            <option value="9">📝 Exam: Technology</option>
           </select>
           <button class="tbtn tbtn-primary" onclick="loadEditPassage()" style="font-size:.82rem">Load Passage</button>
           <button class="tbtn tbtn-outline" onclick="checkAllEdits()" style="font-size:.82rem;color:var(--ink)" id="editCheckBtn" disabled>✔ Check All</button>
@@ -6523,6 +6529,87 @@ https://brdmochi13.github.io/sec1-english/
         { wrong: 'is study', right: 'is studying', type: 'Tense', explain: 'Present continuous = is + verb-ing' }
       ],
       text: 'She dont enjoy crowded places. I have saw that film three times. It took a hour to finish the task. The classroom was more noisier after recess. All the food was ate quickly. He gave me many advices about the exam. Most students go to school everyday without fail. By then, she had wrote five paragraphs. He hopes to enter an university next year. Currently, she is study hard for her exams.'
+    },
+    {
+      title: 'Passage 6 — Exam Prep: Hawker Centre',
+      passage: 'Singapore hawker centres is one of the most beloved part of our culture. Every day, thousand of people visit these open-air food courts to enjoyed cheap and delicious meals. The food there are always fresh, and the prices is very reasonable. I remember when I was a child, my grandmother bring me to our neighbourhood hawker centre every Sunday morning. We always orders the same thing — a bowl of hot noodle soup and a cup of teh tarik. Sitting there with she, watching the crowds, was one of my most happiest memories.',
+      errors: [
+        { wrong: 'is', right: 'are', type: 'SVA', explain: '"Hawker centres" plural → "are"' },
+        { wrong: 'part', right: 'parts', type: 'Plural', explain: '"Beloved parts" — plural needed' },
+        { wrong: 'thousand', right: 'thousands', type: 'Plural', explain: '"Thousands of people" — plural' },
+        { wrong: 'enjoyed', right: 'enjoy', type: 'Tense', explain: '"To enjoy" — infinitive after "to"' },
+        { wrong: 'are', right: 'is', type: 'SVA', explain: '"The food" singular → "is"' },
+        { wrong: 'is', right: 'are', type: 'SVA', explain: '"The prices" plural → "are"' },
+        { wrong: 'bring', right: 'brought', type: 'Tense', explain: 'Past tense of "bring" = "brought"' },
+        { wrong: 'orders', right: 'ordered', type: 'Tense', explain: 'Past narrative → "ordered"' },
+        { wrong: 'she', right: 'her', type: 'Pronoun', explain: '"With her" — object pronoun after preposition' },
+        { wrong: 'most happiest', right: 'happiest', type: 'Comparison', explain: '"Happiest" already superlative — no "most"' }
+      ]
+    },
+    {
+      title: 'Passage 7 — Exam Prep: Social Media',
+      passage: 'Many young people today spends hours on social media every day. While these platforms allows us to connect with friend around the world, they can also be harmful if we do not use it responsible. Some students neglects their homework because they are too busy scrolling through they phones. Others compare theirself to influencers and feel bad about their own lifes. However, social media is not all negative. When used wisely, it can be a powerful tool for learning. We must learns to control our usage and to think critical about what we see online.',
+      errors: [
+        { wrong: 'spends', right: 'spend', type: 'SVA', explain: '"Many young people" plural → "spend"' },
+        { wrong: 'allows', right: 'allow', type: 'SVA', explain: '"These platforms" plural → "allow"' },
+        { wrong: 'friend', right: 'friends', type: 'Plural', explain: '"Friends" — plural needed' },
+        { wrong: 'it', right: 'them', type: 'Pronoun', explain: '"Them" — refers to plural "platforms"' },
+        { wrong: 'responsible', right: 'responsibly', type: 'Adverb', explain: '"Use" = verb → needs adverb "responsibly"' },
+        { wrong: 'neglects', right: 'neglect', type: 'SVA', explain: '"Some students" plural → "neglect"' },
+        { wrong: 'they', right: 'their', type: 'Pronoun', explain: '"Their phones" — possessive pronoun' },
+        { wrong: 'theirself', right: 'themselves', type: 'Pronoun', explain: '"Themselves" — correct reflexive pronoun' },
+        { wrong: 'lifes', right: 'lives', type: 'Plural', explain: '"Lives" is the plural of "life"' },
+        { wrong: 'learns', right: 'learn', type: 'SVA', explain: '"We" plural → "learn" (no -s)' },
+        { wrong: 'critical', right: 'critically', type: 'Adverb', explain: '"Think" = verb → needs adverb "critically"' }
+      ]
+    },
+    {
+      title: 'Passage 8 — Exam Prep: National Service',
+      passage: 'National Service, or NS, is a important rite of passage for male Singaporeans. When a young man complete his studies, he is required to serve two years in the armed forces. Many people believe that NS makes young men more responsible and discipline. However, others feel that the two years takes valuable time away from they careers. My brother, who recently finish his NS, told me that he had learned a great deal. He become more independence and learned to work as part of a team. Despite the challenges, he would not have trade the experience for anything.',
+      errors: [
+        { wrong: 'a important', right: 'an important', type: 'Article', explain: '"An" before vowel sound — "an important"' },
+        { wrong: 'complete', right: 'completes', type: 'SVA', explain: '"A young man" singular → "completes"' },
+        { wrong: 'discipline', right: 'disciplined', type: 'Word Form', explain: '"Disciplined" — adjective form needed' },
+        { wrong: 'takes', right: 'take', type: 'SVA', explain: '"Two years" plural → "take"' },
+        { wrong: 'they', right: 'their', type: 'Pronoun', explain: '"Their careers" — possessive pronoun' },
+        { wrong: 'finish', right: 'finished', type: 'Tense', explain: 'Past narrative → "finished"' },
+        { wrong: 'become', right: 'became', type: 'Tense', explain: 'Past tense of "become" = "became"' },
+        { wrong: 'independence', right: 'independent', type: 'Word Form', explain: '"More independent" — adjective needed, not noun' },
+        { wrong: 'trade', right: 'traded', type: 'Tense', explain: '"Would not have traded" — past participle needed' }
+      ]
+    },
+    {
+      title: 'Passage 9 — Exam Prep: Environment',
+      passage: 'Climate change are one of the most serious issue facing our world today. Every year, temperature around the world rises, and extreme weather events becomes more common. In Singapore, we has already begun to experience hotter days and heavier rainfall. Scientists warn that if we do not act now, the consequences will be irreversible. There are many thing we can do to helps. For example, we should reduce our used of plastic. Governments and individuals both need to plays their part. The future of our planet depend on the choices we make today.',
+      errors: [
+        { wrong: 'are', right: 'is', type: 'SVA', explain: '"Climate change" singular → "is"' },
+        { wrong: 'issue', right: 'issues', type: 'Plural', explain: '"Issues" — plural needed' },
+        { wrong: 'temperature', right: 'temperatures', type: 'Plural', explain: '"Temperatures" — plural noun' },
+        { wrong: 'rises', right: 'rise', type: 'SVA', explain: '"Temperatures" plural → "rise"' },
+        { wrong: 'becomes', right: 'become', type: 'SVA', explain: '"Weather events" plural → "become"' },
+        { wrong: 'has', right: 'have', type: 'SVA', explain: '"We" plural → "have"' },
+        { wrong: 'thing', right: 'things', type: 'Plural', explain: '"Many things" — plural' },
+        { wrong: 'helps', right: 'help', type: 'SVA', explain: '"We can help" — base form after modal' },
+        { wrong: 'used', right: 'use', type: 'Word Form', explain: '"Reduce our use of" — noun form needed' },
+        { wrong: 'plays', right: 'play', type: 'SVA', explain: '"Governments and individuals" plural → "play"' },
+        { wrong: 'depend', right: 'depends', type: 'SVA', explain: '"The future" singular → "depends"' }
+      ]
+    },
+    {
+      title: 'Passage 10 — Exam Prep: Technology in Schools',
+      passage: 'Technology have changed the way students learn in schools today. With the introduction of tablets and laptop, lessons has become more interactive. Students can now access information immediate and complete assignment online. However, some student are easily distracted by their devices. Additionally, students who does not have devices at home may fall behind they classmates. Teachers must ensure that technology are used purposeful in the classroom, and that every student is given the opportunity to participate equally.',
+      errors: [
+        { wrong: 'have', right: 'has', type: 'SVA', explain: '"Technology" singular → "has"' },
+        { wrong: 'laptop', right: 'laptops', type: 'Plural', explain: '"Laptops" — plural' },
+        { wrong: 'has', right: 'have', type: 'SVA', explain: '"Lessons" plural → "have"' },
+        { wrong: 'immediate', right: 'immediately', type: 'Adverb', explain: '"Access" = verb → needs adverb' },
+        { wrong: 'assignment', right: 'assignments', type: 'Plural', explain: '"Assignments" — plural' },
+        { wrong: 'student', right: 'students', type: 'Plural', explain: '"Some students" — plural' },
+        { wrong: 'does', right: 'do', type: 'SVA', explain: '"Students who do not" — plural → "do"' },
+        { wrong: 'they', right: 'their', type: 'Pronoun', explain: '"Their classmates" — possessive pronoun' },
+        { wrong: 'are', right: 'is', type: 'SVA', explain: '"Technology" singular → "is"' },
+        { wrong: 'purposeful', right: 'purposefully', type: 'Adverb', explain: '"Used" = verb → needs adverb "purposefully"' }
+      ]
     }
   ];
 
@@ -10301,6 +10388,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
       var prompt = buildEssayMarkingPrompt(currentEssayPrompt, text, rubric);
 
+      // Append copy-paste warning to prompt if detected
+      if (situationSimilarity > 55) {
+        prompt += '\n\nWARNING: ' + situationSimilarity + '% of student answer matches prompt text. This suggests copying. In your JSON response, set copy_paste_detected:true and deduct content marks. State clearly in overall_feedback that copying the question earns 0 content marks in real exams.';
+      }
+
       try {
         var response = '';
         if (provider === 'ollama') {
@@ -10607,6 +10699,43 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
           id: 'ec6', title: 'Describing Someone Inspiring', situation: 'You recently met someone who inspired you. Write an email to your pen pal telling her about this person.',
           points: ['Describe who this person is and how you met them', 'Explain what they said or did that inspired you', 'Tell your pen pal how this experience has affected how you think or act'], words: '160–200'
         },
+      ],
+      exam: [
+        {
+          id: 'ep1', title: 'Situation Writing — School Project Problem',
+          situation: 'You are working on a group project with your friend Wei Jie. Unfortunately, two of your group members are not contributing. Write an email to Wei Jie discussing this problem and what the group should do.',
+          points: ['Describe what the two group members are not doing', 'Explain how this is affecting the project', 'Suggest what the group should do to solve the problem'],
+          words: '150–200',
+          examTip: "Use an informal tone — contractions (don't, we've, it's), friendly language. Address Wei Jie by name. Sign off with your name."
+        },
+        {
+          id: 'ep2', title: 'Situation Writing — Lost Item at School',
+          situation: "You left your wallet in the school canteen yesterday. A classmate, Priya, found it and returned it to you. Write an email to Priya thanking her and telling her what was in the wallet.",
+          points: ['Thank Priya and say how relieved you were', 'Describe what important items were inside the wallet', 'Suggest doing something to show your appreciation'],
+          words: '150–200',
+          examTip: "Avoid generic phrases like 'Thank you very much' — be personal and specific. The examiner wants to see genuine, warm informal language."
+        },
+        {
+          id: 'ep3', title: "Situation Writing — Planning a Surprise",
+          situation: "Your friend Amir's birthday is next Friday. You want to plan a surprise celebration for him with your mutual friend Siti. Write an email to Siti sharing your plan.",
+          points: ['Tell Siti why you want to do something special for Amir', 'Describe your plan for the surprise celebration', 'Ask Siti for her help and suggestions'],
+          words: '150–200',
+          examTip: "Use excited, enthusiastic language. Include a rhetorical question to engage Siti — e.g. 'What do you think we should get him?'"
+        },
+        {
+          id: 'ep4', title: 'Situation Writing — New Hobby',
+          situation: 'You have recently taken up a new hobby and are really enjoying it. Write an email to your cousin Raj telling him about this new hobby.',
+          points: ['Describe what the hobby is and how you started it', 'Explain what you enjoy about it and what you have learned so far', 'Encourage Raj to try it too and suggest how he can get started'],
+          words: '150–200',
+          examTip: "Include specific details — not just 'I like it' but exactly what makes it enjoyable. Vivid, specific language scores higher than vague enthusiasm."
+        },
+        {
+          id: 'ep5', title: 'Situation Writing — Advice on a Problem',
+          situation: 'Your friend Jun Wei has emailed you saying he is struggling to manage his time between his studies and his CCA. He is feeling stressed. Write an email to Jun Wei giving him advice.',
+          points: ['Acknowledge how he is feeling and show that you understand', 'Give him at least two specific suggestions to manage his time better', 'Encourage him and tell him you are there to support him'],
+          words: '150–200',
+          examTip: "Start with empathy before jumping into advice. Show you understand how he feels first. Then give specific, practical tips — not vague advice like 'try your best'."
+        },
       ]
     };
 
@@ -10806,6 +10935,22 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       status.textContent = '⏳ AI is marking your email...';
 
       var pointsList = currentEmailPrompt.points.map(function (p, i) { return (i + 1) + '. ' + p; }).join('\n');
+
+      // Copy-paste detection: check if student copied prompt text verbatim
+      function _similarityCheck(text, reference) {
+        var tLow = text.toLowerCase().replace(/[^a-z0-9 ]/g,'');
+        var rLow = reference.toLowerCase().replace(/[^a-z0-9 ]/g,'');
+        var rWords = rLow.split(' ').filter(function(w){ return w.length > 4; });
+        var matches = rWords.filter(function(w){ return tLow.indexOf(w) >= 0; });
+        return rWords.length > 0 ? Math.round(matches.length / rWords.length * 100) : 0;
+      }
+      var situationSimilarity = _similarityCheck(bodyText, currentEmailPrompt.situation);
+      var pointsSimilarity = _similarityCheck(bodyText, pointsList);
+      var copyPasteWarning = '';
+      if (situationSimilarity > 60) {
+        copyPasteWarning = '\n\nWARNING: The student appears to have copied significant portions of the prompt situation directly into their answer (' + situationSimilarity + '% word match). Please flag this clearly in your feedback. Real marks will be deducted for copied content — the student must write in their OWN words.';
+      }
+
       var prompt = 'You are a Singapore secondary school English teacher marking a Sec 1 NT/G1 student\'s informal email.\n\n'
         + 'PROMPT GIVEN TO STUDENT:\n' + currentEmailPrompt.situation + '\n\n'
         + 'CONTENT POINTS TO COVER:\n' + pointsList + '\n\n'
@@ -10833,7 +10978,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         else response = await callOpenAICompat('https://api.groq.com/openai/v1/chat/completions', apiKey, 'llama-3.3-70b-versatile', prompt);
 
         var result = extractJSON(response);
-        displayEmailResult(result, fullText);
+        displayEmailResult(result, fullText, situationSimilarity);
         saveEmailAttempt(result, fullText);
         status.textContent = '✅ Marked! See results below.';
       } catch (e) {
@@ -10842,7 +10987,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       btn.disabled = false; btn.textContent = '🤖 AI Mark';
     }
 
-    function displayEmailResult(r, text) {
+    function displayEmailResult(r, text, copyPctSim) {
       var pct = Math.round((r.total / r.total_max) * 100);
       var col = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
       var criteria = [
@@ -10851,7 +10996,18 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         { name: 'Content', data: r.content },
         { name: 'Language', data: r.language }
       ];
-      var html = '<div style="font-weight:700;font-size:1rem;margin-bottom:.6rem">📊 AI Marking Result</div>';
+      // Copy-paste warning banner
+      var html = '';
+      if ((copyPctSim || 0) > 55 || (r && r.copy_paste_detected)) {
+        html += '<div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:8px;padding:.65rem .8rem;margin-bottom:.6rem;font-size:.82rem;color:#78350f">' +
+          '<strong>⚠️ Copy-Paste Detected (' + (copyPctSim||0) + '% match with question)</strong><br>' +
+          'Mokshith, you used words directly from the question in your answer. ' +
+          'In the real exam this loses you <strong>Content marks</strong>. ' +
+          'You must write everything in your <strong>own words</strong>. ' +
+          'Read the situation carefully, then put it aside and write from memory.' +
+          '</div>';
+      }
+      html += '<div style="font-weight:700;font-size:1rem;margin-bottom:.6rem">📊 AI Marking Result</div>';
       html += '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:.7rem">'
         + '<div style="font-size:2rem;font-weight:900;color:' + col + '">' + r.total + '/' + r.total_max + '</div>'
         + '<div><div style="font-size:1.1rem;font-weight:700;color:' + col + '">' + pct + '% — Grade ' + (r.grade || '') + '</div>'
