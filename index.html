@@ -5867,8 +5867,29 @@ https://brdmochi13.github.io/sec1-english/
         fsData.history = fsData.history.map(function (h) { var s = Object.assign({}, h); delete s.uploads; return s; });
       }
       fsData._updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-      db.collection('progress').doc(getUID()).set(fsData, { merge: true })
-        .catch(function (e) { console.error('Firebase save error:', e); });
+      var _uid = getUID();
+      if (!_uid || _uid === 'anon') {
+        console.warn('[SAVE] No valid UID — skipping Firestore write');
+        _updateSyncBadge('error');
+        return;
+      }
+      db.collection('progress').doc(_uid).set(fsData, { merge: true })
+        .then(function() {
+          _updateSyncBadge('ok');
+          console.log('[SAVE] Firestore write OK for uid:', _uid,
+            '| editHistory:', (fsData.editHistory||[]).length,
+            '| history:', (fsData.history||[]).length);
+        })
+        .catch(function (e) {
+          console.error('[SAVE] Firestore write FAILED:', e.message);
+          _updateSyncBadge('error');
+          // Retry once after 3 seconds
+          setTimeout(function() {
+            db.collection('progress').doc(_uid).set(fsData, { merge: true })
+              .then(function(){ _updateSyncBadge('ok'); console.log('[SAVE] Retry OK'); })
+              .catch(function(e2){ console.error('[SAVE] Retry also failed:', e2.message); });
+          }, 3000);
+        });
     }
 
     function loadDataFromFirebase() {
@@ -5965,16 +5986,13 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     function _doFirestoreWrite(d) {
-      if (!db || !currentUser) return;
-      if (_fsSyncing) { _fsPendingSync = true; return; }
-      _fsSyncing = true;
+      if (!db || !currentUser) {
+        // Not ready yet — queue for retry in 1s
+        setTimeout(function(){ if (db && currentUser) _doFirestoreWrite(loadData()); }, 1000);
+        return;
+      }
       _updateSyncBadge('syncing');
       saveDataToFirebase(d);
-      setTimeout(function () {
-        _fsSyncing = false;
-        _updateSyncBadge('ok');
-        if (_fsPendingSync) { _fsPendingSync = false; _doFirestoreWrite(loadData()); }
-      }, 2000);
     }
 
     function pullFromFirestore() { loadDataFromFirebase(); }
@@ -5986,6 +6004,21 @@ https://brdmochi13.github.io/sec1-english/
       var s = states[state] || states.local;
       badge.textContent = s.text; badge.style.background = s.bg; badge.style.color = s.color;
     }
+
+    // Save to Firestore when user switches tabs or phone screen locks
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden' && db && currentUser) {
+        console.log('[VISIBILITY] Page hidden — force Firestore write');
+        saveDataToFirebase(loadData());
+      }
+    });
+
+    // Save before page unload
+    window.addEventListener('beforeunload', function() {
+      if (db && currentUser) {
+        saveDataToFirebase(loadData());
+      }
+    });
 
     window.addEventListener('online', function () {
       _fsOnline = true;
@@ -13032,6 +13065,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       }
     });
     saveData(_ed);
+    // Force immediate Firestore write for editing — don't rely on debounce
+    if (db && currentUser) {
+      console.log('[EDIT] Forcing Firestore write after editing session');
+      saveDataToFirebase(_ed);
+    }
     renderEditHistory();
   }
 
