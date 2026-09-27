@@ -5232,7 +5232,10 @@ https://brdmochi13.github.io/sec1-english/
     </div>
     <!-- Editing history -->
     <div class="card">
-      <div class="card-head"><div class="card-title">📋 Editing History</div></div>
+      <div class="card-head">
+        <div class="card-title">📋 Editing History</div>
+        <button onclick="renderEditHistory()" style="font-size:.72rem;padding:3px 10px;border-radius:6px;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer">🔄</button>
+      </div>
       <div class="card-body" id="editHistory"><div class="empty-state"><div class="es-icon">📋</div><p>No editing attempts yet</p></div></div>
     </div>
   </div>
@@ -7243,6 +7246,7 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
         setTimeout(renderActivityPanel, 400);
       }
       if (id === 'storiesTab') { initStoriesTab(); }
+      if (id === 'editTab') { try { renderEditHistory(); } catch(e){} }
       if (id === 'tipsTab' || id === 'notesTab') {
         if (!notesRendered) renderNotes();
         setTimeout(refreshPersonalTips, 100);
@@ -14146,10 +14150,13 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
             try { renderAdaptivePanel(); } catch(e){}
             try { renderUnifiedMasteryRadar(d); } catch(e){}
             try { renderActivityPanel(); } catch(e){}
+            try { renderEditHistory(); } catch(e){}
+            try { renderEmailHistory(); } catch(e){}
           }, 500);
-          // Extra retry for activity panel after all data settles
+          // Extra retry after all data settles
           setTimeout(function() {
             try { renderActivityPanel(); } catch(e){}
+            try { renderEditHistory(); } catch(e){}
           }, 2000);
         }, 600);
       })
