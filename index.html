@@ -5055,6 +5055,11 @@ https://brdmochi13.github.io/sec1-english/
             style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem"
             id="emailPromptMeta"></div>
           <div style="font-size:.88rem;font-weight:700;margin-bottom:.5rem" id="emailPromptTitle"></div>
+          <!-- Context box (green bar) -->
+          <div id="emailContextBox" style="display:none;font-size:.78rem;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:.35rem .65rem;margin-bottom:.5rem;color:#14532d"></div>
+          <!-- Stimulus email box -->
+          <div id="emailStimulusBox" style="display:none;margin-bottom:.65rem"></div>
+          <!-- Task instruction -->
           <div style="font-size:.82rem;line-height:1.6;margin-bottom:.6rem" id="emailPromptSituation"></div>
           <!-- Content points checklist -->
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem">
@@ -5062,6 +5067,8 @@ https://brdmochi13.github.io/sec1-english/
               points (one paragraph each):</div>
             <div id="emailContentPoints"></div>
           </div>
+          <!-- Exam tip -->
+          <div id="emailExamTip" style="display:none"></div>
         </div>
 
         <!-- SPLIT LAYOUT: email editor left, live checklist right -->
@@ -10735,76 +10742,17 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         },
       ],
       exam: [
-        {
-          id: 'ep1', title: 'Situation Writing — School Project Problem',
-          situation: 'You are working on a group project with your friend Wei Jie. Unfortunately, two of your group members are not contributing. Write an email to Wei Jie discussing this problem and what the group should do.',
-          points: ['Describe what the two group members are not doing', 'Explain how this is affecting the project', 'Suggest what the group should do to solve the problem'],
-          words: '150–200',
-          examTip: "Use an informal tone — contractions (don't, we've, it's), friendly language. Address Wei Jie by name. Sign off with your name."
-        },
-        {
-          id: 'ep2', title: 'Situation Writing — Lost Item at School',
-          situation: "You left your wallet in the school canteen yesterday. A classmate, Priya, found it and returned it to you. Write an email to Priya thanking her and telling her what was in the wallet.",
-          points: ['Thank Priya and say how relieved you were', 'Describe what important items were inside the wallet', 'Suggest doing something to show your appreciation'],
-          words: '150–200',
-          examTip: "Avoid generic phrases like 'Thank you very much' — be personal and specific. The examiner wants to see genuine, warm informal language."
-        },
-        {
-          id: 'ep3', title: "Situation Writing — Planning a Surprise",
-          situation: "Your friend Amir's birthday is next Friday. You want to plan a surprise celebration for him with your mutual friend Siti. Write an email to Siti sharing your plan.",
-          points: ['Tell Siti why you want to do something special for Amir', 'Describe your plan for the surprise celebration', 'Ask Siti for her help and suggestions'],
-          words: '150–200',
-          examTip: "Use excited, enthusiastic language. Include a rhetorical question to engage Siti — e.g. 'What do you think we should get him?'"
-        },
-        {
-          id: 'ep4', title: 'Situation Writing — New Hobby',
-          situation: 'You have recently taken up a new hobby and are really enjoying it. Write an email to your cousin Raj telling him about this new hobby.',
-          points: ['Describe what the hobby is and how you started it', 'Explain what you enjoy about it and what you have learned so far', 'Encourage Raj to try it too and suggest how he can get started'],
-          words: '150–200',
-          examTip: "Include specific details — not just 'I like it' but exactly what makes it enjoyable. Vivid, specific language scores higher than vague enthusiasm."
-        },
-        {
-          id: 'ep5', title: 'Situation Writing — Advice on a Problem',
-          situation: 'Your friend Jun Wei has emailed you saying he is struggling to manage his time between his studies and his CCA. He is feeling stressed. Write an email to Jun Wei giving him advice.',
-          points: ['Acknowledge how he is feeling and show that you understand', 'Give him at least two specific suggestions to manage his time better', 'Encourage him and tell him you are there to support him'],
-          words: '150–200',
-          examTip: "Start with empathy before jumping into advice. Show you understand how he feels first. Then give specific, practical tips — not vague advice like 'try your best'."
-        },
-        {
-          id: 'ep6', title: 'Situation Writing — School Excursion',
-          situation: 'You recently went on a school excursion to the Singapore Science Centre with your class. It was an interesting and enjoyable experience. Write an email to your cousin Nisha, who lives overseas, telling her about the excursion.',
-          points: ['Describe what you saw or did at the Science Centre that interested you most', 'Explain what you learned from the experience', 'Tell her why you would recommend a visit if she ever comes to Singapore'],
-          words: '150–200',
-          examTip: "Use vivid, specific details — not just 'it was fun'. Name a specific exhibit or activity. Show enthusiasm naturally through your word choices, not by repeating 'it was amazing'."
-        },
-        {
-          id: 'ep7', title: 'Situation Writing — Helping a New Student',
-          situation: 'A new student from Malaysia, Daniel, has just joined your class and is finding it hard to settle in. You want to help him feel welcome. Write an email to your friend Hui Ling suggesting how the class can help Daniel.',
-          points: ['Describe the difficulties Daniel seems to be facing in settling in', 'Suggest at least two practical ways the class can make Daniel feel more welcome', 'Ask Hui Ling to help you organise something for Daniel'],
-          words: '150–200',
-          examTip: "This is a problem-solving email. Be specific about what Daniel is struggling with — don't just say 'he is shy'. Your suggestions should be concrete and actionable, not vague."
-        },
-        {
-          id: 'ep8', title: 'Situation Writing — A Misunderstanding',
-          situation: 'You had an argument with your close friend Siti last week over something that was a misunderstanding. You have been feeling bad about it since. Write an email to Siti to resolve the situation.',
-          points: ['Explain your understanding of what caused the misunderstanding', 'Apologise sincerely and take responsibility for your part in the argument', 'Suggest a way to meet up and resolve things properly'],
-          words: '150–200',
-          examTip: "An apology email must sound genuine — not defensive. Do not blame Siti. Use 'I' statements: 'I am sorry', 'I should have'. Examiners look for emotional sincerity in the language."
-        },
-        {
-          id: 'ep9', title: 'Situation Writing — Favourite Book or Movie',
-          situation: 'You have recently read a book or watched a movie that you really enjoyed. Write an email to your friend Marcus telling him about it and encouraging him to read or watch it too.',
-          points: ['Briefly describe what the book or movie is about without giving away the ending', 'Explain specifically what you enjoyed about it and why it affected you', 'Persuade Marcus to read or watch it by telling him why he in particular would enjoy it'],
-          words: '150–200',
-          examTip: "Personalise your recommendation — say something specific about Marcus that makes you think he would enjoy it. Generic enthusiasm ('it is so good') scores poorly. Specific detail scores well."
-        },
-        {
-          id: 'ep10', title: 'Situation Writing — Complaining About a Problem',
-          situation: 'There is a problem in your neighbourhood that has been bothering you and your family — for example, noise, littering, stray animals, or a broken facility. Write an email to your friend Kai telling him about this problem.',
-          points: ['Describe the problem clearly and explain how long it has been going on', 'Explain how it is affecting you and your family specifically', 'Tell Kai what you and your family have done or plan to do about it'],
-          words: '150–200',
-          examTip: "Choose ONE specific problem and stick to it. Use precise language: not 'some noise' but 'loud music from a neighbour every night after 11pm'. Specific details make your writing convincing."
-        },
+        // ── Singapore-format Situational Writing (ep1–ep10) ──
+        {"id": "ep1", "title": "Reply to Friend — School Project Problem", "contextBox": "You are Mokshith, a Secondary 1 student at Greendale Secondary School.", "stimulusType": "email", "stimulusFrom": "Wei Jie", "stimulusDate": "Monday, 22 September 2026", "stimulusSubject": "Problems with our group project", "stimulusBody": "Hi Mokshith,\n\nI hope you are doing well! I am writing to you about our History group project that is due on 3 October 2026.\n\nI am really worried because two of our group members, Faris and Dinesh, have not been attending our group meetings. We have already had three meetings — on 8, 15 and 19 September — but they did not come to any of them. They also have not responded to our messages in the group chat.\n\nOur project is on the topic \"Singapore's Founding Leaders\" and we need to submit a poster and a five-minute presentation. Right now, only you and I have been doing any work.\n\nWhat do you think we should do? Please let me know soon as we are running out of time.\n\nBest wishes,\nWei Jie", "task": "Write an email to Wei Jie in reply to his email.", "points": ["Describe how the situation is affecting the quality of your project", "Suggest TWO specific actions the group should take to deal with Faris and Dinesh", "Tell Wei Jie what you will take responsibility for to help complete the project on time"], "words": "150–200", "examTip": "Refer to the specific details in Wei Jie's email — the dates (8, 15, 19 Sept), the deadline (3 Oct), the topic ('Singapore's Founding Leaders'). A strong answer uses these details, not generic statements."},
+        {"id": "ep2", "title": "Reply to Friend — School Camp Invitation", "contextBox": "You are Mokshith, a Secondary 1 student. Your friend Priya has written to you about an upcoming school camp.", "stimulusType": "email", "stimulusFrom": "Priya", "stimulusDate": "Friday, 19 September 2026", "stimulusSubject": "Sec 1 Adventure Camp — Are you going?", "stimulusBody": "Hi Mokshith!\n\nHave you heard about the Sec 1 Adventure Camp? It is happening from 14 to 16 October 2026 at Outward Bound Singapore on Pulau Ubin. The camp costs $85 and the sign-up deadline is 26 September 2026.\n\nThe activities include kayaking, rock climbing, a high ropes course and a night walk through the forest. We will also be camping in tents overnight!\n\nI have already signed up and paid. I think it will be a great chance for us to bond with our classmates and try new things. However, I know some of our friends are not sure whether to go because they are nervous about the outdoor activities.\n\nAre you planning to sign up? What do you think about the camp? I really hope we can go together!\n\nYour friend,\nPriya", "task": "Write an email to Priya in reply to her email.", "points": ["Tell Priya whether you plan to sign up for the camp and give ONE reason for your decision", "Describe ONE activity from the camp that you are either looking forward to or worried about, and explain why", "Suggest what both of you can do to encourage nervous friends to join the camp"], "words": "150–200", "examTip": "You must take a clear position — either you ARE going or you ARE NOT. Use specific details: Pulau Ubin, 14–16 October, $85, kayaking/rock climbing. Name one activity specifically."},
+        {"id": "ep3", "title": "Reply to Friend — Lost Belonging", "contextBox": "You are Mokshith. Yesterday, you left your calculator at the school library. Your classmate Siti found it and has emailed you.", "stimulusType": "email", "stimulusFrom": "Siti", "stimulusDate": "Tuesday, 23 September 2026", "stimulusSubject": "I found something of yours!", "stimulusBody": "Hi Mokshith,\n\nYou will never guess what I found in the library today! I was studying in the library after school at around 4.30 pm when I noticed a Casio scientific calculator (model FX-95ES PLUS) left on Table 12, near the window.\n\nI checked with the librarian, Mrs Tan, but no one had come to claim it. I noticed your name written on a sticker on the back — \"Mokshith B.\" — so I took it home to keep it safe for you.\n\nYour calculator is fine — I have kept it in my pencil case. You will need it for the Mathematics test on 25 September!\n\nPlease let me know when and where we can meet so I can return it to you. I am usually free during recess (9.30–10.00 am) or after school until 5.00 pm.\n\nSee you soon!\nSiti", "task": "Write an email to Siti in reply to her email.", "points": ["Thank Siti and explain why the calculator is especially important to you right now", "Suggest a specific time and place to meet Siti to collect the calculator", "Offer to do something to show your appreciation for Siti's kindness"], "words": "150–200", "examTip": "Use the specific details — the calculator model, Table 12, Mrs Tan, the Maths test on 25 Sept, Siti's free times (recess 9.30–10am or after school). A thank-you email must sound genuine, not like a template."},
+        {"id": "ep4", "title": "Reply to Cousin — Recommending a Hobby", "contextBox": "You are Mokshith. Your cousin Raj, who lives in Kuala Lumpur, has sent you an email asking for advice.", "stimulusType": "email", "stimulusFrom": "Raj (your cousin)", "stimulusDate": "Saturday, 20 September 2026", "stimulusSubject": "Looking for a new hobby — any ideas?", "stimulusBody": "Hi Mokshith!\n\nHow are you? I hope school is going well for you in Singapore.\n\nI have been feeling quite bored lately during the weekends. All I do is play video games and watch YouTube videos, and my mum is always nagging me to find something more productive to do.\n\nI am thinking of picking up a new hobby but I do not know where to start. I enjoy things that are creative and that do not cost too much money. I am also happy to try something that I can do at home. However, I am not very sporty so I would prefer something that is not too physical.\n\nDo you have any hobbies that you enjoy? Can you recommend something for me? I would really appreciate your advice!\n\nYour cousin,\nRaj", "task": "Write an email to Raj in reply to his email.", "points": ["Recommend ONE specific hobby that suits Raj and explain why it matches his interests and constraints", "Describe TWO things Raj would need to get started and roughly how much they would cost", "Share your OWN personal experience with this or a similar hobby to encourage Raj"], "words": "150–200", "examTip": "Raj's constraints: creative, low-cost, can do at home, not sporty. Name the hobby specifically. Give real approximate costs. Share a personal anecdote. Generic answers ('you could try something creative') score 0."},
+        {"id": "ep5", "title": "Reply to Friend — Apologising for a Misunderstanding", "contextBox": "You are Mokshith. Last Friday, you forgot to meet your friend Jun Wei at Tampines Mall as you had arranged. Jun Wei sent you this email.", "stimulusType": "email", "stimulusFrom": "Jun Wei", "stimulusDate": "Sunday, 21 September 2026", "stimulusSubject": "What happened on Friday??", "stimulusBody": "Hi Mokshith,\n\nI am writing because I am really upset about what happened last Friday, 19 September.\n\nWe had agreed to meet at Tampines Mall at 2.00 pm to study for our Science test together and then catch the 5.00 pm screening of the new Marvel film at Cathay Cineplex. I waited for you at the McDonald's near the entrance for 45 minutes. I tried calling you four times and sent three messages but you did not reply.\n\nI ended up going home alone and I missed the film. It also means I did not get to study for the test with you, which I was really counting on.\n\nI am not sure why you did not show up or why you did not reply to my messages. I hope everything is alright with you. But I am quite disappointed and I think you owe me an explanation.\n\nJun Wei", "task": "Write an email to Jun Wei in reply to his email.", "points": ["Apologise sincerely and give a genuine explanation for what happened on Friday 19 September", "Acknowledge specifically how your absence affected Jun Wei — the film AND the study session", "Suggest TWO specific ways to make it up to Jun Wei and repair the friendship"], "words": "150–200", "examTip": "Reference specific details: Tampines Mall, 2pm, McDonald's at the entrance, the Science test, the Marvel film at Cathay Cineplex, 45 minutes waiting. A genuine apology uses 'I should have...' and 'I am sorry that...' — it does not make excuses."},
+        {"id": "ep6", "title": "Reply to Cousin — School Excursion to Science Centre", "contextBox": "You are Mokshith. Your class recently went on an excursion to the Singapore Science Centre. Your overseas cousin Nisha has emailed asking about it.", "stimulusType": "email", "stimulusFrom": "Nisha (your cousin)", "stimulusDate": "Wednesday, 24 September 2026", "stimulusSubject": "How was your school trip?", "stimulusBody": "Hi Mokshith!\n\nMum told me that your school recently organised an excursion somewhere interesting in Singapore. I am so curious — I have not visited Singapore since 2023 and I miss it so much!\n\nI remember you once told me that your school does something called an 'enrichment programme' where they take students to different places to learn outside the classroom. Is that what this was?\n\nI have a few questions:\n• Where did you go, and what was the place like?\n• What was the most interesting or surprising thing you saw or did there?\n• Would you recommend it as a place for me to visit if I come to Singapore next December?\n\nI hope you had a great time! Write back soon — I love hearing about life in Singapore.\n\nLots of love,\nNisha", "task": "Write an email to Nisha in reply to her email.", "points": ["Tell Nisha where you went and describe what the place is like in a way that brings it to life for her", "Describe the most interesting or surprising thing you experienced there and explain why it stood out", "Give Nisha ONE specific reason to visit when she comes in December and suggest something she must see or do there"], "words": "150–200", "examTip": "Nisha has not visited Singapore since 2023 and is coming in December — use this. Describe the Science Centre as if she has never been. Name specific exhibits (e.g. Kinetic Garden, Echo Chamber, Omni-Theatre). Be vivid and enthusiastic."},
+        {"id": "ep7", "title": "Reply to Friend — Helping a New Classmate Settle In", "contextBox": "You are Mokshith. A new student, Daniel, joined your class two weeks ago from Johor Bahru, Malaysia. Your friend Hui Ling has emailed you about him.", "stimulusType": "email", "stimulusFrom": "Hui Ling", "stimulusDate": "Thursday, 18 September 2026", "stimulusSubject": "What should we do about Daniel?", "stimulusBody": "Hi Mokshith,\n\nI have been thinking about Daniel a lot lately. As you know, he joined our class on 8 September and he has been finding it really hard to settle in.\n\nI have noticed a few things:\n• He always eats lunch alone and looks uncomfortable when people talk to him in a big group\n• He seems confused during lessons — especially during English, because the style of questions here is different from what he was used to in Malaysia\n• He mentioned to me that he misses his old school friends and feels homesick\n\nI feel sorry for him and I think our class should do more to help, but I am not sure what to do. I do not want to make him feel embarrassed or singled out either.\n\nDo you have any ideas for how we can make Daniel feel more welcome without making it awkward? Maybe we could organise something?\n\nLooking forward to hearing from you!\nHui Ling", "task": "Write an email to Hui Ling in reply to her email.", "points": ["Suggest ONE way to help Daniel feel less lonely during school hours — explain specifically how it would work", "Suggest ONE way to help Daniel with his academic adjustment, especially for English", "Propose a simple class activity or outing to help Daniel bond with everyone, and ask Hui Ling to help plan it"], "words": "150–200", "examTip": "Reference Daniel's specific issues from Hui Ling's email: eating alone, struggling with English questions (different style from Malaysia), homesickness. Generic suggestions ('be nice to him') score 0. Specific ideas ('invite him to join our lunch group at the canteen corner table') score well."},
+        {"id": "ep8", "title": "Reply to Friend — Advice on a Difficult Decision", "contextBox": "You are Mokshith. Your close friend Amir plays for the school football team and is facing a difficult decision. He has emailed you for advice.", "stimulusType": "email", "stimulusFrom": "Amir", "stimulusDate": "Friday, 26 September 2026", "stimulusSubject": "I need your advice — seriously", "stimulusBody": "Hi Mokshith,\n\nI really need your help with something. Please keep this between us.\n\nYou know I have been in the school football team since Secondary 1 and it means everything to me. We have the Inter-School Football Championships on 15 November 2026 and Coach Rajan says I am one of the key players.\n\nThe problem is that my End-of-Year exams are from 28 October to 7 November 2026 — just before the championships. My parents found out that I scored only 42% in my last Math test and they have said that if I do not score at least 60% in the EOY exam, they will make me quit the football team permanently.\n\nI have been skipping football training on Tuesdays and Thursdays to study, but Coach Rajan has noticed and warned me that I may lose my place in the team if I miss any more sessions.\n\nI do not know what to do. I feel trapped. What would you do in my situation?\n\nYour friend,\nAmir", "task": "Write an email to Amir in reply to his email.", "points": ["Show that you understand how difficult Amir's situation is and why both his exams and football matter to him", "Give Amir TWO specific, practical suggestions for managing both his studies and football training between now and the EOY exams", "Offer your personal support — tell Amir what YOU will specifically do to help him"], "words": "150–200", "examTip": "Use the specific details: Math score (42%), EOY target (60%), exams 28 Oct–7 Nov, championships 15 Nov, Tuesday/Thursday training. Reference them naturally. Show genuine empathy BEFORE giving advice — do not jump straight to solutions."},
+        {"id": "ep9", "title": "Reply to Friend — Neighbourhood Littering Problem", "contextBox": "You are Mokshith. There has been a serious littering problem at your HDB block. Your friend Marcus has replied to your earlier email about it.", "stimulusType": "email", "stimulusFrom": "Marcus", "stimulusDate": "Monday, 22 September 2026", "stimulusSubject": "Re: The littering problem at Blk 44", "stimulusBody": "Hi Mokshith,\n\nThanks for telling me about the problem at Blk 44 last week. I had no idea it had gotten so bad!\n\nFrom what you told me, people have been throwing food waste and plastic bags from their flat windows onto the void deck and the carpark below. You mentioned that the problem started around two months ago, in July 2026, and that several residents have already complained to each other about it.\n\nI have a few questions:\n• Has anyone officially reported this to the Town Council or NEA yet? If so, what happened?\n• How is this problem affecting your daily life and your family specifically?\n• What do you think the residents of Blk 44 should do together as a community to solve this?\n\nI think community action is the only real solution here. What are your thoughts?\n\nYour friend,\nMarcus", "task": "Write an email to Marcus in reply to his email.", "points": ["Explain what has been done officially to report the problem (Town Council or NEA) and what response was received", "Describe specifically how the littering is affecting your daily life and your family at Blk 44", "Propose a specific community action plan that residents could carry out together to address the problem"], "words": "150–200", "examTip": "This is set in a Singapore HDB context — use local references naturally (Town Council, NEA, void deck, RC, grassroots leaders). Marcus already knows the basic facts — answer his THREE questions directly. Do not repeat what he already knows."},
+        {"id": "ep10", "title": "Reply to Friend — Planning a Farewell for Siti", "contextBox": "You are Mokshith. Your close friend Siti Nabilah is moving to Penang at the end of October. Your friend Ethan has emailed you about organising a farewell.", "stimulusType": "email", "stimulusFrom": "Ethan", "stimulusDate": "Tuesday, 23 September 2026", "stimulusSubject": "Farewell for Siti — let's plan something!", "stimulusBody": "Hi Mokshith,\n\nI just heard the news about Siti! I cannot believe she is leaving at the end of October. She has been part of our class since Primary 4 and it will not be the same without her.\n\nI think we should organise a proper farewell for her. Her last day at our school is Friday, 24 October 2026.\n\nI have done some research and here are two options:\n\nOption A — Class Party at School\n• On 24 October (her last day), during lunch break (12.30–1.30 pm)\n• Bring food, play music, make a memory scrapbook\n• Free of charge — limited to our class of 32 students\n\nOption B — Outing at East Coast Park\n• Saturday, 25 October 2026 (her last weekend in Singapore)\n• BBQ pit, beach volleyball, a slideshow of memories\n• Cost: approximately $15–$20 per person\n• Open to all her close friends from different classes\n\nWhich option do you prefer and why? Can you help organise it? I need your help!\n\nYour friend,\nEthan", "task": "Write an email to Ethan in reply to his email.", "points": ["State clearly which option you prefer and give TWO specific reasons why it would be better for Siti", "Suggest TWO things you could include in the farewell to make it personal and memorable for Siti", "Divide responsibilities — tell Ethan what YOU will organise and ask him to handle something specific"], "words": "150–200", "examTip": "Choose ONE option clearly — do not sit on the fence. Reference specific details (24 Oct vs 25 Oct, $15-$20, scrapbook, East Coast Park BBQ, 12.30-1.30pm). The best answers make the farewell feel genuinely personal to Siti — mention something specific about her."},
       ]
     };
 
@@ -10841,9 +10789,50 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       var diff = document.getElementById('emailDifficulty').value;
       var diffLabel = { basic: '🟢 Basic', standard: '🟡 Standard', challenge: '🔴 Challenge' }[diff] || diff;
 
-      document.getElementById('emailPromptMeta').textContent = diffLabel + ' · ' + (p.words || '150–180') + ' words · Informal Email';
+      document.getElementById('emailPromptMeta').textContent = diffLabel + ' · ' + (p.words || '150–180') + ' words · Situational Writing (Paper 1B)';
       document.getElementById('emailPromptTitle').textContent = p.title;
-      document.getElementById('emailPromptSituation').textContent = p.situation;
+
+      // Context box
+      var ctxEl = document.getElementById('emailContextBox');
+      if (ctxEl) {
+        if (p.contextBox) { ctxEl.textContent = '📌 ' + p.contextBox; ctxEl.style.display = 'block'; }
+        else { ctxEl.style.display = 'none'; }
+      }
+
+      // Stimulus email box
+      var stimEl = document.getElementById('emailStimulusBox');
+      if (stimEl) {
+        if (p.stimulusBody) {
+          var bodyLines = p.stimulusBody
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .split('\n').map(function(l){
+              return l.trim()==='' ? '<div style="height:.5rem"></div>'
+                : '<div style="margin:.15rem 0;font-size:.8rem;line-height:1.6">'+l+'</div>';
+            }).join('');
+          stimEl.innerHTML =
+            '<div style="border:1.5px solid #3b82f6;border-radius:8px;overflow:hidden;background:white;font-size:.8rem">' +
+              '<div style="background:#dbeafe;padding:.35rem .7rem;display:flex;justify-content:space-between;border-bottom:1px solid #bfdbfe">' +
+                '<span style="color:#1e40af"><strong>From:</strong> ' + esc(p.stimulusFrom||'') + '</span>' +
+                '<span style="color:#1e40af;font-size:.72rem">' + esc(p.stimulusDate||'') + '</span>' +
+              '</div>' +
+              '<div style="padding:.25rem .7rem;background:#eff6ff;border-bottom:1px solid #bfdbfe">' +
+                '<span style="color:#1e40af"><strong>Subject:</strong> ' + esc(p.stimulusSubject||'') + '</span>' +
+              '</div>' +
+              '<div style="padding:.5rem .7rem;background:white;max-height:220px;overflow-y:auto">' + bodyLines + '</div>' +
+            '</div>';
+          stimEl.style.display = 'block';
+        } else {
+          stimEl.style.display = 'none';
+        }
+      }
+
+      // Task instruction
+      var sitEl = document.getElementById('emailPromptSituation');
+      if (sitEl) {
+        sitEl.innerHTML = p.task
+          ? '<strong>' + esc(p.task) + '</strong>'
+          : (p.situation ? esc(p.situation) : '');
+      }
 
       var pts = document.getElementById('emailContentPoints');
       pts.innerHTML = p.points.map(function (pt, i) {
@@ -10851,6 +10840,15 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
           + '<span style="background:var(--amber);color:#000;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0">' + (i + 1) + '</span>'
           + '<span style="font-size:.8rem">' + esc(pt) + '</span></div>';
       }).join('');
+
+      // Exam tip
+      var tipArea = document.getElementById('emailExamTip');
+      if (tipArea) {
+        if (p.examTip) {
+          tipArea.innerHTML = '<div style="margin-top:.5rem;padding:.4rem .65rem;background:#fef9c3;border-left:3px solid #f59e0b;border-radius:0 6px 6px 0;font-size:.76rem;color:#78350f"><strong>💡 Examiner tip:</strong> ' + esc(p.examTip) + '</div>';
+          tipArea.style.display = 'block';
+        } else { tipArea.style.display = 'none'; }
+      }
 
       card.style.display = 'block';
       editor.style.display = 'block';
