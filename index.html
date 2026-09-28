@@ -5208,7 +5208,7 @@ https://brdmochi13.github.io/sec1-english/
     <div class="card" style="margin-bottom:.9rem">
       <div class="card-head"><div class="card-title">✏️ Editing Practice</div><div class="card-marks" style="background:var(--blue);color:white">Paper 1A — 10 marks</div></div>
       <div class="card-body">
-        <p style="font-size:.8rem;color:var(--muted);margin-bottom:.6rem">Find and correct the <strong>10 grammar errors</strong> hidden in the passage. Click any underlined blank to type your correction.</p>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:.6rem">Find and correct the <strong id="editErrorCount">10 grammar errors</strong> hidden in the passage. Click any underlined blank to type your correction.</p>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem">
           <select id="editDiffSelect" style="font-size:14px;padding:4px 8px;border-radius:6px;border:1.5px solid var(--border,#e5e7eb)">
             <option value="0">Passage 1 — Everyday Life (Basic)</option>
@@ -5232,7 +5232,10 @@ https://brdmochi13.github.io/sec1-english/
     </div>
     <!-- Editing history -->
     <div class="card">
-      <div class="card-head"><div class="card-title">📋 Editing History</div></div>
+      <div class="card-head">
+        <div class="card-title">📋 Editing History</div>
+        <button onclick="renderEditHistory()" style="font-size:.72rem;padding:3px 10px;border-radius:6px;border:none;background:rgba(255,255,255,.2);color:white;cursor:pointer">🔄</button>
+      </div>
       <div class="card-body" id="editHistory"><div class="empty-state"><div class="es-icon">📋</div><p>No editing attempts yet</p></div></div>
     </div>
   </div>
@@ -5864,8 +5867,29 @@ https://brdmochi13.github.io/sec1-english/
         fsData.history = fsData.history.map(function (h) { var s = Object.assign({}, h); delete s.uploads; return s; });
       }
       fsData._updatedAt = firebase.firestore.FieldValue.serverTimestamp();
-      db.collection('progress').doc(getUID()).set(fsData, { merge: true })
-        .catch(function (e) { console.error('Firebase save error:', e); });
+      var _uid = getUID();
+      if (!_uid || _uid === 'anon') {
+        console.warn('[SAVE] No valid UID — skipping Firestore write');
+        _updateSyncBadge('error');
+        return;
+      }
+      db.collection('progress').doc(_uid).set(fsData, { merge: true })
+        .then(function() {
+          _updateSyncBadge('ok');
+          console.log('[SAVE] Firestore write OK for uid:', _uid,
+            '| editHistory:', (fsData.editHistory||[]).length,
+            '| history:', (fsData.history||[]).length);
+        })
+        .catch(function (e) {
+          console.error('[SAVE] Firestore write FAILED:', e.message);
+          _updateSyncBadge('error');
+          // Retry once after 3 seconds
+          setTimeout(function() {
+            db.collection('progress').doc(_uid).set(fsData, { merge: true })
+              .then(function(){ _updateSyncBadge('ok'); console.log('[SAVE] Retry OK'); })
+              .catch(function(e2){ console.error('[SAVE] Retry also failed:', e2.message); });
+          }, 3000);
+        });
     }
 
     function loadDataFromFirebase() {
@@ -5962,16 +5986,13 @@ https://brdmochi13.github.io/sec1-english/
     }
 
     function _doFirestoreWrite(d) {
-      if (!db || !currentUser) return;
-      if (_fsSyncing) { _fsPendingSync = true; return; }
-      _fsSyncing = true;
+      if (!db || !currentUser) {
+        // Not ready yet — queue for retry in 1s
+        setTimeout(function(){ if (db && currentUser) _doFirestoreWrite(loadData()); }, 1000);
+        return;
+      }
       _updateSyncBadge('syncing');
       saveDataToFirebase(d);
-      setTimeout(function () {
-        _fsSyncing = false;
-        _updateSyncBadge('ok');
-        if (_fsPendingSync) { _fsPendingSync = false; _doFirestoreWrite(loadData()); }
-      }, 2000);
     }
 
     function pullFromFirestore() { loadDataFromFirebase(); }
@@ -5983,6 +6004,21 @@ https://brdmochi13.github.io/sec1-english/
       var s = states[state] || states.local;
       badge.textContent = s.text; badge.style.background = s.bg; badge.style.color = s.color;
     }
+
+    // Save to Firestore when user switches tabs or phone screen locks
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden' && db && currentUser) {
+        console.log('[VISIBILITY] Page hidden — force Firestore write');
+        saveDataToFirebase(loadData());
+      }
+    });
+
+    // Save before page unload
+    window.addEventListener('beforeunload', function() {
+      if (db && currentUser) {
+        saveDataToFirebase(loadData());
+      }
+    });
 
     window.addEventListener('online', function () {
       _fsOnline = true;
@@ -6532,14 +6568,13 @@ https://brdmochi13.github.io/sec1-english/
     },
     {
       title: 'Passage 6 — Exam Prep: Hawker Centre',
-      passage: 'Singapore hawker centres is one of the most beloved part of our culture. Every day, thousand of people visit these open-air food courts to enjoyed cheap and delicious meals. The food there are always fresh, and the prices is very reasonable. I remember when I was a child, my grandmother bring me to our neighbourhood hawker centre every Sunday morning. We always orders the same thing — a bowl of hot noodle soup and a cup of teh tarik. Sitting there with she, watching the crowds, was one of my most happiest memories.',
+      passage: 'Singapore hawker centres are one of the most beloved part of our culture. Every day, thousand of people come to these open-air food courts to enjoyed cheap and delicious meals. The food there are always fresh, and the price are very reasonable. I remember when I was a child, my grandmother bring me to our neighbourhood hawker centre every Sunday morning. We always orders the same thing — a bowl of hot noodle soup and a cup of teh tarik. Sitting there with she, watching the crowds, was one of my most happiest memories.',
       errors: [
-        { wrong: 'is', right: 'are', type: 'SVA', explain: '"Hawker centres" plural → "are"' },
         { wrong: 'part', right: 'parts', type: 'Plural', explain: '"Beloved parts" — plural needed' },
         { wrong: 'thousand', right: 'thousands', type: 'Plural', explain: '"Thousands of people" — plural' },
         { wrong: 'enjoyed', right: 'enjoy', type: 'Tense', explain: '"To enjoy" — infinitive after "to"' },
         { wrong: 'are', right: 'is', type: 'SVA', explain: '"The food" singular → "is"' },
-        { wrong: 'is', right: 'are', type: 'SVA', explain: '"The prices" plural → "are"' },
+        { wrong: 'price', right: 'prices', type: 'Plural', explain: '"The prices" — plural needed here' },
         { wrong: 'bring', right: 'brought', type: 'Tense', explain: 'Past tense of "bring" = "brought"' },
         { wrong: 'orders', right: 'ordered', type: 'Tense', explain: 'Past narrative → "ordered"' },
         { wrong: 'she', right: 'her', type: 'Pronoun', explain: '"With her" — object pronoun after preposition' },
@@ -6548,15 +6583,13 @@ https://brdmochi13.github.io/sec1-english/
     },
     {
       title: 'Passage 7 — Exam Prep: Social Media',
-      passage: 'Many young people today spends hours on social media every day. While these platforms allows us to connect with friend around the world, they can also be harmful if we do not use it responsible. Some students neglects their homework because they are too busy scrolling through they phones. Others compare theirself to influencers and feel bad about their own lifes. However, social media is not all negative. When used wisely, it can be a powerful tool for learning. We must learns to control our usage and to think critical about what we see online.',
+      passage: 'Many young people today spends hours on social media every day. While these platforms allows us to connect with friends around the world, the platforms can also be harmful if we do not use them responsable. Some students neglects their homework because they are too busy scrolling through thier phones. Others compare theirself to influencers and feel bad about their own lifes. However, social media is not all negative. When used wisely, it can be a powerful tool for learning. We must learns to control our usage and to think critical about what we see online.',
       errors: [
         { wrong: 'spends', right: 'spend', type: 'SVA', explain: '"Many young people" plural → "spend"' },
         { wrong: 'allows', right: 'allow', type: 'SVA', explain: '"These platforms" plural → "allow"' },
-        { wrong: 'friend', right: 'friends', type: 'Plural', explain: '"Friends" — plural needed' },
-        { wrong: 'it', right: 'them', type: 'Pronoun', explain: '"Them" — refers to plural "platforms"' },
-        { wrong: 'responsible', right: 'responsibly', type: 'Adverb', explain: '"Use" = verb → needs adverb "responsibly"' },
+        { wrong: 'responsable', right: 'responsibly', type: 'Adverb/Spelling', explain: '"Use" = verb → needs adverb "responsibly"' },
         { wrong: 'neglects', right: 'neglect', type: 'SVA', explain: '"Some students" plural → "neglect"' },
-        { wrong: 'they', right: 'their', type: 'Pronoun', explain: '"Their phones" — possessive pronoun' },
+        { wrong: 'thier', right: 'their', type: 'Spelling', explain: '"Their phones" — common misspelling of "their"' },
         { wrong: 'theirself', right: 'themselves', type: 'Pronoun', explain: '"Themselves" — correct reflexive pronoun' },
         { wrong: 'lifes', right: 'lives', type: 'Plural', explain: '"Lives" is the plural of "life"' },
         { wrong: 'learns', right: 'learn', type: 'SVA', explain: '"We" plural → "learn" (no -s)' },
@@ -6597,14 +6630,14 @@ https://brdmochi13.github.io/sec1-english/
     },
     {
       title: 'Passage 10 — Exam Prep: Technology in Schools',
-      passage: 'Technology have changed the way students learn in schools today. With the introduction of tablets and laptop, lessons has become more interactive. Students can now access information immediate and complete assignment online. However, some student are easily distracted by their devices. Additionally, students who does not have devices at home may fall behind they classmates. Teachers must ensure that technology are used purposeful in the classroom, and that every student is given the opportunity to participate equally.',
+      passage: 'Technology have changed the way students learn in schools today. With the introduction of tablets and laptop, lessons has become more interactive. Students can now access information immediate and complete assignment online. However, some learner are easily distracted by their devices. Additionally, students who does not have devices at home may fall behind they classmates. Teachers must ensure that technology are used purposeful in the classroom, and that every learner is given the opportunity to participate equally.',
       errors: [
         { wrong: 'have', right: 'has', type: 'SVA', explain: '"Technology" singular → "has"' },
         { wrong: 'laptop', right: 'laptops', type: 'Plural', explain: '"Laptops" — plural' },
         { wrong: 'has', right: 'have', type: 'SVA', explain: '"Lessons" plural → "have"' },
-        { wrong: 'immediate', right: 'immediately', type: 'Adverb', explain: '"Access" = verb → needs adverb' },
+        { wrong: 'immediate', right: 'immediately', type: 'Adverb', explain: '"Access" = verb → needs adverb "immediately"' },
         { wrong: 'assignment', right: 'assignments', type: 'Plural', explain: '"Assignments" — plural' },
-        { wrong: 'student', right: 'students', type: 'Plural', explain: '"Some students" — plural' },
+        { wrong: 'learner', right: 'learners', type: 'Plural', explain: '"Some learners" — plural needed' },
         { wrong: 'does', right: 'do', type: 'SVA', explain: '"Students who do not" — plural → "do"' },
         { wrong: 'they', right: 'their', type: 'Pronoun', explain: '"Their classmates" — possessive pronoun' },
         { wrong: 'are', right: 'is', type: 'SVA', explain: '"Technology" singular → "is"' },
@@ -7243,6 +7276,7 @@ CLOZE II (one word): Connectors=however/although/because/since/therefore/when/wh
         setTimeout(renderActivityPanel, 400);
       }
       if (id === 'storiesTab') { initStoriesTab(); }
+      if (id === 'editTab') { try { renderEditHistory(); } catch(e){} }
       if (id === 'tipsTab' || id === 'notesTab') {
         if (!notesRendered) renderNotes();
         setTimeout(refreshPersonalTips, 100);
@@ -10736,6 +10770,41 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
           words: '150–200',
           examTip: "Start with empathy before jumping into advice. Show you understand how he feels first. Then give specific, practical tips — not vague advice like 'try your best'."
         },
+        {
+          id: 'ep6', title: 'Situation Writing — School Excursion',
+          situation: 'You recently went on a school excursion to the Singapore Science Centre with your class. It was an interesting and enjoyable experience. Write an email to your cousin Nisha, who lives overseas, telling her about the excursion.',
+          points: ['Describe what you saw or did at the Science Centre that interested you most', 'Explain what you learned from the experience', 'Tell her why you would recommend a visit if she ever comes to Singapore'],
+          words: '150–200',
+          examTip: "Use vivid, specific details — not just 'it was fun'. Name a specific exhibit or activity. Show enthusiasm naturally through your word choices, not by repeating 'it was amazing'."
+        },
+        {
+          id: 'ep7', title: 'Situation Writing — Helping a New Student',
+          situation: 'A new student from Malaysia, Daniel, has just joined your class and is finding it hard to settle in. You want to help him feel welcome. Write an email to your friend Hui Ling suggesting how the class can help Daniel.',
+          points: ['Describe the difficulties Daniel seems to be facing in settling in', 'Suggest at least two practical ways the class can make Daniel feel more welcome', 'Ask Hui Ling to help you organise something for Daniel'],
+          words: '150–200',
+          examTip: "This is a problem-solving email. Be specific about what Daniel is struggling with — don't just say 'he is shy'. Your suggestions should be concrete and actionable, not vague."
+        },
+        {
+          id: 'ep8', title: 'Situation Writing — A Misunderstanding',
+          situation: 'You had an argument with your close friend Siti last week over something that was a misunderstanding. You have been feeling bad about it since. Write an email to Siti to resolve the situation.',
+          points: ['Explain your understanding of what caused the misunderstanding', 'Apologise sincerely and take responsibility for your part in the argument', 'Suggest a way to meet up and resolve things properly'],
+          words: '150–200',
+          examTip: "An apology email must sound genuine — not defensive. Do not blame Siti. Use 'I' statements: 'I am sorry', 'I should have'. Examiners look for emotional sincerity in the language."
+        },
+        {
+          id: 'ep9', title: 'Situation Writing — Favourite Book or Movie',
+          situation: 'You have recently read a book or watched a movie that you really enjoyed. Write an email to your friend Marcus telling him about it and encouraging him to read or watch it too.',
+          points: ['Briefly describe what the book or movie is about without giving away the ending', 'Explain specifically what you enjoyed about it and why it affected you', 'Persuade Marcus to read or watch it by telling him why he in particular would enjoy it'],
+          words: '150–200',
+          examTip: "Personalise your recommendation — say something specific about Marcus that makes you think he would enjoy it. Generic enthusiasm ('it is so good') scores poorly. Specific detail scores well."
+        },
+        {
+          id: 'ep10', title: 'Situation Writing — Complaining About a Problem',
+          situation: 'There is a problem in your neighbourhood that has been bothering you and your family — for example, noise, littering, stray animals, or a broken facility. Write an email to your friend Kai telling him about this problem.',
+          points: ['Describe the problem clearly and explain how long it has been going on', 'Explain how it is affecting you and your family specifically', 'Tell Kai what you and your family have done or plan to do about it'],
+          words: '150–200',
+          examTip: "Choose ONE specific problem and stick to it. Use precise language: not 'some noise' but 'loud music from a neighbour every night after 11pm'. Specific details make your writing convincing."
+        },
       ]
     };
 
@@ -10951,24 +11020,53 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         copyPasteWarning = '\n\nWARNING: The student appears to have copied significant portions of the prompt situation directly into their answer (' + situationSimilarity + '% word match). Please flag this clearly in your feedback. Real marks will be deducted for copied content — the student must write in their OWN words.';
       }
 
-      var prompt = 'You are a Singapore secondary school English teacher marking a Sec 1 NT/G1 student\'s informal email.\n\n'
-        + 'PROMPT GIVEN TO STUDENT:\n' + currentEmailPrompt.situation + '\n\n'
-        + 'CONTENT POINTS TO COVER:\n' + pointsList + '\n\n'
-        + 'STUDENT\'S EMAIL:\n' + fullText + '\n\n'
-        + 'Mark using this rubric (G1/NT level):\n'
-        + 'A) FORMAT (5 marks): To/Subject/Salutation/Closing/Sign-off correct and appropriate\n'
-        + 'B) REGISTER (5 marks): Tone is friendly, personal, conversational — not formal, not slang\n'
-        + 'C) CONTENT (10 marks): All content points addressed clearly, with adequate detail\n'
-        + 'D) LANGUAGE (10 marks): Grammar, tense consistency, sentence structure, vocabulary accuracy\n\n'
-        + 'Respond ONLY in this JSON format (no extra text):\n'
+      // Count paragraphs in body
+      var bodyParagraphs = bodyText.split(/\n\s*\n/).filter(function(p){ return p.trim().length > 0; });
+      var paraCount = bodyParagraphs.length;
+      var singleParaWarning = paraCount <= 1 ? 'WARNING: Student wrote entire body as ONE paragraph. Each content point should be a separate paragraph. Deduct marks for paragraph structure.' : '';
+      var pointCount = currentEmailPrompt.points ? currentEmailPrompt.points.length : 3;
+
+      var prompt = 'You are a Singapore secondary school English examiner marking a Sec 1 NA/G2 student\'s SITUATIONAL WRITING (informal email).\n\n'
+        + 'SITUATION GIVEN TO STUDENT:\n' + currentEmailPrompt.situation + '\n\n'
+        + 'CONTENT POINTS TO COVER (' + pointCount + ' points):\n' + pointsList + '\n\n'
+        + 'STUDENT\'S EMAIL (full):\n' + fullText + '\n\n'
+        + '━━━ COPY-PASTE ANALYSIS ━━━\n'
+        + 'Word match with question text: ' + situationSimilarity + '%\n'
+        + (situationSimilarity > 55 ? 'FLAG: Student copied from the question. Content using question words verbatim = 0 content marks for those points.\n' : 'No significant copy-paste detected.\n')
+        + '\n━━━ PARAGRAPH STRUCTURE ━━━\n'
+        + 'Body paragraphs detected: ' + paraCount + '\n'
+        + singleParaWarning + '\n'
+        + '\n━━━ MARK USING THIS RUBRIC ━━━\n'
+        + 'A) FORMAT /5: Greeting (Hi/Dear name), body paragraphs, closing (Take care/Yours), sign-off with student name. Deduct for missing parts.\n'
+        + 'B) REGISTER /5: Friendly conversational tone. Contractions ok (I\'m, we\'ll). No overly formal phrases ("I am writing to inform you"). No slang. Penalise if tone is stiff or robotic.\n'
+        + 'C) CONTENT /10: Each point addressed = up to 3 marks. Award 0 for any point that is merely copied from the question. Award 1 for a point addressed but vague. Award 2-3 for specific, personal detail.\n'
+        + 'D) LANGUAGE /10: Grammar accuracy, tense consistency, sentence variety. SVA errors, wrong tense, run-on sentences each deduct marks.\n'
+        + '\n━━━ WRITING STYLE (report separately, no marks but critical feedback) ━━━\n'
+        + 'Check and comment on:\n'
+        + '1. COPY-PASTE: Did student copy phrases from the question into their answer? Name specific phrases if yes.\n'
+        + '2. PARAGRAPH STRUCTURE: Did student write each content point as a separate paragraph? Or all bunched together?\n'
+        + '3. OWN WORDS: Did student rephrase the question in their own voice, or just repeat back the prompt?\n'
+        + '4. PERSONAL DETAILS: Did student add specific, personal details (names, places, feelings) to make the email feel real?\n'
+        + '5. NATURAL LANGUAGE: Does the email sound like a real message from a teenager to a friend, or does it sound like a model answer?\n'
+        + '\nRespond ONLY in this exact JSON (no extra text, no markdown):\n'
         + '{"format":{"score":0,"max":5,"comment":"..."},'
         + '"register":{"score":0,"max":5,"comment":"..."},'
         + '"content":{"score":0,"max":10,"comment":"...","points_addressed":[true,false,true]},'
         + '"language":{"score":0,"max":10,"comment":"..."},'
         + '"total":0,"total_max":30,'
         + '"grade":"A/B/C/D",'
-        + '"overall_feedback":"2-3 sentence encouraging summary",'
-        + '"top_improvements":["specific tip 1","specific tip 2","specific tip 3"]}';
+        + '"overall_feedback":"2-3 sentence honest summary of performance",'
+        + '"writing_style":{'
+        + '"copy_paste_detected":false,'
+        + '"copy_paste_detail":"specific phrases copied if any, else none",'
+        + '"paragraph_structure":"one paragraph per point / all in one paragraph / other",'
+        + '"own_words_score":"poor/fair/good/excellent",'
+        + '"personal_detail_score":"poor/fair/good/excellent",'
+        + '"natural_language_score":"poor/fair/good/excellent",'
+        + '"style_feedback":"2-3 sentences of honest writing style coaching — be direct"'
+        + '},'
+        + '"top_improvements":["specific improvement 1","specific improvement 2","specific improvement 3"],'
+        + '"copy_paste_detected":' + (situationSimilarity > 55 ? 'true' : 'false') + '}';
 
       try {
         var response = '';
@@ -11033,6 +11131,26 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
             return '<div style="font-size:.74rem;color:' + (ok ? 'var(--green)' : 'var(--red)') + '">'
               + (ok ? '✅' : '❌') + ' ' + esc(pt) + '</div>';
           }).join('')
+          + '</div>';
+      }
+
+      // ── Writing Style Analysis panel ───────────────────────────────────────
+      if (r.writing_style) {
+        var ws = r.writing_style;
+        function _sc(s){ return s==='excellent'?'#16a34a':s==='good'?'#0891b2':s==='fair'?'#d97706':'#dc2626'; }
+        function _bd(lbl,sc){ var c=_sc(sc||'fair'); return '<span style="display:inline-block;padding:1px 7px;border-radius:10px;background:'+c+'20;color:'+c+';font-size:.7rem;font-weight:700;margin:.1rem .15rem .1rem 0">'+lbl+': '+(sc||'—').toUpperCase()+'</span>'; }
+        html += '<div style="margin:.55rem 0;padding:.65rem .75rem;border-radius:8px;border:1.5px solid #c4b5fd;background:#faf5ff">'
+          + '<div style="font-size:.74rem;font-weight:700;color:#6d28d9;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem">✍️ Writing Style Feedback</div>'
+          + '<div style="margin-bottom:.4rem">'
+          + _bd('Own Words', ws.own_words_score)
+          + _bd('Personal Detail', ws.personal_detail_score)
+          + _bd('Natural Language', ws.natural_language_score)
+          + '</div>'
+          + (ws.copy_paste_detail && ws.copy_paste_detail !== 'none'
+              ? '<div style="font-size:.76rem;color:#92400e;margin-bottom:.3rem;padding:.3rem .5rem;background:#fef3c7;border-radius:4px">⚠️ <strong>Copied from question:</strong> <em>' + esc(ws.copy_paste_detail) + '</em></div>' : '')
+          + '<div style="font-size:.77rem;margin-bottom:.3rem"><strong>📐 Paragraphs:</strong> ' + esc(ws.paragraph_structure||'—') + '</div>'
+          + (ws.style_feedback
+              ? '<div style="font-size:.79rem;color:#4c1d95;line-height:1.65;padding:.4rem .55rem;background:#ede9fe;border-radius:6px">' + _mdToHtml(ws.style_feedback) + '</div>' : '')
           + '</div>';
       }
 
@@ -12927,7 +13045,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var area = document.getElementById('editPassageArea');
     // Build passage with clickable blanks
     var html = '<div class="edit-passage">';
-    var text = p.text;
+    var text = p.text || p.passage || '';
     p.errors.forEach(function(e, i) {
       if (e.correct) return;
       // Replace first occurrence of wrong word/phrase
@@ -12937,6 +13055,10 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     html += '<div id="editInputArea" style="margin-top:.7rem"></div>';
     area.innerHTML = html;
     document.getElementById('editCheckBtn').disabled = false;
+    // Update error count in header
+    var errCount = p.errors ? p.errors.filter(function(e){return !e.correct;}).length : 0;
+    var countEl = document.getElementById('editErrorCount');
+    if (countEl) countEl.textContent = errCount + ' grammar error' + (errCount !== 1 ? 's' : '');
     document.getElementById('editScore').style.display = 'none';
     document.getElementById('editExplain').innerHTML = '';
     setTimeout(function(){ var el=document.getElementById('editPassageArea'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },100);
@@ -13031,6 +13153,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       }
     });
     saveData(_ed);
+    // Force immediate Firestore write for editing — don't rely on debounce
+    if (db && currentUser) {
+      console.log('[EDIT] Forcing Firestore write after editing session');
+      saveDataToFirebase(_ed);
+    }
     renderEditHistory();
   }
 
@@ -14146,10 +14273,13 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
             try { renderAdaptivePanel(); } catch(e){}
             try { renderUnifiedMasteryRadar(d); } catch(e){}
             try { renderActivityPanel(); } catch(e){}
+            try { renderEditHistory(); } catch(e){}
+            try { renderEmailHistory(); } catch(e){}
           }, 500);
-          // Extra retry for activity panel after all data settles
+          // Extra retry after all data settles
           setTimeout(function() {
             try { renderActivityPanel(); } catch(e){}
+            try { renderEditHistory(); } catch(e){}
           }, 2000);
         }, 600);
       })
