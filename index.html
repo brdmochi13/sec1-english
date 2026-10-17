@@ -4939,6 +4939,14 @@ https://brdmochi13.github.io/sec1-english/
               <option value="editing">Editing</option>
             </select>
           </div>
+          <div class="cfg-item"><label>Questions</label>
+            <select id="qfCount" style="font-size:16px">
+              <option value="15" selected>15 questions</option>
+              <option value="30">30 questions</option>
+              <option value="50">50 questions</option>
+              <option value="100">100 questions 🔥</option>
+            </select>
+          </div>
           <div class="cfg-item"><label>Speed</label>
             <select id="qfSpeed" style="font-size:16px">
               <option value="30">30 sec/question</option>
@@ -11300,6 +11308,233 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       ideal:[4,4,5,5,5,5,6,6,6,6] },
   ];
 
+  // ── QF_EXTRA: Additional question bank for 30/50/100-question sessions ──
+  var QF_EXTRA = {
+    tenses: [
+      { q: 'By the time she arrived, he _____ dinner.', v: 'cook', a: 'had cooked', r: 'Past perfect — action completed before another past event.' },
+      { q: 'The students _____ the experiment right now.', v: 'conduct', a: 'are conducting', r: 'Present continuous for action in progress.' },
+      { q: 'He _____ in this company for ten years by next January.', v: 'work', a: 'will have worked', r: 'Future perfect — completed by a future point.' },
+      { q: 'She _____ to Paris three times already.', v: 'be', a: 'has been', r: 'Present perfect for experience.' },
+      { q: 'The report _____ by the manager before the meeting.', v: 'review', a: 'had been reviewed', r: 'Past perfect passive.' },
+      { q: 'They _____ the project when the power went out.', v: 'complete', a: 'were completing', r: 'Past continuous interrupted by past simple event.' },
+      { q: 'She _____ the violin since she was five.', v: 'play', a: 'has been playing', r: 'Present perfect continuous — started in past, still ongoing.' },
+      { q: 'By midnight, the children _____ fast asleep.', v: 'fall', a: 'had fallen', r: 'Past perfect for action before another past time.' },
+      { q: 'The sun _____ at six tomorrow morning.', v: 'rise', a: 'will rise / rises', r: 'Future: will + base or present simple for scheduled events.' },
+      { q: 'He _____ the novel by the end of this week.', v: 'finish', a: 'will have finished', r: 'Future perfect — completed by end of this week.' },
+      { q: 'The cats _____ on the sofa when I came home.', v: 'sleep', a: 'were sleeping', r: 'Past continuous for ongoing action at a past time.' },
+      { q: 'She _____ her keys in the bag before leaving.', v: 'leave', a: 'left', r: 'Past simple for completed action.' },
+      { q: 'I _____ to call you, but I forgot.', v: 'want', a: 'wanted', r: 'Past simple — single completed action.' },
+      { q: 'The plane _____ in an hour.', v: 'depart', a: 'departs / will depart', r: 'Present simple for timetabled future or will for prediction.' },
+      { q: 'They _____ tennis every Saturday.', v: 'play', a: 'play', r: 'Present simple for habits/routines.' },
+      { q: 'He _____ the answer when the teacher asked.', v: 'not know', a: "didn't know", r: 'Past simple negative.' },
+      { q: 'She _____ for the exam all week.', v: 'study', a: 'has been studying', r: 'Present perfect continuous — ongoing relevance.' },
+      { q: 'The cookies _____ in the oven right now.', v: 'bake', a: 'are being baked', r: 'Present continuous passive.' },
+      { q: 'We _____ this town for over twenty years.', v: 'live', a: 'have lived / have been living', r: 'Present perfect (continuous) — started past, still true.' },
+      { q: 'By 2030, scientists _____ a cure for this disease.', v: 'discover', a: 'will have discovered', r: 'Future perfect for completion before a future point.' },
+      { q: 'The dog _____ all night if we leave it alone.', v: 'bark', a: 'will bark', r: 'Future simple — prediction/result.' },
+      { q: 'She _____ her lunch when the bell rang.', v: 'eat', a: 'was eating', r: 'Past continuous interrupted by past simple.' },
+      { q: 'The museum _____ at 9 a.m. every weekday.', v: 'open', a: 'opens', r: 'Present simple for scheduled/routine facts.' },
+      { q: 'They _____ the project proposal by Friday.', v: 'submit', a: 'will submit / are submitting', r: 'Future plan — will or present continuous.' },
+      { q: 'He _____ never _____ sushi before last night.', v: 'eat', a: 'had never eaten', r: 'Past perfect — first-time experience before a past event.' },
+      { q: 'The children _____ in the garden when it started to rain.', v: 'play', a: 'were playing', r: 'Past continuous.' },
+      { q: 'She _____ the dishes when her phone rang.', v: 'wash', a: 'was washing', r: 'Past continuous interrupted.' },
+      { q: 'He _____ already _____ the news when I told him.', v: 'hear', a: 'had already heard', r: 'Past perfect — prior knowledge.' },
+      { q: 'By the time we arrived, the film _____.', v: 'start', a: 'had started', r: 'Past perfect — completed before arrival.' },
+      { q: 'She _____ her grandmother once a month.', v: 'visit', a: 'visits', r: 'Present simple for regular actions.' },
+      { q: 'They _____ the decision after careful thought.', v: 'make', a: 'made', r: 'Past simple for a completed decision.' },
+      { q: 'The package _____ to the wrong address.', v: 'send', a: 'was sent', r: 'Past simple passive.' },
+      { q: 'I _____ this book three times and I still love it.', v: 'read', a: 'have read', r: 'Present perfect for repeated experience.' },
+      { q: 'She _____ hard lately because of exams.', v: 'work', a: 'has been working', r: 'Present perfect continuous — recent ongoing activity.' },
+      { q: 'By next year, he _____ here for a decade.', v: 'live', a: 'will have lived', r: 'Future perfect.' },
+      { q: 'They _____ their bags and left the hotel.', v: 'pack', a: 'packed', r: 'Past simple — sequential completed actions.' },
+      { q: 'The new bridge _____ next month.', v: 'open', a: 'will open / is opening', r: 'Future plan or scheduled event.' },
+      { q: 'She _____ a song when we entered.', v: 'sing', a: 'was singing', r: 'Past continuous for background action.' },
+      { q: 'He _____ his bike every weekend.', v: 'ride', a: 'rides', r: 'Present simple for regular habit.' },
+      { q: 'The letter _____ before I could read it.', v: 'destroy', a: 'was destroyed', r: 'Past simple passive.' },
+    ],
+    articles: [
+      { q: '_____ Amazon is the longest river in South America.', a: 'The', r: 'Unique geographical feature → The.' },
+      { q: 'She is _____ university student.', a: 'a', r: '"University" starts with /j/ consonant sound → a.' },
+      { q: 'He gave me _____ useful advice.', a: '-', r: '"Advice" is uncountable — no article needed.' },
+      { q: 'We saw _____ old man feeding pigeons.', a: 'an', r: '"Old" starts with vowel /ɒ/ → an.' },
+      { q: '_____ Nile flows through Egypt.', a: 'The', r: 'Rivers take "The".' },
+      { q: 'She plays _____ piano beautifully.', a: 'the', r: '"The" with musical instruments.' },
+      { q: 'I want to be _____ astronaut one day.', a: 'an', r: '"Astronaut" starts with vowel /æ/ → an.' },
+      { q: 'He bought _____ new laptop yesterday.', a: 'a', r: '"Laptop" starts with consonant /l/ → a, first mention.' },
+      { q: '_____ information you gave me was wrong.', a: 'The', r: 'Specific information previously mentioned → The.' },
+      { q: 'She ate _____ apple for breakfast.', a: 'an', r: '"Apple" starts with vowel /æ/ → an.' },
+      { q: 'They climbed _____ highest mountain in the region.', a: 'the', r: 'Superlative → The.' },
+      { q: '_____ gold is more valuable than silver.', a: '-', r: 'General material/substance — no article.' },
+      { q: 'He is _____ honest and hardworking employee.', a: 'an', r: '"Honest" — silent H, vowel sound → an.' },
+      { q: 'I need _____ hour to finish this.', a: 'an', r: '"Hour" — silent H, vowel sound /aʊ/ → an.' },
+      { q: '_____ rich should help the poor.', a: 'The', r: 'The + adjective = group of people.' },
+      { q: 'She has _____ MBA from a top school.', a: 'an', r: '"MBA" — read as letters: M = /ɛm/ vowel sound → an.' },
+      { q: 'He is _____ best student in the class.', a: 'the', r: 'Superlative + unique → The.' },
+      { q: 'We need _____ patience to deal with this.', a: '-', r: '"Patience" is abstract uncountable — no article.' },
+      { q: 'She wore _____ uniform to school.', a: 'a', r: '"Uniform" starts with /j/ consonant sound → a.' },
+      { q: 'There is _____ owl in the old tree.', a: 'an', r: '"Owl" starts with vowel /aʊ/ → an.' },
+      { q: 'He took _____ taxi to the airport.', a: 'a', r: 'First mention, consonant start → a.' },
+      { q: '_____ Pacific Ocean is the largest ocean.', a: 'The', r: 'Named unique geographical body → The.' },
+      { q: 'She is learning _____ French.', a: '-', r: 'Languages take no article.' },
+      { q: 'I saw _____ UFO last night.', a: 'a', r: '"UFO" — spoken as /juː/ consonant sound → a.' },
+      { q: 'Can you open _____ window, please?', a: 'the', r: 'Specific known window in context → The.' },
+      { q: 'He wants to visit _____ United States.', a: 'the', r: 'Countries with plural/union names take The.' },
+      { q: 'She has _____ eye for design.', a: 'an', r: '"Eye" starts with vowel /aɪ/ → an.' },
+      { q: '_____ knowledge is power.', a: '-', r: 'Abstract noun in general sense — no article.' },
+      { q: 'He gave her _____ bouquet of flowers.', a: 'a', r: '"Bouquet" starts with /b/ consonant → a, first mention.' },
+      { q: '_____ sun sets in the west.', a: 'The', r: 'Unique celestial body → The.' },
+      { q: 'She made _____ error in her calculation.', a: 'an', r: '"Error" starts with vowel /ɛ/ → an.' },
+      { q: 'This is _____ most beautiful painting I have seen.', a: 'the', r: 'Superlative + unique reference → The.' },
+      { q: 'He speaks _____ English fluently.', a: '-', r: 'Languages take no article.' },
+      { q: 'We took _____ break after two hours of work.', a: 'a', r: '"Break" — consonant start, first mention → a.' },
+      { q: 'She lost _____ earring at the party.', a: 'an', r: '"Earring" starts with vowel /ɪ/ → an.' },
+      { q: '_____ Prime Minister announced new policies.', a: 'The', r: 'Unique title/role → The.' },
+      { q: 'He found _____ unusual solution to the problem.', a: 'an', r: '"Unusual" starts with vowel /ʌ/ → an.' },
+      { q: 'They went for _____ walk in the evening.', a: 'a', r: '"Walk" — consonant start, first mention → a.' },
+      { q: '_____ moon was full last night.', a: 'The', r: 'Unique celestial body → The.' },
+      { q: 'She is _____ only child in her family.', a: 'the', r: 'Unique — only one → The.' },
+    ],
+    preps: [
+      { q: 'The meeting is scheduled _____ 3 p.m.', a: 'at', r: '"At" for specific times.' },
+      { q: 'She is interested _____ marine biology.', a: 'in', r: '"Interested in" — fixed adjective-preposition pair.' },
+      { q: 'He arrived _____ the train station early.', a: 'at', r: '"At" for specific locations/points.' },
+      { q: 'The answer depends _____ your effort.', a: 'on', r: '"Depend on" — fixed verb-preposition pair.' },
+      { q: 'She is afraid _____ spiders.', a: 'of', r: '"Afraid of" — fixed adjective-preposition pair.' },
+      { q: 'He congratulated her _____ her success.', a: 'on', r: '"Congratulate on" — fixed verb-preposition pair.' },
+      { q: 'The dog ran _____ the fence.', a: 'along', r: '"Along" = following the length of something.' },
+      { q: 'They are fond _____ spicy food.', a: 'of', r: '"Fond of" — fixed adjective-preposition pair.' },
+      { q: 'She apologised _____ being late.', a: 'for', r: '"Apologise for" — fixed verb-preposition pair.' },
+      { q: 'He was punished _____ his behaviour.', a: 'for', r: '"Punished for" — reason/cause.' },
+      { q: 'The children ran _____ the park.', a: 'across', r: '"Across" = from one side to the other (open area).' },
+      { q: 'She is good _____ mathematics.', a: 'at', r: '"Good at" — fixed adjective-preposition pair.' },
+      { q: 'He lives _____ a small flat _____ the third floor.', a: 'in / on', r: '"In" for enclosed space; "on" for floor level.' },
+      { q: 'The train passes _____ the tunnel.', a: 'through', r: '"Through" = inside and out of an enclosed space.' },
+      { q: 'She is different _____ her sister.', a: 'from', r: '"Different from" — standard Singapore/British English.' },
+      { q: 'He succeeded _____ passing the exam.', a: 'in', r: '"Succeed in" — fixed verb-preposition pair.' },
+      { q: 'The cat jumped _____ the table.', a: 'onto', r: '"Onto" = movement to a surface.' },
+      { q: 'She complained _____ the noise.', a: 'about', r: '"Complain about" — fixed verb-preposition pair.' },
+      { q: 'He is responsible _____ locking up.', a: 'for', r: '"Responsible for" — fixed adjective-preposition pair.' },
+      { q: 'They arrived _____ Monday morning.', a: 'on', r: '"On" + days and dates.' },
+      { q: 'She has been waiting _____ an hour.', a: 'for', r: '"For" + duration of time.' },
+      { q: 'He is angry _____ his friend.', a: 'with', r: '"Angry with" a person (not "at" in formal English).' },
+      { q: 'The library is _____ the post office and the bank.', a: 'between', r: '"Between" for two reference points.' },
+      { q: 'She handed the report _____ to her manager.', a: 'over', r: '"Hand over" = pass/submit something.' },
+      { q: 'He is proud _____ his achievements.', a: 'of', r: '"Proud of" — fixed adjective-preposition pair.' },
+      { q: 'They met _____ the first time in 2020.', a: 'for', r: '"For the first time" — fixed expression.' },
+      { q: 'She sat _____ her friends during the concert.', a: 'with', r: '"With" = in the company of.' },
+      { q: 'The store closes _____ midnight.', a: 'at', r: '"At" for specific time points.' },
+      { q: 'He borrowed a pen _____ his classmate.', a: 'from', r: '"Borrow from" — source of borrowing.' },
+      { q: 'They were talking _____ the phone for an hour.', a: 'on', r: '"On the phone" — fixed expression.' },
+      { q: 'She smiled _____ the camera.', a: 'at', r: '"Smile at" — direction of action.' },
+      { q: 'He stumbled _____ an interesting article.', a: 'upon / across', r: '"Stumble upon/across" = discover by chance.' },
+      { q: 'The results depend _____ how hard you work.', a: 'on', r: '"Depend on" — fixed pair.' },
+      { q: 'She looked _____ her notes before the exam.', a: 'through', r: '"Look through" = review/read carefully.' },
+      { q: 'He tripped _____ the step and fell.', a: 'over', r: '"Trip over" = stumble on an obstacle.' },
+      { q: 'The essay consists _____ three main parts.', a: 'of', r: '"Consist of" — fixed verb-preposition pair.' },
+      { q: 'She agreed _____ his suggestion.', a: 'with', r: '"Agree with" a person or idea.' },
+      { q: 'He dealt _____ the problem calmly.', a: 'with', r: '"Deal with" = handle/manage.' },
+      { q: 'They argued _____ the best route to take.', a: 'about / over', r: '"Argue about/over" a topic.' },
+      { q: 'She was born _____ a small village.', a: 'in', r: '"In" for towns/cities/areas.' },
+    ],
+    sva: [
+      { q: 'Every student and teacher', v: 'be', opts: ['is', 'are'], a: 'is', r: '"Every + noun and noun" takes singular verb.' },
+      { q: 'The number of complaints', v: 'be', opts: ['is', 'are'], a: 'is', r: '"The number of" = singular.' },
+      { q: 'A number of students', v: 'be', opts: ['is', 'are'], a: 'are', r: '"A number of" = plural (= several).' },
+      { q: 'Neither the books nor the pen', v: 'be', opts: ['is', 'are'], a: 'is', r: 'Nor: agree with closest subject "pen" (singular) → is.' },
+      { q: 'The jury', v: 'disagree', opts: ['disagrees', 'disagree'], a: 'disagrees', r: 'Collective noun as single unit → singular.' },
+      { q: 'Each of the answers', v: 'be', opts: ['is', 'are'], a: 'is', r: '"Each of" always takes singular verb.' },
+      { q: 'Twenty dollars', v: 'be', opts: ['is', 'are'], a: 'is', r: 'Sums of money = singular.' },
+      { q: 'Everybody in the hall', v: 'cheer', opts: ['cheers', 'cheer'], a: 'cheers', r: '"Everybody" = singular indefinite pronoun.' },
+      { q: 'The scissors', v: 'be', opts: ['is', 'are'], a: 'are', r: '"Scissors" always plural (no singular form).' },
+      { q: 'Neither he nor I', v: 'know', opts: ['knows', 'know'], a: 'know', r: 'Nor: agree with closest ("I") → know (base form).' },
+      { q: 'Two weeks', v: 'be', opts: ['is', 'are'], a: 'is', r: 'Period of time treated as single unit → is.' },
+      { q: 'The staff at the hospital', v: 'work', opts: ['works', 'work'], a: 'work', r: 'Collective noun here referring to individuals → plural.' },
+      { q: 'One of the students', v: 'be', opts: ['is', 'are'], a: 'is', r: '"One of" → the subject is "one" (singular).' },
+      { q: 'The majority of the cake', v: 'be', opts: ['is', 'are'], a: 'is', r: '"Majority" with uncountable noun → singular.' },
+      { q: 'There', v: 'be', opts: ['is', 'are'], a: 'are', r: '"There are" — subject is the plural noun that follows: "There are many reasons".' },
+      { q: 'The team of engineers', v: 'have', opts: ['has', 'have'], a: 'has', r: '"Team" as a single unit → has.' },
+      { q: 'Physics and Chemistry', v: 'be', opts: ['is', 'are'], a: 'are', r: 'Two separate subjects joined by and → plural.' },
+      { q: 'Not only the students but also the teacher', v: 'be', opts: ['is', 'are'], a: 'is', r: 'Not only…but also: agree with closest ("teacher") → is.' },
+      { q: 'Three-quarters of the work', v: 'be', opts: ['is', 'are'], a: 'is', r: 'Fraction + uncountable noun → singular.' },
+      { q: 'The class of thirty students', v: 'attend', opts: ['attends', 'attend'], a: 'attends', r: '"Class" as a single collective unit → attends.' },
+    ],
+    conj: [
+      { q1: 'She practised daily', q2: 'she could not win the competition.', a: 'but / yet', r: 'Contrast — practised hard but still lost.' },
+      { q1: 'Take your umbrella', q2: 'it might rain later.', a: 'because / in case', r: 'Reason or precaution.' },
+      { q1: '', q2: 'she had studied hard, she failed the test.', a: 'Although / Even though', r: 'Concession — surprising contrast.' },
+      { q1: 'He ran quickly', q2: 'he could catch the bus.', a: 'so that', r: 'Purpose — ran in order to catch the bus.' },
+      { q1: 'She will come', q2: 'she finishes her work.', a: 'once / when / after', r: 'Time — one event follows another.' },
+      { q1: 'He is tall', q2: 'his brother is short.', a: 'whereas / while', r: 'Contrast between two different qualities.' },
+      { q1: 'She locked the door', q2: 'going to bed.', a: 'before', r: 'Time sequence — locking happened before sleeping.' },
+      { q1: 'He could not attend the meeting', q2: 'he was ill.', a: 'because / as / since', r: 'Reason for absence.' },
+      { q1: 'They will start the journey', q2: 'everyone is ready.', a: 'once / when', r: 'Condition before action starts.' },
+      { q1: 'She loves singing', q2: 'her sister prefers dancing.', a: 'while / whereas', r: 'Contrast in preference.' },
+      { q1: 'He finished his homework', q2: 'went out to play.', a: 'and', r: 'Joins two sequential actions by same subject.' },
+      { q1: 'Study hard', q2: 'you want to pass.', a: 'if', r: 'Conditional — studying is the condition for passing.' },
+      { q1: '', q2: 'it was cold, she wore a light jacket.', a: 'Although / Despite the fact that', r: 'Concession — wore light jacket despite cold.' },
+      { q1: 'He apologised immediately', q2: 'realising his mistake.', a: 'after', r: 'Time — apology came after realisation.' },
+      { q1: 'She spoke loudly', q2: 'everyone could hear her.', a: 'so that', r: 'Purpose — spoke loudly in order to be heard.' },
+      { q1: 'He is good at Maths', q2: 'poor at English.', a: 'but', r: 'Contrast of two different qualities.' },
+      { q1: 'You may borrow my pen', q2: 'you return it tomorrow.', a: 'as long as / provided that', r: 'Condition — borrowing allowed on one condition.' },
+      { q1: 'She did not come to school', q2: 'she had a fever.', a: 'because / since / as', r: 'Reason for absence.' },
+      { q1: '', q2: 'having checked his work, he submitted it.', a: 'After', r: 'Time — submission after checking.' },
+      { q1: 'They played well', q2: 'they lost the match.', a: 'but / yet / however', r: 'Contrast — good play still resulted in loss.' },
+    ],
+    editing: [
+      { s: "The informations were very helpful.", e: "informations", c: "information", r: '"Information" is uncountable — no plural form.' },
+      { s: "She didn't went to school yesterday.", e: "went", c: "go", r: 'After "did not", use base form of verb.' },
+      { s: "He is more taller than his brother.", e: "more taller", c: "taller", r: 'Never use "more" with -er comparatives.' },
+      { s: "There is too much furnitures in the room.", e: "furnitures", c: "furniture", r: '"Furniture" is uncountable — no plural form.' },
+      { s: "She has less friends than before.", e: "less", c: "fewer", r: '"Fewer" for countable nouns; "less" for uncountable.' },
+      { s: "He suggested to go to the park.", e: "to go", c: "going", r: '"Suggest" is followed by gerund (-ing), not infinitive.' },
+      { s: "The team have won the championship.", e: "have", c: "has", r: '"Team" as a single unit → has.' },
+      { s: "She is more prettier than her sister.", e: "more prettier", c: "prettier", r: 'No double comparative — just "prettier".' },
+      { s: "He enjoy playing football every weekend.", e: "enjoy", c: "enjoys", r: '"He" = 3rd person singular → enjoys.' },
+      { s: "They was happy to see us.", e: "was", c: "were", r: '"They" takes "were" not "was".' },
+      { s: "She advice me to rest.", e: "advice", c: "advised", r: '"Advice" is a noun; the verb is "advise" → advised.' },
+      { s: "I am boring in this class.", e: "boring", c: "bored", r: '"Bored" describes a feeling; "boring" describes a thing.' },
+      { s: "He make me laugh every time.", e: "make", c: "makes", r: '"He" = singular → makes.' },
+      { s: "She is more smart than I expected.", e: "more smart", c: "smarter", r: 'One-syllable/short adjectives use -er, not "more".' },
+      { s: "The news are shocking.", e: "are", c: "is", r: '"News" is uncountable → is.' },
+      { s: "He has many homeworks tonight.", e: "homeworks", c: "homework", r: '"Homework" is uncountable — no plural form.' },
+      { s: "She look forward to see you.", e: "to see", c: "to seeing", r: '"Look forward to" + gerund (-ing).' },
+      { s: "He is laying on the grass.", e: "laying", c: "lying", r: '"Lie" (recline) → lying; "lay" needs an object.' },
+      { s: "They didn't ate anything all day.", e: "ate", c: "eat", r: 'After "didn\'t", use base form: did not eat.' },
+      { s: "The teacher gave us many advices.", e: "advices", c: "advice", r: '"Advice" is uncountable — no plural form.' },
+      { s: "She is taller then her father.", e: "then", c: "than", r: '"Than" for comparisons; "then" is for time.' },
+      { s: "He wished that she was here.", e: "was", c: "were", r: 'Subjunctive mood after "wish" → were (all persons).' },
+      { s: "The children are play in the park.", e: "play", c: "playing", r: '"Are" + verb-ing for present continuous.' },
+      { s: "She speak English very good.", e: "good", c: "well", r: '"Well" is the adverb form — modifies the verb "speak".' },
+      { s: "He don't know the answer.", e: "don't", c: "doesn't", r: '"He" = 3rd person singular → doesn\'t.' },
+      { s: "We need to rise our standards.", e: "rise", c: "raise", r: '"Raise" (transitive) needs an object; "rise" is intransitive.' },
+      { s: "She is an use student.", e: "an", c: "a", r: '"Useful" starts with /j/ consonant sound → a useful.' },
+      { s: "The sheeps were grazing in the field.", e: "sheeps", c: "sheep", r: '"Sheep" is the same in singular and plural.' },
+      { s: "He has a very unique style.", e: "very unique", c: "unique", r: '"Unique" is absolute — cannot be "very unique".' },
+      { s: "She is use to waking up early.", e: "use", c: "used", r: '"Used to" (be accustomed to) → used to waking.' },
+      { s: "He could of helped us.", e: "of", c: "have", r: '"Could have" — "of" is incorrect; sounds like "have" but is wrong.' },
+      { s: "The students listened to the teacher careful.", e: "careful", c: "carefully", r: 'Adverb needed to modify the verb "listened".' },
+      { s: "She has went to the library.", e: "went", c: "gone", r: 'Present perfect: "has gone" not "has went".' },
+      { s: "He is the most fastest runner in school.", e: "most fastest", c: "fastest", r: 'No double superlative — just "fastest".' },
+      { s: "We was watching TV when he called.", e: "was", c: "were", r: '"We" takes "were" not "was".' },
+      { s: "She made a very big mistake, isn't it?", e: "isn't it", c: "didn't she", r: 'Question tag for past tense positive → didn\'t she?' },
+      { s: "He is a ten-years-old boy.", e: "ten-years-old", c: "ten-year-old", r: 'Hyphenated compound adjective uses singular noun → year.' },
+      { s: "The data shows that crime is falling.", e: "shows", c: "show", r: '"Data" is plural → show (formal/academic English).' },
+      { s: "She prefers tea than coffee.", e: "than", c: "to", r: '"Prefer … to …" is the correct pattern.' },
+      { s: "He asked me that what time the film starts.", e: "that what", c: "what", r: 'Indirect question: "He asked me what time…" — no "that" before "what".' },
+      { s: "The price of the goods have gone up.", e: "have", c: "has", r: 'Subject is "price" (singular) → has.' },
+      { s: "She is a very brave women.", e: "women", c: "woman", r: '"Women" is plural; singular is "woman".' },
+      { s: "He drove the car fastly.", e: "fastly", c: "fast", r: '"Fast" is both adjective and adverb — no "-ly" form.' },
+      { s: "They argued between themselves.", e: "between", c: "among", r: '"Among" for more than two people; "between" for exactly two.' },
+      { s: "She is very much interested in painting.", e: "very much", c: "very", r: '"Very interested" — "much" is redundant with "very" before adjective.' },
+      { s: "He bought a clothes for the party.", e: "a clothes", c: "clothes / some clothes", r: '"Clothes" has no singular — use "clothes" or "some clothes".' },
+      { s: "The police was called immediately.", e: "was", c: "were", r: '"Police" is always plural → were.' },
+      { s: "She is more elder than her cousin.", e: "more elder", c: "older / elder", r: 'No double comparative; use "older" or "elder" alone.' },
+      { s: "He reached to the station on time.", e: "reached to", c: "reached", r: '"Reach" is transitive — no preposition needed.' },
+      { s: "They discussed about the plan.", e: "discussed about", c: "discussed", r: '"Discuss" is transitive — no preposition needed.' },
+      { s: "She is suffering from a broke arm.", e: "broke", c: "broken", r: 'Past participle used as adjective → "broken arm".' },
+    ]
+  };
+
   var QF_VISUALS = {
 
       // ── TENSES ──────────────────────────────────────────
@@ -11826,7 +12061,8 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     function startQuickFire() {
       var topic = document.getElementById('qfTopic').value;
       var speed = parseInt(document.getElementById('qfSpeed').value);
-      qfState.questions = buildQFQuestions(topic, 15);
+      var count = parseInt(document.getElementById('qfCount').value) || 15;
+      qfState.questions = buildQFQuestions(topic, count);
       if (!qfState.questions.length) { alert('No questions available for this topic.'); return; }
       qfState.current = 0;
       qfState.score = 0;
@@ -11874,6 +12110,39 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         if (topic === 'mixed' || topic === 'editing') {
           (p.editing || []).forEach(function (q, i) {
             pool.push({ type: 'editing', sentence: q.s, error: q.e, correction: q.c, reason: q.r, pn: pn });
+          });
+        }
+      }
+      // Pull from QF_EXTRA bank (extra questions for 30/50/100 modes)
+      if (typeof QF_EXTRA !== 'undefined') {
+        if (topic === 'mixed' || topic === 'tenses') {
+          (QF_EXTRA.tenses || []).forEach(function (q) {
+            pool.push({ type: 'tenses', q: q.q, verb: q.v, answer: q.a, reason: q.r, pn: 0 });
+          });
+        }
+        if (topic === 'mixed' || topic === 'articles') {
+          (QF_EXTRA.articles || []).forEach(function (q) {
+            pool.push({ type: 'articles', q: q.q, answer: q.a, reason: q.r, pn: 0 });
+          });
+        }
+        if (topic === 'mixed' || topic === 'prepositions') {
+          (QF_EXTRA.preps || []).forEach(function (q) {
+            pool.push({ type: 'prepositions', q: q.q, answer: q.a, reason: q.r, pn: 0 });
+          });
+        }
+        if (topic === 'mixed' || topic === 'sva') {
+          (QF_EXTRA.sva || []).forEach(function (q) {
+            pool.push({ type: 'sva', q: q.q, options: q.opts, answer: q.a, reason: q.r, pn: 0 });
+          });
+        }
+        if (topic === 'mixed' || topic === 'conjunctions') {
+          (QF_EXTRA.conj || []).forEach(function (q) {
+            pool.push({ type: 'conjunctions', q1: q.q1, q2: q.q2, answer: q.a, reason: q.r, pn: 0 });
+          });
+        }
+        if (topic === 'mixed' || topic === 'editing') {
+          (QF_EXTRA.editing || []).forEach(function (q) {
+            pool.push({ type: 'editing', sentence: q.s, error: q.e, correction: q.c, reason: q.r, pn: 0 });
           });
         }
       }
