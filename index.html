@@ -11479,6 +11479,21 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       { q1: 'She did not come to school', q2: 'she had a fever.', a: 'because / since / as', r: 'Reason for absence.' },
       { q1: '', q2: 'having checked his work, he submitted it.', a: 'After', r: 'Time — submission after checking.' },
       { q1: 'They played well', q2: 'they lost the match.', a: 'but / yet / however', r: 'Contrast — good play still resulted in loss.' },
+      { q1: 'She is quiet', q2: 'polite.', a: 'and', r: 'Joins two qualities of the same person.' },
+      { q1: 'He studied hard', q2: 'he passed the exam.', a: 'so / therefore', r: 'Result — hard study led to passing.' },
+      { q1: 'I will call you', q2: 'I arrive home.', a: 'when / once', r: 'Time — calling happens after arriving.' },
+      { q1: 'She was nervous', q2: 'gave her speech confidently.', a: 'but', r: 'Contrast — nervous inside but confident outside.' },
+      { q1: 'He works hard', q2: 'earn more money.', a: 'so as to / in order to', r: 'Purpose — works hard for a financial goal.' },
+      { q1: 'We can go to the beach', q2: 'the park.', a: 'or', r: 'Choice between two options.' },
+      { q1: '', q2: 'being tired, she stayed up late to study.', a: 'Despite / Even though', r: 'Concession — stayed up despite being tired.' },
+      { q1: 'He read the book twice', q2: 'he could understand it better.', a: 'so that', r: 'Purpose — read twice in order to understand.' },
+      { q1: 'She likes painting', q2: 'her brother prefers music.', a: 'while / whereas', r: 'Contrast — different preferences between siblings.' },
+      { q1: 'Eat your vegetables', q2: 'you want to be healthy.', a: 'if', r: 'Condition — health depends on eating vegetables.' },
+      { q1: 'He spoke softly', q2: 'not wake the baby.', a: 'so as not to / in order not to', r: 'Negative purpose — soft speech to avoid waking baby.' },
+      { q1: 'She finished early', q2: 'helped her classmates.', a: 'and', r: 'Joins two sequential actions by the same person.' },
+      { q1: '', q2: 'the rain, they continued their match.', a: 'Despite / In spite of', r: 'Concession despite weather conditions.' },
+      { q1: 'He will succeed', q2: 'he keeps trying.', a: 'as long as / provided that', r: 'Condition — success depends on continued effort.' },
+      { q1: 'She was excited', q2: 'a little scared.', a: 'but / yet', r: 'Contrast — two contrasting emotions at once.' },
     ],
     editing: [
       { s: "The informations were very helpful.", e: "informations", c: "information", r: '"Information" is uncountable — no plural form.' },
@@ -12365,8 +12380,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       var correctRaw = (q.type === 'editing') ? (q.error || q.answer || '') : (q.answer || '');
       var extraAccepted = (q.type === 'editing' && q.correction) ? [q.correction.toLowerCase().trim()] : [];
       // Support multiple accepted answers separated by /
+      // Also accept the full string as-is (e.g. "but / yet / however" for conjunctions)
+      var givenNorm = given.toLowerCase().trim();
       var accepted = correctRaw.toLowerCase().split('/').map(function (a) { return a.trim(); }).concat(extraAccepted);
-      var ok = accepted.indexOf(given.toLowerCase().trim()) !== -1;
+      accepted.push(correctRaw.toLowerCase().trim()); // accept exact full string too
+      var ok = accepted.indexOf(givenNorm) !== -1;
       processQFAnswer(ok, given, q, btn ? btn.closest('.mc-opts') : null);
     }
 
