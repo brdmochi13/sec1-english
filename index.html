@@ -12319,7 +12319,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       if (q.type === 'sva') {
         html += '<div style="font-size:.95rem;margin-bottom:.8rem">' + esc(q.q || '') + '</div><div class="mc-opts">';
         (q.options || []).forEach(function (o) {
-          html += '<button class="mcopt" onclick="answerQF(\'' + esc(o) + '\',this)">' + esc(o) + '</button>';
+          html += '<button class="mcopt" data-ans="' + esc(o) + '" onclick="answerQF(this.dataset.ans,this)">' + esc(o) + '</button>';
         });
         html += '</div>';
       } else if (q.type === 'conjunctions') {
@@ -12331,7 +12331,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
         opts.sort(function () { return Math.random() - .5; });
         html += '<div class="mc-opts">';
         opts.forEach(function (o) {
-          html += '<button class="mcopt" onclick="answerQF(\'' + esc(o) + '\',this)">' + esc(o) + '</button>';
+          html += '<button class="mcopt" data-ans="' + esc(o) + '" onclick="answerQF(this.dataset.ans,this)">' + esc(o) + '</button>';
         });
         html += '</div>';
       } else if (q.type === 'editing') {
