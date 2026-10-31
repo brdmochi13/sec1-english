@@ -5623,12 +5623,20 @@
       if (demoCheck && demoCheck.password === pwd) {
         currentRole = demoCheck.role;
         // Use Firebase Anonymous Auth so Firestore security rules pass
-        // Persist the anon uid so the same user always gets the same Firestore doc
+        // Stable UID strategy: check userMapping in Firestore first so the same
+        // email always maps to the same progress doc, even across devices/browsers.
         var _savedAnonUid = localStorage.getItem('anon_uid_' + email);
         function _proceedWithUid(uid) {
           currentUser.displayName = demoCheck.name;
           currentUser.demoEmail = email;
           localStorage.setItem('anon_uid_' + email, uid);
+          // Write email→uid mapping to Firestore so MCP and other tools can look up by email
+          if (db) {
+            db.collection('userMapping').doc(email.replace(/[@.]/g,'_')).set({
+              email: email, uid: uid, name: demoCheck.name, role: demoCheck.role,
+              lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).catch(function(){});
+          }
           console.log('[LOGIN] currentUser set:', uid);
           document.getElementById('authSubmitBtn').disabled = false;
           document.getElementById('authSubmitBtn').textContent = 'Sign In';
@@ -5636,17 +5644,68 @@
           onAuthSuccess();
         }
         if (USE_FIREBASE && auth) {
-          auth.signInAnonymously()
-            .then(function(uc) {
-              currentUser = uc.user;
-              _proceedWithUid(uc.user.uid);
-            })
-            .catch(function(e) {
-              console.warn('[LOGIN] Anon auth failed, using local mode:', e.message);
-              var fallbackUid = _savedAnonUid || ('demo_' + email.replace(/[@.]/g,'_'));
-              currentUser = { email: email, displayName: demoCheck.name, uid: fallbackUid, isDemo: true };
-              _proceedWithUid(fallbackUid);
-            });
+          // If we have a saved UID from localStorage, reuse it (same anon session)
+          // Otherwise sign in anonymously to get a new UID, but first check Firestore mapping
+          var _doAnonLogin = function() {
+            auth.signInAnonymously()
+              .then(function(uc) {
+                currentUser = uc.user;
+                _proceedWithUid(uc.user.uid);
+              })
+              .catch(function(e) {
+                console.warn('[LOGIN] Anon auth failed, using local mode:', e.message);
+                var fallbackUid = _savedAnonUid || ('demo_' + email.replace(/[@.]/g,'_'));
+                currentUser = { email: email, displayName: demoCheck.name, uid: fallbackUid, isDemo: true };
+                _proceedWithUid(fallbackUid);
+              });
+          };
+          if (_savedAnonUid) {
+            // Reuse existing anon UID from localStorage
+            auth.signInAnonymously()
+              .then(function(uc) {
+                currentUser = uc.user;
+                // Merge data from saved UID into new UID if different
+                if (uc.user.uid !== _savedAnonUid) {
+                  // Try to pull old data first, then proceed
+                  db.collection('progress').doc(_savedAnonUid).get()
+                    .then(function(oldDoc) {
+                      if (oldDoc.exists) {
+                        db.collection('progress').doc(uc.user.uid).set(oldDoc.data(), { merge: true })
+                          .then(function() { _proceedWithUid(uc.user.uid); });
+                      } else { _proceedWithUid(uc.user.uid); }
+                    }).catch(function() { _proceedWithUid(uc.user.uid); });
+                } else { _proceedWithUid(uc.user.uid); }
+              })
+              .catch(function(e) {
+                console.warn('[LOGIN] Anon auth failed:', e.message);
+                var fallbackUid = _savedAnonUid;
+                currentUser = { email: email, displayName: demoCheck.name, uid: fallbackUid, isDemo: true };
+                _proceedWithUid(fallbackUid);
+              });
+          } else {
+            // Check Firestore userMapping for a previously used UID
+            db.collection('userMapping').doc(email.replace(/[@.]/g,'_')).get()
+              .then(function(mapDoc) {
+                if (mapDoc.exists && mapDoc.data().uid) {
+                  var knownUid = mapDoc.data().uid;
+                  localStorage.setItem('anon_uid_' + email, knownUid);
+                  auth.signInAnonymously()
+                    .then(function(uc) {
+                      currentUser = uc.user;
+                      // Migrate old data to new session UID
+                      if (uc.user.uid !== knownUid) {
+                        db.collection('progress').doc(knownUid).get()
+                          .then(function(oldDoc) {
+                            if (oldDoc.exists) {
+                              db.collection('progress').doc(uc.user.uid).set(oldDoc.data(), { merge: true })
+                                .then(function() { _proceedWithUid(uc.user.uid); });
+                            } else { _proceedWithUid(uc.user.uid); }
+                          }).catch(function() { _proceedWithUid(uc.user.uid); });
+                      } else { _proceedWithUid(uc.user.uid); }
+                    }).catch(function() { _doAnonLogin(); });
+                } else { _doAnonLogin(); }
+              }).catch(function() { _doAnonLogin(); });
+          }
         } else {
           var fallbackUid = _savedAnonUid || ('demo_' + email.replace(/[@.]/g,'_'));
           currentUser = { email: email, displayName: demoCheck.name, uid: fallbackUid, isDemo: true };
@@ -5887,6 +5946,10 @@
         fsData.history = fsData.history.map(function (h) { var s = Object.assign({}, h); delete s.uploads; return s; });
       }
       fsData._updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+      // Always stamp name + role so MCP can find the right UID by scanning all progress docs
+      var _userName = (currentUser && (currentUser.displayName || currentUser.demoEmail || (currentUser.email && currentUser.email.split('@')[0]))) || '';
+      fsData._name = _userName;
+      fsData._role = (typeof currentRole !== 'undefined' && currentRole) ? currentRole : 'student';
       var _uid = getUID();
       if (!_uid || _uid === 'anon') {
         console.warn('[SAVE] No valid UID — skipping Firestore write');
