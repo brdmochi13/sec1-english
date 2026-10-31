@@ -4953,6 +4953,12 @@
               <option value="10">10 sec/question (hard)</option>
             </select>
           </div>
+          <div class="cfg-item"><label>Mode</label>
+            <select id="qfMode" style="font-size:16px">
+              <option value="tips" selected>📚 Tips shown</option>
+              <option value="exam">🎯 Exam mode (no tips)</option>
+            </select>
+          </div>
         </div>
         <button class="gen-btn" id="qfStartBtn" onclick="startQuickFire()">
           <span class="btxt">⚡ Start Quick Fire</span>
@@ -11503,6 +11509,21 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       { q1: '', q2: 'the rain, they continued their match.', a: 'Despite / In spite of', r: 'Concession despite weather conditions.' },
       { q1: 'He will succeed', q2: 'he keeps trying.', a: 'as long as / provided that', r: 'Condition — success depends on continued effort.' },
       { q1: 'She was excited', q2: 'a little scared.', a: 'but / yet', r: 'Contrast — two contrasting emotions at once.' },
+      { q1: 'He did not study', q2: 'he failed the test.', a: 'so / therefore', r: 'Result — not studying caused failing.' },
+      { q1: 'She runs every morning', q2: 'stay healthy.', a: 'to / in order to', r: 'Purpose — runs for a health goal.' },
+      { q1: 'We waited outside', q2: 'the rain stopped.', a: 'until', r: 'Time — waiting continued up to the point rain stopped.' },
+      { q1: 'He was ill', q2: 'still came to school.', a: 'but / yet', r: 'Contrast — illness did not stop attendance.' },
+      { q1: '', q2: 'the bad weather, they enjoyed the trip.', a: 'Despite / In spite of', r: 'Concession — enjoyed despite bad weather.' },
+      { q1: 'She called her friend', q2: 'inform her of the news.', a: 'to / in order to', r: 'Purpose — called to share information.' },
+      { q1: 'He is clever', q2: 'his sister is even smarter.', a: 'but / whereas', r: 'Contrast — comparing two different levels.' },
+      { q1: 'Study now', q2: 'you will regret it later.', a: 'or', r: 'Warning — study or face a negative consequence.' },
+      { q1: 'She practised daily', q2: 'she could not win.', a: 'but / yet / however', r: 'Concessive contrast — effort did not lead to winning.' },
+      { q1: 'He whispered', q2: 'not disturb the others.', a: 'so as not to / in order not to', r: 'Negative purpose — whispered to avoid disturbance.' },
+      { q1: 'I enjoy reading', q2: 'my brother prefers gaming.', a: 'while / whereas', r: 'Contrast of preferences between two people.' },
+      { q1: '', q2: 'finishing her meal, she washed the dishes.', a: 'After', r: 'Time — dishwashing followed finishing the meal.' },
+      { q1: 'He kept practising', q2: 'he could play perfectly.', a: 'until', r: 'Time — practised up to the point of perfection.' },
+      { q1: 'She locked the windows', q2: 'going out.', a: 'before', r: 'Time — locked windows prior to leaving.' },
+      { q1: 'The teacher spoke slowly', q2: 'the students could understand.', a: 'so that', r: 'Purpose — slow speech helped understanding.' },
     ],
     editing: [
       { s: "The informations were very helpful.", e: "informations", c: "information", r: '"Information" is uncountable — no plural form.' },
@@ -12096,6 +12117,12 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       qfState.timeLeft = speed;
       qfState.active = true;
       if (qfState.feedbackTimer) { clearInterval(qfState.feedbackTimer); qfState.feedbackTimer = null; }
+      // Exam mode: hide grammar visual panel
+      var examMode = (document.getElementById('qfMode') || {}).value === 'exam';
+      var vp = document.getElementById('qfVisualPanel');
+      var sg = document.getElementById('qfSplitGrid');
+      if (vp) vp.style.display = examMode ? 'none' : '';
+      if (sg) sg.style.gridTemplateColumns = examMode ? '1fr' : '1fr 1fr';
       document.getElementById('qfSession').style.display = 'block';
       document.getElementById('qfResult').style.display = 'none';
       document.getElementById('qfStartBtn').style.display = 'none';
