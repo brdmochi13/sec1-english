@@ -5511,6 +5511,7 @@
           <span>🔥 Streak: <strong id="paraStreak">0</strong></span>
           <span>✅ Done today: <strong id="paraToday">0</strong></span>
           <span>⭐ Total correct: <strong id="paraTotal">0</strong></span>
+          <span>🏆 Marks: <strong id="paraMarks">0</strong></span>
         </div>
       </div>
     </div>
@@ -17232,6 +17233,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     streak: 0,
     today: 0,
     total: 0,
+    totalMarks: 0,
     history: []
   };
 
@@ -17242,6 +17244,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       if (saved) {
         paraState.streak = saved.streak || 0;
         paraState.total  = saved.total  || 0;
+        paraState.totalMarks = saved.totalMarks || 0;
         var today = new Date().toDateString();
         paraState.today  = saved.lastDate === today ? (saved.today || 0) : 0;
         paraState.history = saved.history || [];
@@ -17256,16 +17259,19 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     document.getElementById('paraStreak').textContent = paraState.streak;
     document.getElementById('paraToday').textContent  = paraState.today;
     document.getElementById('paraTotal').textContent  = paraState.total;
+    var mEl = document.getElementById('paraMarks');
+    if (mEl) mEl.textContent = paraState.totalMarks;
   }
 
   function paraSave() {
     try {
       localStorage.setItem('paraStats', JSON.stringify({
-        streak: paraState.streak,
-        total:  paraState.total,
-        today:  paraState.today,
-        lastDate: new Date().toDateString(),
-        history: paraState.history.slice(-50)
+        streak:     paraState.streak,
+        total:      paraState.total,
+        today:      paraState.today,
+        totalMarks: paraState.totalMarks,
+        lastDate:   new Date().toDateString(),
+        history:    paraState.history.slice(-50)
       }));
     } catch(e){}
     // Firestore
@@ -17274,10 +17280,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       if (uid) {
         db.collection('progress').doc(uid).set({
           paraStats: {
-            streak: paraState.streak,
-            total:  paraState.total,
-            today:  paraState.today,
-            lastDate: new Date().toDateString(),
+            streak:     paraState.streak,
+            total:      paraState.total,
+            today:      paraState.today,
+            totalMarks: paraState.totalMarks,
+            lastDate:   new Date().toDateString(),
             historyLen: paraState.history.length
           }
         }, { merge: true }).catch(function(){});
@@ -17285,7 +17292,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     }
   }
 
-  function paraRecordAttempt(level, correct, original, attempt) {
+  function paraRecordAttempt(level, correct, original, attempt, marks, maxMarks) {
     if (correct) {
       paraState.streak++;
       paraState.today++;
@@ -17293,10 +17300,13 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     } else {
       paraState.streak = 0;
     }
+    paraState.totalMarks += (marks || 0);
     paraState.history.unshift({
       ts: Date.now(),
       level: level,
       correct: correct,
+      marks: marks || 0,
+      maxMarks: maxMarks || 5,
       orig: (original || '').substring(0, 80),
       attempt: (attempt || '').substring(0, 80)
     });
@@ -17352,6 +17362,127 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     if (tip) {
       html += '<div style="padding:.4rem .7rem;font-size:.78rem;color:var(--muted);margin-top:.3rem">💡 ' + tip + '</div>';
     }
+    return html;
+  }
+
+  // ── Grammar check ────────────────────────────────────────
+  // Returns array of {type, msg} issue objects
+  function paraGrammarCheck(text, originalText) {
+    var issues = [];
+    if (!text || !text.trim()) return issues;
+    var t = text.trim();
+
+    // 1. Capital letter at start
+    if (t.charAt(0) !== t.charAt(0).toUpperCase() || /^[a-z]/.test(t.charAt(0))) {
+      if (/^[a-z]/.test(t.charAt(0))) {
+        issues.push({ type: 'capital', msg: 'Start with a capital letter.' });
+      }
+    }
+
+    // 2. Terminal punctuation
+    var lastChar = t.charAt(t.length - 1);
+    if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
+      issues.push({ type: 'punctuation', msg: 'End with a full stop (.), question mark (?), or exclamation mark (!).' });
+    }
+
+    // 3. Double spaces
+    if (/  /.test(t)) {
+      issues.push({ type: 'spacing', msg: 'Remove extra spaces between words.' });
+    }
+
+    // 4. Subject-verb: "I were", "he/she/it don't", "he/she/it goes" (simple checks)
+    if (/\bI were\b/i.test(t)) issues.push({ type: 'agreement', msg: '"I were" → should be "I was".' });
+    if (/\b(he|she|it)\s+don'?t\b/i.test(t)) issues.push({ type: 'agreement', msg: '"he/she/it don\'t" → use "doesn\'t".' });
+    if (/\b(they|we|you)\s+doesn'?t\b/i.test(t)) issues.push({ type: 'agreement', msg: '"they/we/you doesn\'t" → use "don\'t".' });
+    if (/\b(he|she|it)\s+have\b/i.test(t) && !/\b(he|she|it)\s+have\s+to\b/i.test(t)) {
+      issues.push({ type: 'agreement', msg: '"he/she/it have" → use "has" (unless "have to").' });
+    }
+
+    // 5. Article before vowel: "a apple", "a orange", "a elephant"
+    if (/\ba\s+(apple|orange|elephant|egg|ice|idea|island|hour|honest|owl|umbrella)\b/i.test(t)) {
+      issues.push({ type: 'article', msg: 'Use "an" before words starting with a vowel sound.' });
+    }
+    // "an" before consonant sound
+    if (/\ban\s+(b|c|d|f|g|h|j|k|l|m|n|p|q|r|s|t|v|w|x|y|z)/i.test(t)) {
+      if (!/\ban\s+(hour|honest|heir)/i.test(t)) {
+        issues.push({ type: 'article', msg: 'Use "a" before words starting with a consonant sound.' });
+      }
+    }
+
+    // 6. Vocabulary variety: check if 3+ words from original are reused (excluding stop words)
+    if (originalText) {
+      var stopWords = {a:1,an:1,the:1,is:1,are:1,was:1,were:1,be:1,been:1,being:1,have:1,has:1,had:1,do:1,does:1,did:1,will:1,would:1,shall:1,should:1,may:1,might:1,must:1,can:1,could:1,it:1,its:1,in:1,on:1,at:1,to:1,for:1,of:1,and:1,but:1,or:1,so:1,yet:1,nor:1,this:1,that:1,these:1,those:1,he:1,she:1,they:1,we:1,you:1,i:1,my:1,his:1,her:1,their:1,our:1,your:1,very:1,also:1,as:1,by:1,from:1,with:1,not:1,no:1,up:1,out:1,if:1,than:1,then:1,when:1,which:1};
+      var origWords = originalText.toLowerCase().replace(/[^a-z ]/g,'').split(/\s+/).filter(function(w){ return w.length > 3 && !stopWords[w]; });
+      var ansWords  = t.toLowerCase().replace(/[^a-z ]/g,'').split(/\s+/).filter(function(w){ return w.length > 3 && !stopWords[w]; });
+      var repeated = ansWords.filter(function(w){ return origWords.indexOf(w) !== -1; });
+      var unique = repeated.filter(function(w,i){ return repeated.indexOf(w) === i; });
+      if (unique.length >= 3) {
+        issues.push({ type: 'vocab', msg: 'Vocabulary variety: ' + unique.slice(0,3).map(function(w){ return '"'+w+'"'; }).join(', ') + ' are repeated from original. Use synonyms.' });
+      }
+    }
+
+    return issues;
+  }
+
+  // ── Scoring ──────────────────────────────────────────────
+  // Returns { marks, maxMarks, breakdown: [{criterion,earned,max,note}] }
+  function paraScoreAnswer(text, originalText, lifted, wordCount, maxWords) {
+    var breakdown = [];
+    var total = 0;
+
+    // Criterion 1: No lifted phrases (2 marks)
+    var liftMark = (lifted && lifted.length > 0) ? 0 : 2;
+    breakdown.push({ criterion: 'No lifted phrases', earned: liftMark, max: 2,
+      note: liftMark === 2 ? 'Own words used ✓' : 'Lifted: ' + (lifted||[]).slice(0,2).map(function(p){ return '"'+p+'"'; }).join(', ') });
+    total += liftMark;
+
+    // Criterion 2: Grammar & Punctuation (1 mark)
+    var grammarIssues = paraGrammarCheck(text, null); // vocab checked separately
+    var grammarErrs = grammarIssues.filter(function(x){ return x.type !== 'vocab'; });
+    var gramMark = grammarErrs.length === 0 ? 1 : 0;
+    breakdown.push({ criterion: 'Grammar & Punctuation', earned: gramMark, max: 1,
+      note: gramMark === 1 ? 'Correct ✓' : grammarErrs.map(function(e){ return e.msg; }).join('; ') });
+    total += gramMark;
+
+    // Criterion 3: Vocabulary variety (1 mark)
+    var vocabIssues = originalText ? paraGrammarCheck(text, originalText).filter(function(x){ return x.type === 'vocab'; }) : [];
+    var vocabMark = vocabIssues.length === 0 ? 1 : 0;
+    breakdown.push({ criterion: 'Vocabulary variety', earned: vocabMark, max: 1,
+      note: vocabMark === 1 ? 'Good word choices ✓' : 'Reused content words from original.' });
+    total += vocabMark;
+
+    // Criterion 4: Completeness (meaning preserved) (1 mark)
+    var minWords = maxWords ? 3 : 4;
+    var tooShort = wordCount < minWords;
+    var tooLong  = maxWords ? (wordCount > maxWords) : false;
+    var compMark = (!tooShort && !tooLong) ? 1 : 0;
+    breakdown.push({ criterion: 'Completeness', earned: compMark, max: 1,
+      note: compMark === 1 ? 'Adequate length ✓' : (tooShort ? 'Answer too short — include the full meaning.' : 'Too long — stay within word limit.') });
+    total += compMark;
+
+    return { marks: total, maxMarks: 5, breakdown: breakdown };
+  }
+
+  // ── Scoring badge HTML ────────────────────────────────────
+  function paraScoreBadgeHtml(scoreObj) {
+    var pct = scoreObj.marks / scoreObj.maxMarks;
+    var badgeCol = pct >= 0.8 ? 'var(--green)' : (pct >= 0.5 ? 'var(--amber)' : 'var(--red)');
+    var badgeBg  = pct >= 0.8 ? 'var(--greenl)' : (pct >= 0.5 ? 'var(--amberl)' : 'var(--redl)');
+    var label    = pct >= 0.8 ? 'Excellent!' : (pct >= 0.6 ? 'Good effort!' : (pct >= 0.4 ? 'Keep practising!' : 'Needs work.'));
+    var html = '<div style="margin-top:.5rem;padding:.5rem .75rem;border-radius:9px;background:' + badgeBg + ';border:1.5px solid ' + badgeCol + '">';
+    html += '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem">';
+    html += '<span style="font-size:1.15rem;font-weight:800;color:' + badgeCol + '">' + scoreObj.marks + '/' + scoreObj.maxMarks + '</span>';
+    html += '<span style="font-size:.82rem;font-weight:700;color:' + badgeCol + '">' + label + '</span>';
+    html += '</div>';
+    // Breakdown table
+    html += '<table style="width:100%;border-collapse:collapse;font-size:.76rem">';
+    scoreObj.breakdown.forEach(function(row){
+      var rowCol = row.earned >= row.max ? 'var(--green)' : 'var(--red)';
+      html += '<tr><td style="padding:1px 4px 1px 0;color:var(--muted)">' + row.criterion + '</td>';
+      html += '<td style="padding:1px 4px;font-weight:700;color:' + rowCol + ';white-space:nowrap">' + row.earned + '/' + row.max + '</td>';
+      html += '<td style="padding:1px 0 1px 4px;color:var(--muted);font-size:.72rem">' + row.note + '</td></tr>';
+    });
+    html += '</table></div>';
     return html;
   }
 
@@ -17414,12 +17545,23 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var wc      = paraWordCount(answer);
     var correct = lifted.length === 0 && wc >= 4;
     var tip = correct ? 'Great — now try to vary the sentence structure next time too!' : '';
-    document.getElementById('paraL1Feedback').innerHTML = paraFeedbackHtml(correct, lifted, wc, null, tip);
+    var scoreObj = paraScoreAnswer(answer, original, lifted, wc, null);
+    var fb = paraFeedbackHtml(correct, lifted, wc, null, tip);
+    // Grammar issues inline
+    var gramIssues = paraGrammarCheck(answer, original).filter(function(x){ return x.type !== 'vocab'; });
+    if (gramIssues.length) {
+      fb += '<div style="padding:.45rem .65rem;background:var(--amberl);border-radius:7px;font-size:.78rem;margin-top:.3rem">';
+      fb += '✏️ <strong>Grammar tips:</strong><ul style="margin:.25rem 0 0 1rem;padding:0">';
+      gramIssues.forEach(function(g){ fb += '<li>' + g.msg + '</li>'; });
+      fb += '</ul></div>';
+    }
+    fb += paraScoreBadgeHtml(scoreObj);
+    document.getElementById('paraL1Feedback').innerHTML = fb;
     // reveal original after checking
     document.getElementById('paraL1Original').style.display = '';
     document.getElementById('paraL1RevealBtn').textContent = '🙈 Hide';
     paraState.l1Revealed = true;
-    paraRecordAttempt(1, correct, original, answer);
+    paraRecordAttempt(1, correct, original, answer, scoreObj.marks, scoreObj.maxMarks);
   }
 
   function paraL1Skip() {
@@ -17461,12 +17603,22 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     var wc       = paraWordCount(answer);
     var tooLong  = wc > 10;
     var correct  = lifted.length === 0 && !tooLong && wc >= 3;
+    var scoreObj = paraScoreAnswer(answer, passage, lifted, wc, 10);
     var fb = paraFeedbackHtml(correct, lifted, wc, 10, null);
+    // Grammar issues
+    var gramIssues = paraGrammarCheck(answer, passage).filter(function(x){ return x.type !== 'vocab'; });
+    if (gramIssues.length) {
+      fb += '<div style="padding:.45rem .65rem;background:var(--amberl);border-radius:7px;font-size:.78rem;margin-top:.3rem">';
+      fb += '✏️ <strong>Grammar tips:</strong><ul style="margin:.25rem 0 0 1rem;padding:0">';
+      gramIssues.forEach(function(g){ fb += '<li>' + g.msg + '</li>'; });
+      fb += '</ul></div>';
+    }
+    fb += paraScoreBadgeHtml(scoreObj);
     if (correct) {
       fb += '<div style="padding:.45rem .65rem;background:var(--bluel);border-radius:7px;font-size:.8rem;margin-top:.4rem">📖 <strong>Sample answer:</strong> ' + sample + '</div>';
     }
     document.getElementById('paraL2Feedback').innerHTML = fb;
-    paraRecordAttempt(2, correct, passage, answer);
+    paraRecordAttempt(2, correct, passage, answer, scoreObj.marks, scoreObj.maxMarks);
   }
 
   // ── Level 3: Q23 Simulator ────────────────────────────────
@@ -17535,6 +17687,30 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
     }
     var score = passed + '/10';
     var correct = passed >= 7;
+    // Grammar check on all filled boxes
+    var allGramIssues = [];
+    for (var gi = 1; gi <= 10; gi++) {
+      var gAns = document.getElementById('paraL3Box' + gi).value.trim();
+      if (gAns) {
+        var gErr = paraGrammarCheck(gAns, fullText).filter(function(x){ return x.type !== 'vocab'; });
+        gErr.forEach(function(e){ if (allGramIssues.indexOf('Box '+gi+': '+e.msg) === -1) allGramIssues.push('Box '+gi+': '+e.msg); });
+      }
+    }
+    // Score: lift+word (3 marks per 7+ passed → 2 lift, 1 completeness), grammar (1), vocab (1)
+    var l3LiftMark = passed >= 7 ? 2 : (passed >= 4 ? 1 : 0);
+    var l3GramMark = allGramIssues.length === 0 ? 1 : 0;
+    var l3CompMark = passed >= 7 ? 1 : 0;
+    var l3VocabMark = 1; // give benefit of doubt for Q23 (hard to auto-detect per-box)
+    var l3Marks = l3LiftMark + l3GramMark + l3CompMark + l3VocabMark;
+    var l3MaxMarks = 5;
+    var l3Breakdown = [
+      { criterion: 'No lifted phrases', earned: l3LiftMark, max: 2, note: passed + ' of 10 boxes clean' },
+      { criterion: 'Grammar & Punctuation', earned: l3GramMark, max: 1, note: l3GramMark===1 ? 'No issues ✓' : allGramIssues.slice(0,2).join('; ') },
+      { criterion: 'Vocabulary variety', earned: l3VocabMark, max: 1, note: 'Own words ✓' },
+      { criterion: 'Completeness', earned: l3CompMark, max: 1, note: l3CompMark===1 ? '7+ boxes filled correctly ✓' : 'Need 7+ valid boxes.' }
+    ];
+    var l3ScoreObj = { marks: l3Marks, maxMarks: l3MaxMarks, breakdown: l3Breakdown };
+
     var fbHtml = '<div style="padding:.6rem .85rem;border-radius:8px;background:' + (correct?'var(--greenl)':'var(--redl)') + ';border-left:4px solid ' + (correct?'var(--green)':'var(--red)') + ';font-size:.85rem;margin-bottom:.5rem">';
     fbHtml += (correct ? '✅' : '❌') + ' <strong>' + score + ' boxes passed</strong> ' + (correct ? '— Excellent paraphrasing!' : '— Keep practising!');
     fbHtml += '</div>';
@@ -17544,12 +17720,19 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       issues.forEach(function(x){ fbHtml += '<li>' + x + '</li>'; });
       fbHtml += '</ul></div>';
     }
+    if (allGramIssues.length) {
+      fbHtml += '<div style="padding:.5rem .7rem;background:var(--amberl);border-radius:7px;font-size:.8rem;margin-bottom:.5rem">';
+      fbHtml += '✏️ <strong>Grammar tips:</strong><ul style="margin:.3rem 0 0 1rem;padding:0">';
+      allGramIssues.slice(0,5).forEach(function(x){ fbHtml += '<li>' + x + '</li>'; });
+      fbHtml += '</ul></div>';
+    }
+    fbHtml += paraScoreBadgeHtml(l3ScoreObj);
     fbHtml += '<div style="padding:.45rem .65rem;background:var(--bluel);border-radius:7px;font-size:.78rem;margin-top:.3rem">';
     fbHtml += '📖 <strong>Sample points:</strong><ol style="margin:.3rem 0 0 1.1rem;padding:0">';
     set.sample_points.forEach(function(p){ fbHtml += '<li style="margin-bottom:.15rem">' + p + '</li>'; });
     fbHtml += '</ol></div>';
     document.getElementById('paraL3Feedback').innerHTML = fbHtml;
-    paraRecordAttempt(3, correct, set.p1, score);
+    paraRecordAttempt(3, correct, set.p1, score, l3Marks, l3MaxMarks);
   }
 
   // ── History ──────────────────────────────────────────────
@@ -17569,6 +17752,10 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       html += '<span style="font-weight:700;color:' + (h.correct?'var(--green)':'var(--red)') + '">' + (h.correct?'✅':'❌') + '</span>';
       html += '<span style="color:var(--muted);min-width:40px">' + timeStr + '</span>';
       html += '<span style="background:var(--bluel);color:var(--blue);border-radius:4px;padding:1px 6px;font-size:.72rem;font-weight:700">L' + h.level + ' ' + lvlLabel + '</span>';
+      if (h.marks !== undefined) {
+        var mc = h.marks >= h.maxMarks ? 'var(--green)' : (h.marks >= Math.ceil(h.maxMarks/2) ? 'var(--amber)' : 'var(--red)');
+        html += '<span style="font-size:.72rem;font-weight:700;color:' + mc + ';min-width:32px">' + h.marks + '/' + (h.maxMarks||5) + '</span>';
+      }
       html += '<span style="color:var(--muted);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + (h.attempt||'') + '</span>';
       html += '</div>';
     });
@@ -17579,9 +17766,10 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   function paraClearHistory() {
     if (!confirm('Clear paraphrase history?')) return;
     paraState.history = [];
-    paraState.streak  = 0;
-    paraState.today   = 0;
-    paraState.total   = 0;
+    paraState.streak     = 0;
+    paraState.today      = 0;
+    paraState.total      = 0;
+    paraState.totalMarks = 0;
     paraUpdateStats();
     paraSave();
     paraRenderHistory();
