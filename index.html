@@ -14187,7 +14187,7 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
 
 
-    renderDashboard();
+    try { renderDashboard(); } catch(e) { console.warn('[renderDashboard startup]', e.message); }
     restoreProviderConfig();
     onProviderChange();
     // Pull latest data from Firestore on load
@@ -14785,7 +14785,11 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   function selectTF(idx, val) {
     compState.tfAnswers[idx] = val;
     var btns = document.querySelectorAll('#compTF'+idx+' .comp-tf-btn');
-    btns.forEach(function(b) { b.classList.toggle('selected', b.textContent.replace('Not Stated','NS').trim()===val || (val==='NS'&&b.textContent==='Not Stated')); });
+    btns.forEach(function(b) {
+      var t = b.textContent.trim();
+      var bval = t === 'Not Stated' ? 'NS' : t.charAt(0).toUpperCase();
+      b.classList.toggle('selected', bval === val);
+    });
   }
 
   function submitComp() {
