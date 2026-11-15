@@ -3762,6 +3762,7 @@
     <button class="mtab" onclick="showTab('cwTab',this)">📝 Cont. Writing</button>
     <button class="mtab" onclick="showTab('storiesTab',this)">📖 Stories</button>
     <button class="mtab" onclick="showTab('tipsTab',this)">📒 Notes & Tips</button>
+    <button class="mtab" onclick="showTab('paraTab',this)">🖊️ Paraphrase</button>
   </div>
 
   <!-- ═══════════════════════════════ DASHBOARD ═══════════════════════════════ -->
@@ -5488,6 +5489,101 @@
       <div class="card-head"><div class="card-title">📋 Writing History</div></div>
       <div class="card-body" id="cwHistory"><div class="empty-state"><div class="es-icon">📋</div><p>No attempts yet</p></div></div>
     </div>
+  </div>
+
+  <!-- ═══════════════════════════════ PARAPHRASE TAB ═══════════════════════════════ -->
+  <div id="paraTab" class="tab-content">
+
+    <!-- HEADER CARD -->
+    <div class="card" style="margin-bottom:.9rem;border:2px solid var(--purple,#5b21b6)">
+      <div class="card-head" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:8px 8px 0 0;padding:.6rem 1rem">
+        <div class="card-title" style="color:white;font-size:.95rem">🖊️ Cover &amp; Rewrite Trainer</div>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.8)">Paraphrase in your own words — no lift &amp; shift!</div>
+      </div>
+      <div class="card-body" style="padding:.6rem .9rem">
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.5rem">
+          <div style="font-size:.8rem;color:var(--muted)">Choose level:</div>
+          <button class="tbtn tbtn-primary" id="paraLvl1Btn" onclick="paraSetLevel(1)" style="font-size:.78rem;padding:3px 10px">Level 1 — Sentence</button>
+          <button class="tbtn" id="paraLvl2Btn" onclick="paraSetLevel(2)" style="font-size:.78rem;padding:3px 10px;background:var(--amberl);color:var(--amber);border:1.5px solid var(--amber)">Level 2 — Bullet Point</button>
+          <button class="tbtn" id="paraLvl3Btn" onclick="paraSetLevel(3)" style="font-size:.78rem;padding:3px 10px;background:var(--redl);color:var(--red);border:1.5px solid var(--red)">Level 3 — Q23 Simulator</button>
+        </div>
+        <div style="display:flex;gap:.7rem;align-items:center;font-size:.8rem">
+          <span>🔥 Streak: <strong id="paraStreak">0</strong></span>
+          <span>✅ Done today: <strong id="paraToday">0</strong></span>
+          <span>⭐ Total correct: <strong id="paraTotal">0</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEVEL 1 — SENTENCE REWRITE -->
+    <div id="paraL1Panel" class="card" style="margin-bottom:.9rem">
+      <div class="card-head"><div class="card-title">Level 1 — Sentence Rewrite</div><div class="card-marks" style="background:var(--blue);color:white">Cover, then rewrite</div></div>
+      <div class="card-body">
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:.6rem">Read the sentence below. Cover it up (or close your eyes). Write it in your <em>own</em> words without looking. 3+ matching words in a row = LIFTED ❌</p>
+        <div style="display:flex;gap:.5rem;margin-bottom:.7rem">
+          <button class="tbtn tbtn-primary" onclick="paraL1New()" style="font-size:.82rem">🔀 New Sentence</button>
+          <button class="tbtn" id="paraL1RevealBtn" onclick="paraL1ToggleReveal()" style="font-size:.82rem;background:var(--amberl);color:var(--amber);border:1.5px solid var(--amber)">👁 Reveal / Hide</button>
+        </div>
+        <div id="paraL1Original" style="display:none;padding:.65rem .85rem;background:var(--bluel,#eff6ff);border-left:4px solid var(--blue);border-radius:0 8px 8px 0;font-size:.88rem;margin-bottom:.7rem;line-height:1.6"></div>
+        <div id="paraL1Hint" style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem"></div>
+        <textarea id="paraL1Input" placeholder="Write your paraphrase here…" style="width:100%;min-height:70px;font-size:.88rem;border-radius:8px;border:1.5px solid var(--border);padding:.5rem .7rem;resize:vertical;font-family:inherit;box-sizing:border-box"></textarea>
+        <div style="display:flex;gap:.5rem;margin-top:.5rem">
+          <button class="tbtn tbtn-primary" onclick="paraL1Check()" style="font-size:.82rem">✅ Check My Paraphrase</button>
+          <button class="tbtn" onclick="paraL1Skip()" style="font-size:.78rem;background:var(--greenl);color:var(--green);border:1.5px solid var(--green)">⏭ Skip</button>
+        </div>
+        <div id="paraL1Feedback" style="margin-top:.6rem"></div>
+      </div>
+    </div>
+
+    <!-- LEVEL 2 — BULLET POINT BUILDER -->
+    <div id="paraL2Panel" class="card" style="margin-bottom:.9rem;display:none">
+      <div class="card-head"><div class="card-title">Level 2 — Bullet Point (≤10 words)</div><div class="card-marks" style="background:var(--amber);color:white">Like Q23 boxes</div></div>
+      <div class="card-body">
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:.6rem">Read the paragraph. Find the <strong>ONE key point</strong> and write it in <strong>≤ 10 words</strong>, in your own words. No lifting from the text!</p>
+        <button class="tbtn tbtn-primary" onclick="paraL2New()" style="font-size:.82rem;margin-bottom:.7rem">🔀 New Paragraph</button>
+        <div id="paraL2PassageBox" style="padding:.65rem .85rem;background:#fef3e2;border-left:4px solid var(--amber);border-radius:0 8px 8px 0;font-size:.86rem;margin-bottom:.7rem;line-height:1.65"></div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">
+          <input id="paraL2Input" type="text" placeholder="Your key point in ≤ 10 words…" style="flex:1;font-size:.88rem;border-radius:8px;border:1.5px solid var(--border);padding:.45rem .7rem;font-family:inherit" oninput="paraL2WordCount()" />
+          <span id="paraL2WC" style="font-size:.8rem;color:var(--muted);min-width:40px;text-align:right">0 / 10</span>
+        </div>
+        <button class="tbtn tbtn-primary" onclick="paraL2Check()" style="font-size:.82rem">✅ Check</button>
+        <div id="paraL2Feedback" style="margin-top:.6rem"></div>
+      </div>
+    </div>
+
+    <!-- LEVEL 3 — Q23 SIMULATOR -->
+    <div id="paraL3Panel" class="card" style="margin-bottom:.9rem;display:none">
+      <div class="card-head"><div class="card-title">Level 3 — Q23 Summary Simulator</div><div class="card-marks" style="background:var(--red);color:white">Full exam practice</div></div>
+      <div class="card-body">
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Read both paragraphs. Fill in <strong>10 boxes</strong> — each is one point in <strong>≤ 10 words</strong>, starting with the given phrase. <strong>No verbatim lifting</strong> (3+ consecutive words = penalty).</p>
+        <button class="tbtn tbtn-primary" onclick="paraL3New()" style="font-size:.82rem;margin-bottom:.7rem">🔀 New Q23 Set</button>
+        <div id="paraL3Passage" style="padding:.65rem .85rem;background:var(--greenl,#f0fdf4);border-left:4px solid var(--green);border-radius:0 8px 8px 0;font-size:.86rem;margin-bottom:.8rem;line-height:1.65"></div>
+        <div id="paraL3Starter" style="font-size:.82rem;color:var(--blue);font-weight:700;margin-bottom:.5rem;padding:.4rem .6rem;background:var(--bluel);border-radius:6px"></div>
+        <div id="paraL3Boxes" style="display:flex;flex-direction:column;gap:.45rem;margin-bottom:.7rem"></div>
+        <button class="tbtn tbtn-primary" onclick="paraL3Check()" style="font-size:.82rem;width:100%">✅ Submit &amp; Check All 10 Boxes</button>
+        <div id="paraL3Feedback" style="margin-top:.7rem"></div>
+      </div>
+    </div>
+
+    <!-- TIPS CARD -->
+    <div class="card" style="margin-bottom:.9rem">
+      <div class="card-head"><div class="card-title">💡 Paraphrase Tips</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;font-size:.8rem">
+          <div style="padding:.5rem .65rem;background:var(--bluel,#eff6ff);border-radius:7px;border-left:3px solid var(--blue)"><strong>Change word order</strong><br>Move the subject to the end, or start with the result instead of the cause.</div>
+          <div style="padding:.5rem .65rem;background:var(--greenl,#f0fdf4);border-radius:7px;border-left:3px solid var(--green)"><strong>Use synonyms</strong><br>Replace key nouns and verbs with words you know well — not just swapping one word.</div>
+          <div style="padding:.5rem .65rem;background:#fefce8;border-radius:7px;border-left:3px solid #f59e0b"><strong>Change sentence type</strong><br>Turn an active sentence passive, or a long clause into a short phrase.</div>
+          <div style="padding:.5rem .65rem;background:var(--purplel,#f5f3ff);border-radius:7px;border-left:3px solid var(--purple)"><strong>3-word rule</strong><br>If 3 or more words in a row match the original — that's a lift. Break it up!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">📋 Paraphrase History</div><button class="tbtn" onclick="paraClearHistory()" style="font-size:.73rem;padding:2px 8px;background:var(--redl);color:var(--red);border:1px solid var(--red)">Clear</button></div>
+      <div class="card-body" id="paraHistory"><div class="empty-state"><div class="es-icon">🖊️</div><p>No attempts yet</p></div></div>
+    </div>
+
   </div>
 
   <!-- ═══════════════════════════════ HISTORY TAB ═══════════════════════════════ -->
@@ -17044,6 +17140,467 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       alert('=== LOCAL DATA ===\n' + msg + '\n\nFirebase not connected');
     }
   }
+  // ==== END DIAGNOSTIC ====
+
+  // ══════════════════════════════════════════════════════
+  //  COVER & REWRITE PARAPHRASE TRAINER
+  // ══════════════════════════════════════════════════════
+
+  var PARA_SENTENCES = [
+    { text: "Lions in the wild are facing extinction because poachers hunt them illegally for their fur and bones.", topic: "lions" },
+    { text: "Conservation efforts have helped increase the lion population in protected game reserves across Africa.", topic: "lions" },
+    { text: "Many young lions struggle to find food because human settlements have reduced the size of their natural habitat.", topic: "lions" },
+    { text: "Fishermen who rely on the river for their livelihood are increasingly worried about pollution affecting their catch.", topic: "fishing" },
+    { text: "The overfishing of coastal waters has led to a sharp decline in fish stocks over the past two decades.", topic: "fishing" },
+    { text: "Scientists warn that rising sea temperatures are causing fish to migrate to cooler, deeper waters far from shore.", topic: "fishing" },
+    { text: "Students who read widely tend to perform better in examinations because they have a richer vocabulary.", topic: "general" },
+    { text: "Regular exercise not only improves physical health but also boosts mental well-being and concentration.", topic: "general" },
+    { text: "Recycling household waste reduces the amount of rubbish sent to landfills, helping to protect the environment.", topic: "general" },
+    { text: "Community gardens allow residents to grow fresh vegetables and strengthen bonds between neighbours.", topic: "general" },
+    { text: "The widespread use of smartphones has made it easier for people to stay connected, but has also increased screen time among the young.", topic: "general" },
+    { text: "Teachers play a crucial role in shaping the values and attitudes of the next generation.", topic: "general" }
+  ];
+
+  var PARA_PARAGRAPHS = [
+    {
+      text: "Lions in the wild are under severe threat. Poachers illegally hunt them for their valuable fur and bones, which are sold on the black market. As a result, the number of wild lions has fallen dramatically over the last fifty years. Conservation organisations are working hard to protect remaining populations by setting up game reserves and educating local communities about the importance of these animals.",
+      key_point: "Poaching and illegal trade reduce lion numbers significantly, and conservation groups are trying to reverse this."
+    },
+    {
+      text: "Fresh-water fishing has sustained many riverside communities for centuries. However, increasing pollution from factories and farms has contaminated rivers, making fish unsafe to eat. Some fishermen have been forced to abandon their traditional way of life and seek work in cities. Without clean water, the ecological balance of these rivers is permanently destroyed.",
+      key_point: "River pollution is destroying fish habitats and forcing fishing communities to leave their homes."
+    },
+    {
+      text: "Keeping wild animals in zoos is a highly debated issue. Supporters argue that zoos protect endangered species from extinction and allow scientists to study animal behaviour closely. Critics, however, believe that confining animals to small enclosures causes them unnecessary stress and prevents them from living naturally. The welfare of the animal must always be the first priority.",
+      key_point: "Zoo supporters say they protect species; critics argue enclosures harm animal welfare."
+    },
+    {
+      text: "Teenagers today face immense pressure to perform well academically. The fear of disappointing their families and failing to secure a place in a prestigious school drives many students to study late into the night. This lack of sleep affects their concentration and mood, creating a cycle that is difficult to break. Schools and parents must work together to promote a healthier balance between study and rest.",
+      key_point: "Academic pressure causes sleep deprivation in teens, harming their concentration and mood."
+    }
+  ];
+
+  var PARA_Q23_SETS = [
+    {
+      title: "Lions in the Wild",
+      starter: "Your first point must begin with: 'Lions in the wild are …'",
+      p1: "Lions in the wild are under severe threat from illegal hunting. Poachers target lions for their fur, teeth and bones, which fetch high prices on the black market. Many lions also die because farmers who live near game reserves shoot them to protect their livestock. The number of wild lions has fallen by more than forty per cent in the last two decades, with fewer than twenty thousand remaining across the African continent.",
+      p2: "Conservation organisations are fighting back with a range of strategies. Rangers patrol game reserves around the clock to deter poachers, while hidden cameras and tracking collars help monitor individual lions. Community education programmes teach local farmers to use lion-proof enclosures for their cattle instead of retaliating against predators. Fundraising campaigns raise money to expand the size of protected areas, giving lions more space to hunt and breed safely.",
+      sample_points: [
+        "Lions in the wild are hunted illegally for their body parts.",
+        "Farmers near reserves kill lions to protect their animals.",
+        "Lion numbers have dropped sharply over twenty years.",
+        "Fewer than twenty thousand wild lions remain today.",
+        "Rangers patrol reserves to stop poachers at night.",
+        "Cameras and collars help conservation workers track lions.",
+        "Farmers are taught to build enclosures to protect cattle.",
+        "Education reduces conflict between people and lions.",
+        "Fundraising helps expand protected land for lions.",
+        "More space allows lions to hunt and reproduce safely."
+      ]
+    },
+    {
+      title: "River Fishing Communities",
+      starter: "Your first point must begin with: 'Fishing communities living along the river …'",
+      p1: "Fishing communities living along the river have depended on the water for generations. However, the rapid growth of nearby factories has led to the dumping of chemical waste directly into the river, poisoning the fish and making the water dangerous. Fish catches have fallen by over sixty per cent in just ten years, leaving many families unable to earn enough to survive. Children who eat contaminated fish have suffered health problems, increasing pressure on the local hospital.",
+      p2: "Local authorities and environmental groups are now taking action. Laws against illegal dumping have been strengthened, and several factory owners have been fined heavily for polluting the river. Volunteers regularly collect rubbish from the riverbank, while scientists test water samples to track improvements. Some fishing families have been given small grants to start alternative businesses, such as eco-tourism or fish farming in clean tanks, ensuring they do not have to rely solely on the polluted river.",
+      sample_points: [
+        "Fishing communities living along the river rely on it for their income.",
+        "Factory waste has poisoned the river and its fish.",
+        "Fish catches have fallen by sixty per cent in ten years.",
+        "Families cannot earn enough due to fewer fish.",
+        "Children eating contaminated fish have become ill.",
+        "New laws now punish factory owners who pollute the river.",
+        "Volunteers clean the riverbank regularly.",
+        "Scientists test the water to monitor recovery.",
+        "Some families receive grants to start new businesses.",
+        "Alternative livelihoods reduce dependence on the polluted river."
+      ]
+    }
+  ];
+
+  var paraState = {
+    level: 1,
+    l1Idx: -1,
+    l1Revealed: false,
+    l2Idx: -1,
+    l3Idx: -1,
+    streak: 0,
+    today: 0,
+    total: 0,
+    history: []
+  };
+
+  function paraInit() {
+    // Load saved stats
+    try {
+      var saved = JSON.parse(localStorage.getItem('paraStats') || 'null');
+      if (saved) {
+        paraState.streak = saved.streak || 0;
+        paraState.total  = saved.total  || 0;
+        var today = new Date().toDateString();
+        paraState.today  = saved.lastDate === today ? (saved.today || 0) : 0;
+        paraState.history = saved.history || [];
+      }
+    } catch(e){}
+    paraUpdateStats();
+    paraRenderHistory();
+    paraSetLevel(1);
+  }
+
+  function paraUpdateStats() {
+    document.getElementById('paraStreak').textContent = paraState.streak;
+    document.getElementById('paraToday').textContent  = paraState.today;
+    document.getElementById('paraTotal').textContent  = paraState.total;
+  }
+
+  function paraSave() {
+    try {
+      localStorage.setItem('paraStats', JSON.stringify({
+        streak: paraState.streak,
+        total:  paraState.total,
+        today:  paraState.today,
+        lastDate: new Date().toDateString(),
+        history: paraState.history.slice(-50)
+      }));
+    } catch(e){}
+    // Firestore
+    if (db && currentUser) {
+      var uid = getUID ? getUID() : (currentUser ? currentUser.uid : null);
+      if (uid) {
+        db.collection('progress').doc(uid).set({
+          paraStats: {
+            streak: paraState.streak,
+            total:  paraState.total,
+            today:  paraState.today,
+            lastDate: new Date().toDateString(),
+            historyLen: paraState.history.length
+          }
+        }, { merge: true }).catch(function(){});
+      }
+    }
+  }
+
+  function paraRecordAttempt(level, correct, original, attempt) {
+    if (correct) {
+      paraState.streak++;
+      paraState.today++;
+      paraState.total++;
+    } else {
+      paraState.streak = 0;
+    }
+    paraState.history.unshift({
+      ts: Date.now(),
+      level: level,
+      correct: correct,
+      orig: (original || '').substring(0, 80),
+      attempt: (attempt || '').substring(0, 80)
+    });
+    paraUpdateStats();
+    paraSave();
+    paraRenderHistory();
+  }
+
+  // ── Lift detection ──────────────────────────────────────
+  function paraCheckLift(original, answer, threshold) {
+    threshold = threshold || 3;
+    var origW = original.toLowerCase().replace(/[^a-z0-9 ]/g,'').split(/\s+/).filter(Boolean);
+    var ansW  = answer.toLowerCase().replace(/[^a-z0-9 ]/g,'').split(/\s+/).filter(Boolean);
+    var lifted = [];
+    for (var i = 0; i <= ansW.length - threshold; i++) {
+      var chunk = ansW.slice(i, i + threshold);
+      for (var j = 0; j <= origW.length - threshold; j++) {
+        var match = true;
+        for (var k = 0; k < threshold; k++) {
+          if (origW[j+k] !== chunk[k]) { match = false; break; }
+        }
+        if (match) {
+          lifted.push(chunk.join(' '));
+          break;
+        }
+      }
+    }
+    // deduplicate
+    var seen = {};
+    return lifted.filter(function(x){ if(seen[x]) return false; seen[x]=true; return true; });
+  }
+
+  function paraWordCount(str) {
+    return str.trim().split(/\s+/).filter(Boolean).length;
+  }
+
+  function paraFeedbackHtml(correct, liftedPhrases, wordCount, maxWords, tip) {
+    var html = '';
+    if (liftedPhrases && liftedPhrases.length) {
+      html += '<div style="padding:.5rem .7rem;border-radius:8px;background:var(--redl);border-left:4px solid var(--red);font-size:.82rem;margin-bottom:.4rem">';
+      html += '❌ <strong>Lifted ' + liftedPhrases.length + ' phrase(s):</strong> ';
+      html += liftedPhrases.map(function(p){ return '<em>"' + p + '"</em>'; }).join(', ');
+      html += '<br>Rewrite those parts completely in your own words.</div>';
+    }
+    if (maxWords && wordCount > maxWords) {
+      html += '<div style="padding:.5rem .7rem;border-radius:8px;background:#fef3e2;border-left:4px solid var(--amber);font-size:.82rem;margin-bottom:.4rem">';
+      html += '⚠️ <strong>Too long:</strong> ' + wordCount + ' words (max ' + maxWords + '). Cut it down!</div>';
+    }
+    if (correct) {
+      html += '<div style="padding:.5rem .7rem;border-radius:8px;background:var(--greenl);border-left:4px solid var(--green);font-size:.82rem">';
+      html += '✅ <strong>Looks good!</strong> No lifted phrases detected' + (maxWords ? ', and within word limit.' : '.') + '</div>';
+    }
+    if (tip) {
+      html += '<div style="padding:.4rem .7rem;font-size:.78rem;color:var(--muted);margin-top:.3rem">💡 ' + tip + '</div>';
+    }
+    return html;
+  }
+
+  // ── Level switcher ───────────────────────────────────────
+  function paraSetLevel(n) {
+    paraState.level = n;
+    ['1','2','3'].forEach(function(x){
+      document.getElementById('paraL'+x+'Panel').style.display = (x == n ? '' : 'none');
+    });
+    // button highlight
+    var colours = {1:'var(--blue)', 2:'var(--amber)', 3:'var(--red)'};
+    ['1','2','3'].forEach(function(x){
+      var btn = document.getElementById('paraLvl'+x+'Btn');
+      btn.className = 'tbtn' + (x == n ? ' tbtn-primary' : '');
+      if (x != n) {
+        btn.style.background = (x=='2'?'var(--amberl)':(x=='3'?'var(--redl)':'var(--greenl)'));
+        btn.style.color = colours[x];
+        btn.style.border = '1.5px solid ' + colours[x];
+      } else {
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.border = '';
+      }
+    });
+    if (n === 1 && paraState.l1Idx === -1) paraL1New();
+    if (n === 2 && paraState.l2Idx === -1) paraL2New();
+    if (n === 3 && paraState.l3Idx === -1) paraL3New();
+  }
+
+  // ── Level 1: Sentence ────────────────────────────────────
+  function paraL1New() {
+    var pool = PARA_SENTENCES;
+    var idx;
+    do { idx = Math.floor(Math.random() * pool.length); } while (idx === paraState.l1Idx && pool.length > 1);
+    paraState.l1Idx = idx;
+    paraState.l1Revealed = false;
+    var el = document.getElementById('paraL1Original');
+    el.style.display = 'none';
+    el.textContent = pool[idx].text;
+    document.getElementById('paraL1Hint').textContent = '📌 Topic: ' + pool[idx].topic + ' · ' + paraWordCount(pool[idx].text) + ' words in original';
+    document.getElementById('paraL1Input').value = '';
+    document.getElementById('paraL1Feedback').innerHTML = '';
+    document.getElementById('paraL1RevealBtn').textContent = '👁 Reveal';
+  }
+
+  function paraL1ToggleReveal() {
+    paraState.l1Revealed = !paraState.l1Revealed;
+    var el = document.getElementById('paraL1Original');
+    el.style.display = paraState.l1Revealed ? '' : 'none';
+    document.getElementById('paraL1RevealBtn').textContent = paraState.l1Revealed ? '🙈 Hide' : '👁 Reveal';
+  }
+
+  function paraL1Check() {
+    var idx = paraState.l1Idx;
+    if (idx < 0) { paraL1New(); return; }
+    var original = PARA_SENTENCES[idx].text;
+    var answer   = document.getElementById('paraL1Input').value.trim();
+    if (!answer) { document.getElementById('paraL1Feedback').innerHTML = '<div style="color:var(--muted);font-size:.82rem">Please write something first!</div>'; return; }
+    var lifted  = paraCheckLift(original, answer, 3);
+    var wc      = paraWordCount(answer);
+    var correct = lifted.length === 0 && wc >= 4;
+    var tip = correct ? 'Great — now try to vary the sentence structure next time too!' : '';
+    document.getElementById('paraL1Feedback').innerHTML = paraFeedbackHtml(correct, lifted, wc, null, tip);
+    // reveal original after checking
+    document.getElementById('paraL1Original').style.display = '';
+    document.getElementById('paraL1RevealBtn').textContent = '🙈 Hide';
+    paraState.l1Revealed = true;
+    paraRecordAttempt(1, correct, original, answer);
+  }
+
+  function paraL1Skip() {
+    paraState.streak = 0;
+    paraUpdateStats();
+    paraSave();
+    paraL1New();
+  }
+
+  // ── Level 2: Bullet Point ────────────────────────────────
+  function paraL2New() {
+    var pool = PARA_PARAGRAPHS;
+    var idx;
+    do { idx = Math.floor(Math.random() * pool.length); } while (idx === paraState.l2Idx && pool.length > 1);
+    paraState.l2Idx = idx;
+    document.getElementById('paraL2PassageBox').innerHTML = pool[idx].text;
+    document.getElementById('paraL2Input').value = '';
+    document.getElementById('paraL2WC').textContent = '0 / 10';
+    document.getElementById('paraL2WC').style.color = 'var(--muted)';
+    document.getElementById('paraL2Feedback').innerHTML = '';
+  }
+
+  function paraL2WordCount() {
+    var val = document.getElementById('paraL2Input').value;
+    var wc = paraWordCount(val);
+    var el = document.getElementById('paraL2WC');
+    el.textContent = wc + ' / 10';
+    el.style.color = wc > 10 ? 'var(--red)' : (wc >= 5 ? 'var(--green)' : 'var(--muted)');
+  }
+
+  function paraL2Check() {
+    var idx = paraState.l2Idx;
+    if (idx < 0) { paraL2New(); return; }
+    var passage  = PARA_PARAGRAPHS[idx].text;
+    var sample   = PARA_PARAGRAPHS[idx].key_point;
+    var answer   = document.getElementById('paraL2Input').value.trim();
+    if (!answer) { document.getElementById('paraL2Feedback').innerHTML = '<div style="color:var(--muted);font-size:.82rem">Write a key point first!</div>'; return; }
+    var lifted   = paraCheckLift(passage, answer, 3);
+    var wc       = paraWordCount(answer);
+    var tooLong  = wc > 10;
+    var correct  = lifted.length === 0 && !tooLong && wc >= 3;
+    var fb = paraFeedbackHtml(correct, lifted, wc, 10, null);
+    if (correct) {
+      fb += '<div style="padding:.45rem .65rem;background:var(--bluel);border-radius:7px;font-size:.8rem;margin-top:.4rem">📖 <strong>Sample answer:</strong> ' + sample + '</div>';
+    }
+    document.getElementById('paraL2Feedback').innerHTML = fb;
+    paraRecordAttempt(2, correct, passage, answer);
+  }
+
+  // ── Level 3: Q23 Simulator ────────────────────────────────
+  function paraL3New() {
+    var pool = PARA_Q23_SETS;
+    var idx;
+    do { idx = Math.floor(Math.random() * pool.length); } while (idx === paraState.l3Idx && pool.length > 1);
+    paraState.l3Idx = idx;
+    var set = pool[idx];
+    document.getElementById('paraL3Passage').innerHTML =
+      '<strong>Paragraph 1</strong><br>' + set.p1 + '<br><br><strong>Paragraph 2</strong><br>' + set.p2;
+    document.getElementById('paraL3Starter').textContent = set.starter;
+    var boxesHtml = '';
+    for (var i = 1; i <= 10; i++) {
+      boxesHtml += '<div style="display:flex;align-items:center;gap:.45rem">' +
+        '<span style="font-size:.78rem;font-weight:700;color:var(--muted);min-width:20px">' + i + '.</span>' +
+        '<input type="text" id="paraL3Box' + i + '" placeholder="Point ' + i + ' (≤10 words)…" ' +
+        'style="flex:1;font-size:.84rem;border-radius:6px;border:1.5px solid var(--border);padding:.35rem .6rem;font-family:inherit" ' +
+        'oninput="paraL3BoxCount(' + i + ')" />' +
+        '<span id="paraL3WC' + i + '" style="font-size:.75rem;color:var(--muted);min-width:38px;text-align:right">0/10</span>' +
+        '<span id="paraL3Icon' + i + '" style="font-size:.9rem;min-width:16px"></span>' +
+      '</div>';
+    }
+    document.getElementById('paraL3Boxes').innerHTML = boxesHtml;
+    document.getElementById('paraL3Feedback').innerHTML = '';
+  }
+
+  function paraL3BoxCount(n) {
+    var val = document.getElementById('paraL3Box' + n).value;
+    var wc = paraWordCount(val);
+    var el = document.getElementById('paraL3WC' + n);
+    el.textContent = wc + '/10';
+    el.style.color = wc > 10 ? 'var(--red)' : (wc >= 3 ? 'var(--green)' : 'var(--muted)');
+  }
+
+  function paraL3Check() {
+    var idx = paraState.l3Idx;
+    if (idx < 0) { paraL3New(); return; }
+    var set = PARA_Q23_SETS[idx];
+    var fullText = set.p1 + ' ' + set.p2;
+    var passed = 0, issues = [];
+    for (var i = 1; i <= 10; i++) {
+      var ans = document.getElementById('paraL3Box' + i).value.trim();
+      var iconEl = document.getElementById('paraL3Icon' + i);
+      var boxEl  = document.getElementById('paraL3Box' + i);
+      if (!ans) {
+        iconEl.textContent = '⬜';
+        boxEl.style.borderColor = 'var(--border)';
+        issues.push('Box ' + i + ': empty');
+        continue;
+      }
+      var lifted  = paraCheckLift(fullText, ans, 3);
+      var wc      = paraWordCount(ans);
+      var ok = lifted.length === 0 && wc >= 3 && wc <= 10;
+      if (ok) {
+        passed++;
+        iconEl.textContent = '✅';
+        boxEl.style.borderColor = 'var(--green)';
+      } else {
+        iconEl.textContent = '❌';
+        boxEl.style.borderColor = 'var(--red)';
+        if (lifted.length) issues.push('Box ' + i + ': lifted "' + lifted[0] + '"');
+        else if (wc > 10) issues.push('Box ' + i + ': ' + wc + ' words (max 10)');
+        else if (wc < 3) issues.push('Box ' + i + ': too short');
+      }
+    }
+    var score = passed + '/10';
+    var correct = passed >= 7;
+    var fbHtml = '<div style="padding:.6rem .85rem;border-radius:8px;background:' + (correct?'var(--greenl)':'var(--redl)') + ';border-left:4px solid ' + (correct?'var(--green)':'var(--red)') + ';font-size:.85rem;margin-bottom:.5rem">';
+    fbHtml += (correct ? '✅' : '❌') + ' <strong>' + score + ' boxes passed</strong> ' + (correct ? '— Excellent paraphrasing!' : '— Keep practising!');
+    fbHtml += '</div>';
+    if (issues.length) {
+      fbHtml += '<div style="padding:.5rem .7rem;background:var(--amberl);border-radius:7px;font-size:.8rem;margin-bottom:.5rem">';
+      fbHtml += '<strong>Issues to fix:</strong><ul style="margin:.3rem 0 0 1rem;padding:0">';
+      issues.forEach(function(x){ fbHtml += '<li>' + x + '</li>'; });
+      fbHtml += '</ul></div>';
+    }
+    fbHtml += '<div style="padding:.45rem .65rem;background:var(--bluel);border-radius:7px;font-size:.78rem;margin-top:.3rem">';
+    fbHtml += '📖 <strong>Sample points:</strong><ol style="margin:.3rem 0 0 1.1rem;padding:0">';
+    set.sample_points.forEach(function(p){ fbHtml += '<li style="margin-bottom:.15rem">' + p + '</li>'; });
+    fbHtml += '</ol></div>';
+    document.getElementById('paraL3Feedback').innerHTML = fbHtml;
+    paraRecordAttempt(3, correct, set.p1, score);
+  }
+
+  // ── History ──────────────────────────────────────────────
+  function paraRenderHistory() {
+    var el = document.getElementById('paraHistory');
+    if (!el) return;
+    if (!paraState.history.length) {
+      el.innerHTML = '<div class="empty-state"><div class="es-icon">🖊️</div><p>No attempts yet</p></div>';
+      return;
+    }
+    var html = '<div style="display:flex;flex-direction:column;gap:.35rem">';
+    paraState.history.slice(0,20).forEach(function(h){
+      var d = new Date(h.ts);
+      var timeStr = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+      var lvlLabel = ['','Sentence','Bullet','Q23'][h.level] || 'L'+h.level;
+      html += '<div style="display:flex;gap:.5rem;align-items:center;font-size:.8rem;padding:.35rem .6rem;border-radius:7px;background:' + (h.correct?'var(--greenl)':'var(--redl)') + '">';
+      html += '<span style="font-weight:700;color:' + (h.correct?'var(--green)':'var(--red)') + '">' + (h.correct?'✅':'❌') + '</span>';
+      html += '<span style="color:var(--muted);min-width:40px">' + timeStr + '</span>';
+      html += '<span style="background:var(--bluel);color:var(--blue);border-radius:4px;padding:1px 6px;font-size:.72rem;font-weight:700">L' + h.level + ' ' + lvlLabel + '</span>';
+      html += '<span style="color:var(--muted);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + (h.attempt||'') + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  }
+
+  function paraClearHistory() {
+    if (!confirm('Clear paraphrase history?')) return;
+    paraState.history = [];
+    paraState.streak  = 0;
+    paraState.today   = 0;
+    paraState.total   = 0;
+    paraUpdateStats();
+    paraSave();
+    paraRenderHistory();
+  }
+
+  // Auto-init when tab is first opened
+  (function(){
+    var origShowTab = window.showTab;
+    if (typeof origShowTab === 'function') {
+      window.showTab = function(id, btn) {
+        origShowTab(id, btn);
+        if (id === 'paraTab' && !paraState._inited) {
+          paraState._inited = true;
+          paraInit();
+        }
+      };
+    }
+  })();
+
+  // ══════════════════════════════════════════════════════
+  //  END PARAPHRASE TRAINER
+  // ══════════════════════════════════════════════════════
+
   // ==== END DIAGNOSTIC ====
 
   </script>
