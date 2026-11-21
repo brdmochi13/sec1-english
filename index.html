@@ -41,6 +41,58 @@
       line-height: 1.6
     }
 
+    /* LEVEL PILL */
+    .level-pill{display:flex;align-items:center;gap:.3rem;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:.25rem .6rem;flex-shrink:0}
+    .level-pill label{color:rgba(255,255,255,.65);font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+    .level-sel{background:transparent;border:none;color:#f5f0e8;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;padding:0 .2rem;outline:none}
+    .level-sel option{background:#1c1c1e;color:#f5f0e8}
+
+    /* SEC 2 STYLES */
+    .s2-welcome{background:linear-gradient(135deg,var(--ink) 0%,#2d3748 100%);color:#f5f0e8;border-radius:12px;padding:1.4rem 1.6rem;margin-bottom:1.2rem}
+    .s2-welcome h2{font-family:'Libre Baskerville',serif;font-size:1.2rem;margin-bottom:.4rem}
+    .s2-welcome p{font-size:.86rem;color:rgba(245,240,232,.75);line-height:1.6}
+    .s2-level-badge{display:inline-block;background:var(--gold);color:#1c1c1e;font-size:.72rem;font-weight:700;border-radius:10px;padding:2px 10px;margin-bottom:.5rem;letter-spacing:.3px}
+    .s2-passage-box{background:#fffdf7;border:1.5px solid #e5dfc8;border-radius:8px;padding:1rem 1.2rem;font-size:.92rem;line-height:1.75;margin-bottom:1rem;white-space:pre-wrap}
+    .s2-passage-title{font-family:'Libre Baskerville',serif;font-size:.95rem;font-weight:700;margin-bottom:.5rem;color:var(--ink)}
+    .s2-q-block{margin-bottom:1.1rem}
+    .s2-q-text{font-weight:600;margin-bottom:.4rem;font-size:.9rem}
+    .s2-marks-pill{display:inline-block;background:var(--amberl);color:var(--amber);font-size:.68rem;font-weight:700;border-radius:10px;padding:1px 7px;margin-left:.4rem;vertical-align:middle}
+    .s2-ans{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:.5rem .7rem;font-family:inherit;font-size:.88rem;resize:vertical;min-height:70px;background:#fff}
+    .s2-ans:focus{outline:none;border-color:var(--blue)}
+    .s2-fb{margin-top:.4rem;padding:.5rem .7rem;border-radius:6px;border-left:3px solid;display:none;font-size:.85rem}
+    .s2-fb-wrong{background:var(--redl);border-color:var(--red);color:#7f1d1d}
+    .s2-type-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.68rem;font-weight:700;margin-bottom:.3rem}
+    .s2-mistake-tip{padding:.3rem .5rem;border-radius:5px;background:#fff7ed;border-left:3px solid #f97316;font-size:.72rem;color:#9a3412;margin-bottom:.3rem}
+    .s2-hint-btn{background:var(--amberl);border:1.5px solid var(--amber);color:var(--amber);border-radius:6px;padding:.25rem .7rem;font-family:inherit;font-size:.74rem;font-weight:700;cursor:pointer;transition:all .15s;margin-bottom:.4rem;display:inline-block}
+    .s2-hint-btn:hover{background:var(--amber);color:#fff}
+    .s2-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.7rem;margin-bottom:1rem}
+    .s2-stat-card{background:var(--card);border:1.5px solid var(--border);border-radius:8px;padding:.85rem;text-align:center}
+    .s2-stat-num{font-family:'Libre Baskerville',serif;font-size:1.6rem;font-weight:700;color:var(--green)}
+    .s2-stat-lbl{font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .s2-tone-opts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.5rem 0}
+    .s2-tone-opt{background:var(--card);border:1.5px solid var(--border);border-radius:7px;padding:.5rem .8rem;cursor:pointer;font-size:.85rem;font-weight:600;text-align:center;transition:all .15s}
+    .s2-tone-opt:hover{border-color:var(--blue)}
+    .s2-tone-opt.s2-selected{border-color:var(--blue);background:var(--bluel)}
+    .s2-tone-opt.s2-correct{border-color:var(--green);background:var(--greenl);color:var(--green)}
+    .s2-tone-opt.s2-wrong{border-color:var(--red);background:var(--redl);color:var(--red)}
+    .s2-seq-list{list-style:none;margin:.6rem 0}
+    .s2-seq-item{background:var(--card);border:1.5px solid var(--border);border-radius:7px;padding:.6rem .9rem;margin-bottom:.4rem;cursor:grab;display:flex;align-items:center;gap:.6rem;font-size:.88rem;user-select:none;transition:box-shadow .15s}
+    .s2-seq-item:active{cursor:grabbing}
+    .s2-seq-item.s2-dragging{opacity:.4}
+    .s2-seq-item.s2-over{border-color:var(--blue);background:var(--bluel)}
+    .s2-seq-correct{border-color:var(--green)!important;background:var(--greenl)!important}
+    .s2-seq-wrong{border-color:var(--red)!important;background:var(--redl)!important}
+    .s2-seq-num{font-weight:700;font-size:.75rem;color:var(--muted);min-width:1.2rem}
+    .s2-point-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin:.5rem 0}
+    .s2-point{display:flex;align-items:flex-start;gap:.4rem;background:var(--card);border:1.5px solid var(--border);border-radius:6px;padding:.5rem .7rem;cursor:pointer;font-size:.82rem;line-height:1.4;transition:all .15s}
+    .s2-point input{margin-top:2px;flex-shrink:0}
+    .s2-point.s2-pt-selected{border-color:var(--blue);background:var(--bluel)}
+    .s2-point.s2-pt-correct{border-color:var(--green);background:var(--greenl)}
+    .s2-point.s2-pt-wrong{border-color:var(--red);background:var(--redl)}
+    .s2-sum-box{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:.5rem .7rem;font-family:inherit;font-size:.88rem;resize:vertical;min-height:90px}
+    .s2-word-ctx{background:#fffdf7;border:1.5px solid #e5dfc8;border-radius:8px;padding:.8rem 1rem;font-size:.92rem;line-height:1.75;margin-bottom:.7rem}
+    @media(max-width:600px){.s2-tone-opts,.s2-point-grid{grid-template-columns:1fr}}
+
     /* TOPBAR */
     .topbar {
       background: var(--ink);
@@ -3729,8 +3781,15 @@
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <div class="logo">S1 English <span>Mastery</span> <span id="roleBadge" class="role-badge role-student"
+    <div class="logo">English <span>Mastery</span> <span id="roleBadge" class="role-badge role-student"
         style="display:none">Student</span></div>
+    <div class="level-pill">
+      <label>LEVEL</label>
+      <select class="level-sel" id="levelSel" onchange="switchLevel(this.value)">
+        <option value="sec1" selected>Sec 1 (G3)</option>
+        <option value="sec2">Sec 2 (G2)</option>
+      </select>
+    </div>
     <div class="top-btns">
       <span id="userDisplayName" style="color:rgba(255,255,255,.5);font-size:.75rem;display:none"></span>
       <button class="tbtn tbtn-outline" onclick="openKeyModal()">🔐 Answer Key</button>
@@ -3749,6 +3808,8 @@
   </div>
 
 
+  <!-- SEC 1 SHELL -->
+  <div id="sec1Shell">
   <!-- MAIN TABS -->
   <div class="main-tabs">
     <button class="mtab active" onclick="showTab('dashTab',this)">📊 Dashboard</button>
@@ -19591,6 +19652,472 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
 
   // ==== END DIAGNOSTIC ====
 
+  // ══════════════════════════════════════════════════════
+  //  LEVEL SWITCHER
+  // ══════════════════════════════════════════════════════
+  function switchLevel(v){
+    document.getElementById('sec1Shell').style.display = v==='sec1'?'block':'none';
+    document.getElementById('sec2Shell').style.display = v==='sec2'?'block':'none';
+  }
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 STATS
+  // ══════════════════════════════════════════════════════
+  var s2stats = {infer:0,lang:0,tone:0,seq:0,sum:0};
+  function s2loadStats(){
+    try{ var s=JSON.parse(localStorage.getItem('em_s2_stats')); if(s) s2stats=s; }catch(e){}
+    ['infer','lang','tone','seq','sum'].forEach(function(k){
+      var el=document.getElementById('s2d_'+k); if(el) el.textContent=s2stats[k];
+    });
+  }
+  function s2saveStats(){ try{ localStorage.setItem('em_s2_stats',JSON.stringify(s2stats)); }catch(e){} }
+  function s2bumpStat(k){ s2stats[k]++; s2saveStats(); s2loadStats(); }
+
+  function s2typeBadge(t){
+    var map={'Inference':['#ede9fe','#7c3aed'],'Language in Context':['#d1fae5','#065f46'],'Tone & Intent':['#fdf2f8','#9d174d'],'Sequencing':['#fef3c7','#92400e'],'Summary Writing':['#e0f2fe','#0369a1']};
+    var c=map[t]||['#f3f4f6','#374151'];
+    return '<span class="s2-type-badge" style="background:'+c[0]+';color:'+c[1]+'">'+t+'</span>';
+  }
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 — INFERENCE DATA
+  // ══════════════════════════════════════════════════════
+  var S2_INFER = [
+    {title:"The Last Garden",passage:`Old Mr Tan had not left his house for three years. Each morning, his neighbours would see the curtains part for exactly four minutes, then fall still again. No one knocked on his door anymore — not since the incident with Mrs Lim's son. Yet every spring, without fail, the small patch of garden beside his front gate would burst into colour: dahlias, bird-of-paradise, and once, improbably, a climbing rose that had no business surviving a Singapore December.\n\nThe postman, Ravi, noticed the garden first. "Someone tends this," he told his colleague. "You don't get blooms like that by accident." He began leaving the letters propped against the gate instead of dropping them through the slot, hoping to catch a glimpse. He never did. But one morning he found a folded note wedged beneath a dahlia stem: "Thank you for being careful with my letters." Nothing more.`,questions:[{q:"What does Mr Tan's behaviour with the curtains suggest about his personality?",marks:2,model:"The fact that he opens the curtains for exactly four minutes every morning suggests he is cautious and controlled — he wants to observe the outside world but strictly limits his exposure to it, implying he is anxious or deeply private.",hint:"Look at the word 'exactly' and what it tells you about how he controls his contact with the outside world."},{q:"What can you infer about the relationship between Mr Tan and his neighbours, based on the phrase 'not since the incident with Mrs Lim's son'?",marks:2,model:"The phrase implies that something unpleasant happened involving Mrs Lim's son that damaged Mr Tan's relationships with the neighbourhood. The vagueness suggests the neighbours consider it a sensitive matter.",hint:"Consider why the writer chose not to explain the incident — what does that silence suggest?"},{q:"What does the note left for Ravi reveal about Mr Tan?",marks:2,model:"Despite his extreme withdrawal from society, Mr Tan is observant and appreciative — he noticed Ravi's small act of kindness and went to the effort of responding, showing he still craves some human connection.",hint:"Think about what it took for Mr Tan to leave the note, given everything we know about him."}]},
+    {title:"The Test Score",passage:`When the teacher placed the paper face-down on Priya's desk, Priya did not turn it over immediately. She watched instead as Wei Lin snatched hers up, went pale, and stuffed it into her bag without a word. She watched as Daniel read his twice, then smiled at the ceiling. Only then did Priya flip her own paper — and stare at the number for a long time before folding it into her textbook.\n\nThat evening, her mother asked how the test went. "Fine," said Priya. Her mother smiled and went back to chopping vegetables. Priya set the table, washed the dishes, and fed the cat. She did not mention the number, and her mother, who had learned to read the particular quality of Priya's silences, did not ask again.`,questions:[{q:"What can you infer about Wei Lin's test result from her reaction?",marks:2,model:"Wei Lin went pale and immediately hid her paper, suggesting she received a poor result she was ashamed of and did not want others to see.",hint:"Focus on the physical reaction and the action that followed — what do they together reveal?"},{q:"What does Priya's decision to observe her classmates before looking at her own result suggest about her character?",marks:2,model:"Priya's deliberate delay suggests she is cautious and emotionally careful — she gauges others' reactions first, perhaps to prepare herself mentally before confronting her own result.",hint:"Why would someone wait and watch before looking at their own paper?"},{q:"What does the final sentence suggest about the mother's understanding of Priya?",marks:2,model:"The phrase 'learned to read the particular quality of Priya's silences' suggests the mother knows her daughter deeply and can tell when she is concealing something significant. By choosing not to press her, she shows respect and sensitivity.",hint:"What does it mean to 'read' a silence?"}]},
+    {title:"The Scholarship Letter",passage:`The letter sat on the kitchen table for six days before anyone opened it. It had arrived on a Tuesday; by Saturday it had developed a slight coffee ring on one corner from where Marcus's father had placed his mug down without looking. Marcus himself walked past it at least twice a day. He knew what it contained — or rather, he knew there were only two possible contents, and he had spent six days deciding which of them he was more afraid of.\n\nHis younger sister Bea opened it on Sunday morning, while Marcus was at football practice. She read it once, placed it back in the envelope, and was sitting at the table with two glasses of orange juice when Marcus returned. The glasses told him everything before he even looked at her face.`,questions:[{q:"What does the detail about the coffee ring suggest about Marcus's father's attitude towards the letter?",marks:2,model:"The coffee ring suggests the father placed his mug on top of the letter without noticing it, implying he was deliberately avoiding looking at it — suggesting he too was anxious about the contents and was coping by ignoring it.",hint:"Consider whether the coffee ring was accidental or a symptom of something the father was feeling."},{q:"What does Marcus's statement — 'he had spent six days deciding which of them he was more afraid of' — suggest about his feelings?",marks:2,model:"Marcus's dilemma suggests he fears both outcomes equally — he is afraid of rejection, but possibly equally afraid of success and the pressure that would come with a scholarship. This reveals his anxiety and self-doubt.",hint:"Why would someone be afraid of a good outcome?"},{q:"What do the two glasses of orange juice suggest about the news in the letter?",marks:2,model:"The two glasses suggest Bea is celebrating and wants to celebrate with Marcus — she has prepared a drink for him, implying the news is positive. The gesture shows her affection and her confidence that the moment deserves marking.",hint:"Think about when people prepare drinks for someone who is about to arrive — what are they signalling?"}]},
+    {title:"Night Market",passage:`The night market appeared every Friday at exactly 7pm and vanished by midnight, leaving behind only a faint smell of charcoal and sugar cane juice. Stall holders who had operated there for twenty years refused to give their real names, going only by the name of their product: Uncle Popiah, Auntie Ice Kachang, the Durian Brothers.\n\nA food blogger once spent three Fridays trying to identify the stalls' permanent locations so she could visit them on other days. She found nothing — no registered business names, no social media presence, no evidence that these vendors existed outside the market hours. Her eventual blog post attracted 40,000 readers. The stall holders, when shown the post on a phone screen, seemed unbothered. Uncle Popiah read it carefully, handed the phone back, and said only: "Good photo of my popiah."`,questions:[{q:"What does the market vendors' refusal to use their real names suggest about their attitude towards their identity?",marks:2,model:"By identifying themselves only by their product, the vendors suggest that their craft defines who they are more than their personal identity does. It also implies a deliberate choice to remain anonymous and outside mainstream commercial systems.",hint:"Think about what a name usually gives us — and what is lost or gained by replacing it with a product name."},{q:"What can be inferred about the stall holders from their reaction to the blog post?",marks:2,model:"Their calm, unbothered response — especially Uncle Popiah's focus on the photo of his food rather than the article's content — suggests they are indifferent to public attention or online fame. They derive satisfaction from their craft, not from recognition.",hint:"What would you expect someone to focus on if they read an article about themselves?"}]},
+    {title:"Sports Day",passage:`Of the six runners in the 1500m final, Hamid was the smallest by some margin. He had qualified for the final by finishing third in his heat — the slowest qualifying time of the day. His coach had not watched the heat; he had been dealing with a sprained ankle on the other side of the field. When he saw Hamid's name on the finalists' board, he checked it twice.\n\nThe final began at 3pm, into a headwind that the other runners leaned against and grimaced. Hamid ran slightly behind the pack for the first three laps. With 200 metres to go, he was still fifth. Then, with a smoothness that the spectators would later find difficult to explain, he moved to the outside lane, lengthened his stride, and ran the final straight in a time that the electronic board recorded but that several adults present later claimed could not be right.`,questions:[{q:"What does the coach's reaction to seeing Hamid's name on the board suggest about Hamid?",marks:2,model:"The coach checking the board twice suggests he was surprised, implying that Hamid's qualification was unexpected — either because the coach had low expectations of him, or because Hamid had not shown this level of ability before.",hint:"Why would someone need to check the same board twice?"},{q:"What can you infer from the description of Hamid's final burst as having a 'smoothness that the spectators would later find difficult to explain'?",marks:2,model:"The word 'smoothness' and the spectators' difficulty in explaining it suggests Hamid's acceleration was effortless and natural — he appeared to have been conserving energy during the race and released it strategically at the end, implying he is a tactically intelligent runner.",hint:"What does it mean when something looks effortless?"}]},
+    {title:"The Last Rehearsal",passage:`On the night of the final rehearsal, the director said nothing for a long time after the cast finished their run-through. She walked slowly to the front of the empty hall, her heels loud on the wooden floor. She looked at the stage — the painted backdrop, the borrowed chairs, the costume rail pushed to the left — then turned back to the cast.\n\n"Tomorrow," she said finally, "do exactly that."\n\nNo one moved. Then someone at the back of the hall began to clap, slowly at first, then faster, and the applause spread until the room was full of it. The director sat down in the front row, pressed both palms flat on her thighs, and looked at the floor. She stayed that way until the noise stopped.`,questions:[{q:"What can you infer from the director's long silence after the run-through?",marks:2,model:"The director's silence suggests she is deeply moved or processing something significant. Rather than immediately giving notes, her pause implies the performance exceeded her expectations and she is taking time to absorb what she witnessed.",hint:"Directors usually speak immediately after a rehearsal. What does choosing silence instead communicate?"},{q:"What does the director's gesture of pressing 'both palms flat on her thighs' and looking at the floor suggest about how she is feeling?",marks:2,model:"This gesture suggests she is trying to compose herself and suppress an emotional response — pressing her palms down is a physical way of grounding herself. Looking at the floor prevents the cast from seeing her face, suggesting strong emotion she does not want to show.",hint:"Consider what the body language reveals — why would someone press their hands down and look away?"}]},
+    {title:"The Argument",passage:`They had been arguing for eleven minutes — Mia had checked her phone twice — when her father stopped mid-sentence, walked to the kitchen window, and stood there looking out at the garden. Mia waited. The refrigerator hummed. Outside, a bird called once and fell silent.\n\n"I had a teacher like that," her father said finally, not turning around. "Hated him at the time."\n\nMia did not say anything.\n\n"Turned out he was the only one who expected anything of me." He turned from the window then, and she noticed — she had not noticed before — that his hair at the temples was almost entirely white. "I'm not saying I'm right," he said. "I'm saying I might not be wrong."`,questions:[{q:"What does the father's act of walking to the window mid-sentence suggest about his state of mind?",marks:2,model:"Walking away mid-sentence suggests he is struggling to articulate his position or is trying to manage his emotions. The deliberate physical movement implies he needs a moment to collect himself, suggesting the argument is affecting him more than he wants to show.",hint:"Consider why someone would stop talking and walk away rather than finishing what they were saying."},{q:"What can you infer from the father's statement: 'I'm not saying I'm right. I'm saying I might not be wrong'?",marks:2,model:"This careful phrasing shows the father is stepping back from a position of authority and admitting uncertainty — acknowledging that his perspective may be valid but not the whole truth. It signals a willingness to listen while still standing by his underlying concern.",hint:"What is the difference between saying 'I'm right' and 'I might not be wrong'?"}]},
+    {title:"The New Neighbour",passage:`The woman who moved into Flat 14 on the third floor brought almost nothing with her: two suitcases, a folding bicycle, and a cardboard box from which, over the following weeks, she produced a remarkable variety of objects — a brass lamp, stacks of paperback novels, a small framed painting of a lighthouse, and what appeared to be a professional-grade espresso machine.\n\nShe introduced herself to no one. She did not use the lift, always taking the stairs at a pace that the other residents found faintly alarming. She left at 6.15am and returned at various times that bore no apparent relationship to any work schedule the building's most observant residents could identify. She nodded when she passed people in the corridor but had, as far as anyone could tell, never initiated a conversation.`,questions:[{q:"What do the contents of the woman's cardboard box suggest about her personality?",marks:2,model:"The variety of items — a brass lamp, novels, a lighthouse painting and a professional espresso machine — suggests she is cultured, independent and particular about comfort. Despite bringing very little, she chose items that reflect aesthetic taste and personal pleasure rather than necessity.",hint:"Look at what she chose to bring. What do these specific items tell you about what she values?"},{q:"What can be inferred about the woman from the fact that her comings and goings followed 'no apparent relationship to any work schedule'?",marks:2,model:"Her irregular schedule suggests she either works freelance, has an unconventional job, or deliberately keeps her movements unpredictable. Combined with her other behaviours, it implies she values her privacy and is comfortable with her independence from routine social observation.",hint:"Think about what having no fixed schedule means for someone who also avoids conversation and self-introduction."}]}
+  ];
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 — LANGUAGE IN CONTEXT DATA
+  // ══════════════════════════════════════════════════════
+  var S2_LANG = [
+    {ctx:'The elderly man shuffled across the floor, each step <u>tentative</u> as though the ground itself might give way beneath him.',word:'tentative',meaning:'Uncertain and hesitant, as if testing each step before committing to it.',effect:'Creates a sense of fragility and vulnerability — the reader feels the man\'s physical and perhaps emotional insecurity.'},
+    {ctx:'The city devoured the countryside. Fields that had stood for generations were <u>swallowed</u> by concrete and glass in the space of a single decade.',word:'swallowed',meaning:'Completely engulfed or consumed, leaving nothing behind.',effect:'The violent imagery suggests the urbanisation was aggressive and total — the countryside had no defence against it, emphasising the speed and completeness of the destruction.'},
+    {ctx:'She smiled, but the smile was <u>brittle</u> — the kind that cracks if you look too long.',word:'brittle',meaning:'Fragile and likely to break easily; here, a smile maintained with effort that could not last.',effect:'Creates unease — the reader senses tension beneath the surface and anticipates that the character\'s composure will not hold, building dramatic tension.'},
+    {ctx:'His explanation was <u>labyrinthine</u>, winding through digressions and qualifications until the original point was entirely lost.',word:'labyrinthine',meaning:'Extremely complicated and confusing, like a maze that is impossible to navigate.',effect:'Implies the speaker is either incapable of clarity or deliberately obscuring the truth — the word choice casts doubt on his honesty as much as his logic.'},
+    {ctx:'The playground was <u>alive</u> with the sound of children — shrieks, laughter, the percussion of small feet on tarmac.',word:'alive',meaning:'Full of energy, movement and noise — vibrant with activity.',effect:'Personifying the playground as "alive" makes it feel like a living, breathing entity, amplifying the sense of joyful chaos and emphasising how central the children\'s energy is to the space.'},
+    {ctx:'After the storm, the village was <u>eerily</u> quiet. Not a door creaked, not a curtain moved.',word:'eerily',meaning:'Strangely and unsettlingly quiet — a silence that feels unnatural.',effect:'Transforms silence from something peaceful into something threatening, warning the reader that something is wrong even before any further information is given.'},
+    {ctx:'She had <u>weathered</u> forty years of the city\'s changes and wore that history in the lines of her face.',word:'weathered',meaning:'Survived and endured difficult conditions over a long period of time.',effect:'The metaphor links human resilience to natural endurance — just as stone is shaped by weather, she has been shaped by time and hardship, implying strength and depth of character.'},
+    {ctx:'The politician\'s promises were <u>hollow</u> — resonant when spoken, empty when examined.',word:'hollow',meaning:'Without substance or sincerity; sounding impressive but containing nothing real.',effect:'The word "hollow" evokes a physical emptiness that mirrors moral emptiness — the reader is invited to distrust everything the politician has said.'},
+    {ctx:'The report landed on the minister\'s desk with a <u>thud</u> that seemed to echo through the whole department.',word:'thud',meaning:'A heavy, dull sound made by something solid hitting a surface.',effect:'The "thud" and its echo give the report a physical weight that mirrors its political significance — suggesting the findings are heavy, serious, and impossible to ignore.'},
+    {ctx:'The music <u>crept</u> under the door and wound itself around the dinner conversation, changing its mood without anyone noticing.',word:'crept',meaning:'Moved slowly and silently, entering without being observed.',effect:'Personifying the music as creeping gives it a stealthy, almost mischievous quality — it suggests the music\'s power is subtle but real, shaping emotions without conscious awareness.'}
+  ];
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 — TONE & INTENT DATA
+  // ══════════════════════════════════════════════════════
+  var S2_TONE = [
+    {passage:'We congratulate the government on another year of bold inaction. While the coral bleaches, the ministers deliberate. While the last of the mangroves fall, committees are formed. One day, perhaps, they will finish forming their thoughts — just in time to describe, very accurately, what used to be there.',tones:['Sarcastic','Nostalgic','Hopeful','Frightened'],correct:0,keyWords:['"congratulate"','"bold inaction"','"just in time to describe what used to be there"'],explanation:'The writer uses false praise ("We congratulate", "bold inaction") to attack the government\'s failure to act. The phrase "just in time to describe what used to be there" is bitterly ironic — suggesting the only thing they will accomplish is cataloguing destruction they could have prevented.'},
+    {passage:'The old kampung house smelled of the past — of attap and wood smoke, of my grandmother\'s curry that had soaked into the walls over fifty years. I pressed my palm against the beam she had touched every morning on her way to the kitchen, and felt, faintly, that she was still there.',tones:['Angry','Melancholic and tender','Clinical','Humorous'],correct:1,keyWords:['"smelled of the past"','"felt, faintly, that she was still there"'],explanation:'The writer\'s tone is tender and gently sad — longing for what is lost, but warm rather than bitter. The sensory details (smell, touch) and the gentle fantasy of feeling the grandmother\'s presence convey love and grief combined.'},
+    {passage:'The findings are as follows: a 23% increase in particulate matter in the eastern zone; a corresponding 17% reduction in respiratory health scores among residents aged 0–12; and a projected 40% rise in long-term treatment costs if current emission levels persist. The data speaks clearly. It remains to be seen whether anyone is listening.',tones:['Despairing','Controlled and warning','Cheerful','Disbelieving'],correct:1,keyWords:['"The data speaks clearly"','"It remains to be seen whether anyone is listening"'],explanation:'The majority is deliberately neutral and clinical. But the final two sentences shift: "The data speaks clearly" is a quiet but pointed statement, and "It remains to be seen whether anyone is listening" is a barely-contained warning or accusation.'},
+    {passage:'My son ran his first kilometre today. He has asked to do it again tomorrow. I have learned, in this year of watching him learn things I could not teach him, that joy does not require an audience — it only requires permission.',tones:['Boastful','Quietly joyful and reflective','Envious','Anxious'],correct:1,keyWords:['"joy does not require an audience — it only requires permission"'],explanation:'The tone is warm, understated and reflective. The writer does not celebrate loudly — instead, they draw a quiet philosophical insight from a small moment. The final line shows the parent\'s own emotional growth alongside the child\'s physical one.'},
+    {passage:'They called it a renovation. What they meant was: the food court is gone, the uncle with the fishball noodles is gone, the auntie who always gave extra for children is gone, and in their place stands a glass atrium that photographs beautifully and tastes of nothing.',tones:['Celebratory','Bitter and mournful','Confused','Envious'],correct:1,keyWords:['"tastes of nothing"','"What they meant was"'],explanation:'The writer is both bitter (at the loss) and mournful (for what is gone). The contrast between the official language ("renovation") and the writer\'s restatement ("What they meant was") signals distrust and anger. "Photographs beautifully and tastes of nothing" crystallises the loss: beauty without substance.'},
+    {passage:'The audience will note that this performance represents the culmination of eleven months of rehearsal, four set rebuilds, two director changes, and one incident involving a dry ice machine that legal counsel has advised us not to discuss. We hope you enjoy the show.',tones:['Nostalgic','Deadpan and humorous','Furious','Sorrowful'],correct:1,keyWords:['"one incident involving a dry ice machine that legal counsel has advised us not to discuss"'],explanation:'The tone is dry and comic. The list builds expectation of something serious, then the "dry ice machine" line punctures it with absurdity. The phrase "that legal counsel has advised us not to discuss" is comedy through understatement.'},
+    {passage:'She had lived through the occupation, the separation, independence and its complications, the economic miracle and its costs. She voted at every election, even the uncontested ones, because, she said, the act of voting was not about the result — it was about the record. She wanted history to know she had been there.',tones:['Despairing','Dignified and determined','Frivolous','Regretful'],correct:1,keyWords:['"the act of voting was not about the result — it was about the record"'],explanation:'The tone is quietly dignified — the woman\'s reasoning elevates a small civic act into a statement of historical witness. The writer\'s respect is evident in the careful listing of everything she has lived through.'},
+    {passage:'Please note that the form must be submitted in triplicate. The original must be in blue or black ink only; red ink forms will not be accepted. If submitting by post, allow 28 working days. If submitting in person, take a number. Numbers are issued from 8am. The office opens at 8.30am.',tones:['Sympathetic','Deadpan and absurdist','Encouraging','Melancholic'],correct:1,keyWords:['"Numbers are issued from 8am. The office opens at 8.30am."'],explanation:'The final two sentences create deadpan comedy through logical contradiction — you must take a number before the office opens, which is impossible. The formal, bureaucratic register throughout makes the absurdity more pronounced. The writer satirises bureaucratic inefficiency without breaking from an official tone.'}
+  ];
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 — SEQUENCING DATA
+  // ══════════════════════════════════════════════════════
+  var S2_SEQ = [
+    {title:'The River Rescue',passage:`When the flood warning reached the village, Kamala was already awake. She had felt the river before the alarm — something in its sound had changed in the night. She woke her parents first, then her younger brother. While her father called the village head, Kamala packed their documents into a waterproof bag: identity cards, the land deed, her brother's medical records. By the time the truck arrived to evacuate them, the water was already at the garden gate. They left with the bag, two changes of clothes each, and the photograph from the living room wall. The house flooded to the ceiling by noon.`,items:[{text:'Kamala heard the river\'s sound change',order:1},{text:'Kamala woke her parents and brother',order:2},{text:'Kamala packed documents into a waterproof bag',order:3},{text:'The evacuation truck arrived',order:4},{text:'The family left with minimal belongings',order:5},{text:'The house flooded to the ceiling',order:6}]},
+    {title:'The Audition',passage:`Jonas had prepared for the audition for six weeks. He had memorised three monologues and practised each one with a timer. On the day itself, he arrived forty minutes early, only to find the building locked. He sat on the steps and ran through his lines silently. When the doors opened, he was the first inside. He signed in at the desk, changed into his costume in the bathroom, and sat in the waiting area reading his notes. When his name was called, he stood, straightened his jacket, and walked through the door. Twenty minutes later, he walked out. He called his mother before he even reached the car.`,items:[{text:'Jonas prepared for six weeks',order:1},{text:'Jonas sat on the steps running through his lines',order:2},{text:'Jonas signed in at the desk',order:3},{text:'Jonas changed into his costume',order:4},{text:'Jonas walked through the audition door',order:5},{text:'Jonas called his mother',order:6}]},
+    {title:'The Stray Cat',passage:`The cat appeared on a Tuesday. No one had seen it arrive — it was simply there, sitting on the common corridor railing of the third floor. By Wednesday, Mrs Osman had left out a saucer of milk. By Thursday, the milk was gone and the cat had moved to the second floor. On Friday, the cat appeared inside the lift when the doors opened, sat calmly as it descended to the ground floor, and walked out without looking back. On Saturday, a child on the fourth floor found a litter of kittens behind the water heater cabinet. No one ever saw the original cat again.`,items:[{text:'The cat appeared on the third floor railing',order:1},{text:'Mrs Osman left out a saucer of milk',order:2},{text:'The cat moved to the second floor',order:3},{text:'The cat rode the lift to the ground floor and left',order:4},{text:'A child found kittens behind the water heater',order:5}]},
+    {title:'The Power Cut',passage:`The power cut began at 9.47pm, mid-sentence, mid-episode. For a moment, the whole block stood in absolute darkness. Then, one by one, phone torches appeared at windows like horizontal stars. Mr Fernandez from 12B knocked on three neighbours' doors to check on the elderly residents. Someone produced a portable speaker; someone else brought biryani. By 11pm, six families were seated in the corridor, sharing food they had been about to eat separately. The power returned at 11.42pm. People gathered their containers, said goodnight, and went back to their separate screens and separate silences.`,items:[{text:'The power cut began',order:1},{text:'Phone torches appeared at windows',order:2},{text:'Mr Fernandez checked on elderly neighbours',order:3},{text:'Six families ate together in the corridor',order:4},{text:'The power returned',order:5},{text:'People returned to their separate screens',order:6}]},
+    {title:'The Interview',passage:`Nadia had applied for the job on impulse, using a CV she had not updated in three years. When the interview confirmation arrived, she spent a weekend rewriting her experience in language she did not entirely recognise as her own. At the interview, she answered the first four questions well and the fifth — 'What is your greatest weakness?' — catastrophically. She said, without thinking: "I find it difficult to pretend to be someone I'm not." There was a pause. The interviewer wrote something down. Two weeks later, Nadia received an offer letter with a note attached: "We appreciate people who answer question five honestly."`,items:[{text:'Nadia applied on impulse with an outdated CV',order:1},{text:'Nadia rewrote her CV over a weekend',order:2},{text:'Nadia answered questions one to four well',order:3},{text:'Nadia gave a candid answer to question five',order:4},{text:'The interviewer wrote something down',order:5},{text:'Nadia received an offer letter with a note',order:6}]},
+    {title:'The Prize-Giving',passage:`The school's annual prize-giving ceremony followed a strict schedule: opening address by the principal, national anthem, guest speaker, prize presentation, school song, dismissal. This year the schedule was disrupted when the first prize winner, a girl named Yuen, walked to the stage, accepted her certificate, and instead of returning to her seat, turned to the microphone and said: "I want to give this to my form teacher, Mr Hassan, because he is the only teacher who told me I could do it when I did not believe him." She placed the certificate on the edge of the stage and went back to her seat. Mr Hassan, seated in the third row, did not move for a full minute. The ceremony then resumed on schedule.`,items:[{text:'The principal gave the opening address',order:1},{text:'The national anthem was performed',order:2},{text:'Yuen walked to the stage and accepted her certificate',order:3},{text:'Yuen placed the certificate on the stage edge',order:4},{text:'Mr Hassan sat motionless for a full minute',order:5},{text:'The ceremony resumed on schedule',order:6}]},
+    {title:'Moving Day',passage:`The movers arrived at 8am. By 9, the living room was empty. By 10, Lena had realised three boxes were missing. She found two in the lorry — mislabelled. The third was never accounted for. She signed the forms at noon, did a final walk through the flat, and stood for a moment in Jess's old bedroom — now bare walls, bare floor, a curtain hook with nothing hanging from it. She locked the door at 12.47pm and did not look back as she walked to the car. She called Jess from the car park. Jess, who had already arrived at the new flat and was eating instant noodles on a cardboard box, told her not to cry. Lena said she wasn't. Neither of them believed her.`,items:[{text:'The movers arrived',order:1},{text:'Lena found two mislabelled boxes in the lorry',order:2},{text:'Lena signed the forms',order:3},{text:'Lena stood in Jess\'s old bedroom',order:4},{text:'Lena locked the door',order:5},{text:'Lena called Jess from the car park',order:6}]},
+    {title:'Sports Day Relay',passage:`The relay team had trained for six weeks. On the day, their first runner, Ahmad, started well and handed the baton cleanly to Priya. Priya ran the second leg with a slight headwind but maintained pace. The third runner, Wei, stumbled on a wet patch near the halfway mark but recovered without dropping the baton. The final runner, Devi, received the baton in third place. With fifty metres to go she had pulled level with the second-placed team. At the finish line, she crossed first by a margin so small that the result had to be confirmed by photo. The team waited in silence for three minutes. Then the board displayed their number.`,items:[{text:'Ahmad started the first leg and handed the baton to Priya',order:1},{text:'Priya ran the second leg into a headwind',order:2},{text:'Wei stumbled but recovered without dropping the baton',order:3},{text:'Devi received the baton in third place',order:4},{text:'Devi crossed the finish line first',order:5},{text:'The team waited for the photo finish result',order:6}]}
+  ];
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 — SUMMARY WRITING DATA
+  // ══════════════════════════════════════════════════════
+  var S2_SUM = [
+    {title:'Urban Greenery',passage:`Singapore has significantly expanded its urban greenery over the past three decades. Rooftop gardens now sit above shopping centres, and sky bridges connect parks that were once separated by roads. Studies have shown that exposure to green spaces reduces stress hormones by up to 16% in urban dwellers. The cooling effect of vegetation also reduces reliance on air conditioning, cutting household energy costs. Critics argue that the land used for parks could house more people. Supporters counter that density without liveability drives residents abroad, costing Singapore talent it cannot afford to lose. Some of the most visited green spaces in the city charge no admission fee, making them accessible to residents at all income levels.`,question:'Summarise the <strong>benefits</strong> of urban greenery in Singapore. Write in continuous prose using your own words.',points:[{text:'Reduces stress hormones in urban residents',correct:true},{text:'Creates habitats for rare animals',correct:false},{text:'Lowers household energy costs by reducing air conditioning use',correct:true},{text:'Green spaces are accessible to all income levels at no cost',correct:true},{text:'Helps retain talent by improving liveability',correct:true},{text:'Critics say parks waste land that could house people',correct:false},{text:'Sky bridges connect previously separated parks',correct:false},{text:'Singapore expanded greenery over thirty years',correct:false}],model:'Urban greenery in Singapore benefits residents in several ways. Research shows it lowers stress hormone levels significantly. Vegetation also cools the environment, reducing the need for air conditioning and cutting energy costs. The city\'s green spaces are free to visit, making them available to people from all backgrounds. Beyond individual wellbeing, greenery improves quality of life enough to encourage skilled residents to stay in Singapore rather than move abroad.'},
+    {title:'Sleep and Learning',passage:`Sleep plays a critical role in how the brain processes and retains new information. During deep sleep, the brain replays the day's experiences, transferring short-term memories into long-term storage. Students who sleep fewer than seven hours before an exam consistently score lower than those who sleep eight or more, even when both groups studied for the same duration. Sleep deprivation also reduces the brain's ability to form new connections between ideas — a skill central to answering inference and analysis questions. Physical health is affected too: chronic poor sleep is linked to weakened immunity, increased appetite and mood instability. Despite this, surveys of secondary school students in Singapore show that over 60% sleep fewer than seven hours on school nights, often due to screen use after 11pm.`,question:'Summarise the <strong>effects of insufficient sleep</strong> on students. Write in continuous prose using your own words.',points:[{text:'Memory transfer from short-term to long-term is impaired',correct:true},{text:'Sleep-deprived students score lower in exams',correct:true},{text:'The ability to link ideas is reduced',correct:true},{text:'Deep sleep replays daily experiences',correct:false},{text:'Immunity is weakened by chronic poor sleep',correct:true},{text:'Mood instability and increased appetite result from poor sleep',correct:true},{text:'60% of Singapore students sleep under seven hours',correct:false},{text:'Screen use after 11pm is a cause',correct:false}],model:'Insufficient sleep harms students in multiple ways. The brain\'s ability to consolidate new memories is impaired, meaning information studied the previous day is less likely to be retained. Students who do not sleep enough also find it harder to connect ideas, which is essential for answering higher-order questions. Exam performance suffers as a result. Beyond academic impact, chronic sleep deprivation weakens the immune system, disrupts appetite and leads to emotional instability.'},
+    {title:'Libraries in the Digital Age',passage:`Public libraries in Singapore have undergone dramatic change since the 1990s. Where once they housed only books and periodicals, they now offer 3D printers, recording studios, language learning software and co-working spaces. Borrowing numbers for physical books have declined steadily, but library footfall has actually increased — explained partly by the services now on offer and partly by the library's role as a neutral, air-conditioned space for students without stable home environments. Critics warn that the shift towards technology risks marginalising elderly users who are less digitally confident. Library managers counter that multilingual digital assistance kiosks, senior-focused programmes and large-print collections ensure no group is excluded.`,question:'Summarise the ways in which public libraries in Singapore have <strong>adapted to remain relevant</strong>. Write in your own words.',points:[{text:'They now offer services like 3D printing and recording studios',correct:true},{text:'Libraries provide a neutral space for students without stable home environments',correct:true},{text:'Senior-focused programmes and digital kiosks address elderly users\' needs',correct:true},{text:'Co-working spaces attract a wider range of visitors',correct:true},{text:'Physical book borrowing has declined',correct:false},{text:'Footfall has increased despite falling book borrowing',correct:false},{text:'Libraries aim to be the most visited public space in Singapore',correct:false},{text:'Language learning software is now available',correct:true}],model:'Singapore\'s public libraries have adapted to changing needs in several ways. They have expanded beyond books to offer services such as 3D printing, recording studios and language learning tools, attracting a wider audience. Co-working spaces serve students and working adults who need a stable environment. To ensure elderly visitors are not left behind, libraries have introduced multilingual assistance kiosks and programmes specifically designed for seniors, ensuring the library remains inclusive as it evolves.'},
+    {title:'Food Waste',passage:`Singapore generated approximately 744,000 tonnes of food waste in a recent year, making it one of the country's largest waste streams. The majority comes from households, followed by food and beverage businesses. Supermarkets have introduced 'ugly vegetable' discount sections to reduce produce discarded for cosmetic reasons. Some food courts now display portion size options, allowing customers to order less. Schools have incorporated food waste lessons into the curriculum, with some canteens installing food waste weighing machines that show students how much is discarded daily. Despite these initiatives, awareness remains uneven. Composting programmes in some residential estates have converted food scraps into fertiliser, reducing landfill load and benefiting community gardens.`,question:'Summarise the <strong>measures taken to reduce food waste</strong> in Singapore. Write in your own words.',points:[{text:'Supermarkets sell discounted produce that is cosmetically imperfect',correct:true},{text:'Food courts offer smaller portion options',correct:true},{text:'Schools teach students about food waste and show daily discard totals',correct:true},{text:'Composting programmes convert scraps into fertiliser',correct:true},{text:'744,000 tonnes of food waste is generated yearly',correct:false},{text:'Households produce the most food waste',correct:false},{text:'Residents underestimate their own food waste',correct:false},{text:'Hotels contribute to food waste',correct:false}],model:'Several measures have been introduced to tackle food waste in Singapore. Supermarkets now sell vegetables and produce at a discount if they appear imperfect, reducing unnecessary waste. Food courts give customers the option to order smaller portions, helping to reduce leftovers. In schools, food waste is taught as part of the curriculum, and weighing machines show students the scale of daily waste. At the community level, composting programmes turn food scraps into fertiliser, benefiting local gardens and reducing landfill.'},
+    {title:'Learning Music',passage:`Research consistently links music education to improved outcomes in language learning, mathematics and social skills. Children who learn a musical instrument demonstrate greater phonological awareness — an ability to distinguish between sounds — which directly supports reading development. The discipline required to practise an instrument daily also trains focus and self-regulation, skills that transfer to academic study. Group ensemble playing develops listening skills and the ability to cooperate toward a shared goal. Despite the evidence, music education in many schools has been reduced to make room for tested subjects. Music therapists note that adolescents who continue musical study report lower levels of anxiety and higher emotional resilience.`,question:'Summarise the <strong>benefits of music education</strong> for children and adolescents. Write in your own words.',points:[{text:'Music education improves language and mathematical ability',correct:true},{text:'Playing instruments improves phonological awareness and reading',correct:true},{text:'Daily practice builds focus and self-regulation',correct:true},{text:'Ensemble playing develops cooperation and listening',correct:true},{text:'Continuing music study in adolescence reduces anxiety',correct:true},{text:'Many schools have reduced music education',correct:false},{text:'Music therapists work with anxious adolescents',correct:false},{text:'Parents stop music lessons at secondary school',correct:false}],model:'Music education benefits young people in several important ways. Learning to play an instrument sharpens the ability to distinguish sounds, which helps children develop reading skills. The routine of regular practice also trains concentration and self-discipline, qualities that support academic learning generally. Playing in groups teaches children to listen carefully and work towards shared goals. For adolescents, continuing musical study is linked to lower anxiety and greater emotional resilience.'},
+    {title:'Animal Migration',passage:`Animal migration is one of nature's most remarkable phenomena. Each year, millions of wildebeest cross the Serengeti in search of rainfall and fresh grass. Arctic terns travel from the Arctic to the Antarctic and back again, covering approximately 70,000 kilometres annually — the longest known migration of any animal. Some species navigate using the Earth's magnetic field; others rely on the position of the sun or stars. Climate change is disrupting these patterns: warmer springs are causing some species to migrate earlier, arriving at destinations before food sources are ready. Monarch butterflies, which migrate from Canada to Mexico, face habitat loss at both ends of their journey. Conservation efforts focus on protecting migration corridors — the routes animals travel — from development and agricultural expansion.`,question:'Summarise the <strong>threats facing migratory animals</strong> and the efforts to protect them. Write in your own words.',points:[{text:'Warmer springs cause some animals to arrive before food is ready',correct:true},{text:'Monarch butterflies face habitat loss at both migration ends',correct:true},{text:'Conservation focuses on protecting migration corridors',correct:true},{text:'Development and farming threaten migration routes',correct:true},{text:'Wildebeest cross the Serengeti every year',correct:false},{text:'Arctic terns travel 70,000 km annually',correct:false},{text:'Some animals navigate by magnetic field or stars',correct:false},{text:'Migration has occurred for thousands of years',correct:false}],model:'Migratory animals face growing threats. Climate change is altering the timing of migrations, with warmer weather causing some species to arrive at their destinations before food becomes available. Monarch butterflies are particularly vulnerable, losing habitat at both ends of their journey due to land development. Conservation efforts focus on preserving the routes — known as migration corridors — that animals depend on, protecting them from being disrupted by agriculture or construction.'}
+  ];
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 INFERENCE LOGIC
+  // ══════════════════════════════════════════════════════
+  var s2inferIdx=0, s2inferAnswered={};
+  function s2renderInfer(){
+    var p=S2_INFER[s2inferIdx];
+    document.getElementById('s2inferCount').textContent='Passage '+(s2inferIdx+1)+' of '+S2_INFER.length;
+    var html='<div class="s2-passage-title">'+p.title+'</div><div class="s2-passage-box">'+p.passage+'</div>';
+    p.questions.forEach(function(q,i){
+      var key=s2inferIdx+'-'+i, done=s2inferAnswered[key];
+      html+='<div class="s2-q-block">'+s2typeBadge('Inference');
+      html+='<div class="s2-q-text">'+q.q+' <span class="s2-marks-pill">'+q.marks+' marks</span></div>';
+      if(q.hint) html+='<button class="s2-hint-btn" onclick="s2showHint('+s2inferIdx+','+i+',this)">💡 Show hint</button>';
+      html+='<textarea class="s2-ans" id="s2ia'+i+'" rows="3"'+(done?' disabled':'')+'>'+( done||'')+'</textarea>';
+      html+='<div class="s2-fb s2-fb-wrong" id="s2ifb'+i+'" style="'+(done?'display:block':'')+'">';
+      if(done) html+='<div class="s2-mistake-tip">⚠️ Common mistake: Do not just quote from the passage — explain what the clue shows or implies.</div><em style="color:var(--blue)">Model: '+q.model+'</em>';
+      html+='</div></div>';
+    });
+    var allDone=p.questions.every(function(_,i){return s2inferAnswered[s2inferIdx+'-'+i];});
+    html+='<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">';
+    if(!allDone) html+='<button class="tbtn tbtn-primary" onclick="s2submitInfer()">Submit Answers</button>';
+    html+='<button class="tbtn tbtn-outline" onclick="s2inferNav(1)">Next →</button></div>';
+    document.getElementById('s2inferContent').innerHTML=html;
+  }
+  function s2showHint(pi,qi,btn){var h=S2_INFER[pi].questions[qi].hint;btn.textContent='💡 '+h;btn.onclick=null;btn.style.cursor='default';}
+  function s2submitInfer(){
+    var p=S2_INFER[s2inferIdx],ok=true;
+    p.questions.forEach(function(q,i){if(!document.getElementById('s2ia'+i).value.trim())ok=false;});
+    if(!ok){alert('Please answer all questions first.');return;}
+    p.questions.forEach(function(q,i){
+      var v=document.getElementById('s2ia'+i).value.trim();
+      s2inferAnswered[s2inferIdx+'-'+i]=v;
+      var fb=document.getElementById('s2ifb'+i);
+      fb.style.display='block';fb.className='s2-fb s2-fb-wrong';
+      fb.innerHTML='<div class="s2-mistake-tip">⚠️ Common mistake: Do not just quote from the passage — explain what the clue shows or implies.</div><em style="color:var(--blue)">Model: '+q.model+'</em>';
+      document.getElementById('s2ia'+i).disabled=true;
+    });
+    s2bumpStat('infer');
+    var sub=document.querySelector('#s2inferContent .tbtn-primary');if(sub)sub.remove();
+  }
+  function s2inferNav(d){s2inferIdx=Math.max(0,Math.min(S2_INFER.length-1,s2inferIdx+d));s2renderInfer();}
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 LANGUAGE IN CONTEXT LOGIC
+  // ══════════════════════════════════════════════════════
+  var s2langIdx=0, s2langAnswered={};
+  function s2renderLang(){
+    var d=S2_LANG[s2langIdx], done=s2langAnswered[s2langIdx];
+    document.getElementById('s2langCount').textContent='Drill '+(s2langIdx+1)+' of '+S2_LANG.length;
+    var html='<div class="s2-word-ctx">'+d.ctx+'</div>'+s2typeBadge('Language in Context');
+    html+='<div class="s2-q-text" style="margin:.5rem 0 .3rem">1. What does the underlined word mean <em>in this specific context</em>? <span class="s2-marks-pill">1 mark</span></div>';
+    html+='<textarea class="s2-ans" id="s2lm" rows="2"'+(done?' disabled':'')+'>'+(done?done.meaning:'')+'</textarea>';
+    html+='<div class="s2-q-text" style="margin:.7rem 0 .3rem">2. What effect does this word create? <span class="s2-marks-pill">2 marks</span></div>';
+    html+='<textarea class="s2-ans" id="s2le" rows="3"'+(done?' disabled':'')+'>'+(done?done.effect:'')+'</textarea>';
+    if(done){html+='<div class="s2-fb s2-fb-wrong" style="display:block;margin-top:.5rem"><div class="s2-mistake-tip">⚠️ Common mistake: Do not give the dictionary definition — explain what the word means in this sentence and the effect it creates.</div><strong>Model meaning:</strong> '+d.meaning+'<br><br><strong>Model effect:</strong> '+d.effect+'</div>';}
+    html+='<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">';
+    if(!done) html+='<button class="tbtn tbtn-primary" onclick="s2submitLang()">Submit</button>';
+    html+='<button class="tbtn tbtn-outline" onclick="s2langNav(1)">Next →</button></div>';
+    document.getElementById('s2langContent').innerHTML=html;
+  }
+  function s2submitLang(){
+    var m=document.getElementById('s2lm').value.trim(),e=document.getElementById('s2le').value.trim();
+    if(!m||!e){alert('Please answer both questions.');return;}
+    s2langAnswered[s2langIdx]={meaning:m,effect:e};s2bumpStat('lang');s2renderLang();
+  }
+  function s2langNav(d){s2langIdx=Math.max(0,Math.min(S2_LANG.length-1,s2langIdx+d));s2renderLang();}
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 TONE & INTENT LOGIC
+  // ══════════════════════════════════════════════════════
+  var s2toneIdx=0, s2toneAnswered={}, s2toneChosen=null;
+  function s2renderTone(){
+    var ex=S2_TONE[s2toneIdx], done=s2toneAnswered[s2toneIdx];
+    document.getElementById('s2toneCount').textContent='Exercise '+(s2toneIdx+1)+' of '+S2_TONE.length;
+    s2toneChosen=null;
+    var html='<div class="s2-passage-box">'+ex.passage+'</div>'+s2typeBadge('Tone & Intent');
+    html+='<div class="s2-q-text" style="margin:.5rem 0 .4rem">What is the writer\'s tone?</div>';
+    html+='<div class="s2-tone-opts">';
+    ex.tones.forEach(function(t,i){
+      var cls='s2-tone-opt';
+      if(done){if(i===ex.correct)cls+=' s2-correct';else if(i===done.chosen)cls+=' s2-wrong';}
+      html+='<div class="'+cls+'" id="s2to'+i+'"'+(done?'':' onclick="s2pickTone('+i+')"')+'>'+t+'</div>';
+    });
+    html+='</div>';
+    html+='<div class="s2-q-text" style="margin:.7rem 0 .3rem">Explain how word choices reveal this tone: <span class="s2-marks-pill">3 marks</span></div>';
+    html+='<textarea class="s2-ans" id="s2texpl" rows="3"'+(done?' disabled':'')+'>'+(done?done.explain:'')+'</textarea>';
+    if(done){
+      html+='<div class="s2-fb s2-fb-wrong" style="display:block;margin-top:.5rem"><div class="s2-mistake-tip">⚠️ Common mistake: Naming the tone without quoting from the text. Always identify the specific word or phrase, then explain its effect.</div>';
+      html+='<strong>Key words:</strong> '+ex.keyWords.join(', ')+'<br><br><strong>Explanation:</strong> '+ex.explanation+'</div>';
+    }
+    html+='<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">';
+    if(!done) html+='<button class="tbtn tbtn-primary" id="s2toneSub" onclick="s2submitTone()" disabled>Submit</button>';
+    html+='<button class="tbtn tbtn-outline" onclick="s2toneNav(1)">Next →</button></div>';
+    document.getElementById('s2toneContent').innerHTML=html;
+  }
+  function s2pickTone(i){
+    s2toneChosen=i;
+    document.querySelectorAll('.s2-tone-opt').forEach(function(el,idx){el.classList.toggle('s2-selected',idx===i);});
+    var sb=document.getElementById('s2toneSub');if(sb)sb.disabled=false;
+  }
+  function s2submitTone(){
+    var ex=document.getElementById('s2texpl').value.trim();
+    if(!ex){alert('Please explain the tone before submitting.');return;}
+    s2toneAnswered[s2toneIdx]={chosen:s2toneChosen,explain:ex};s2bumpStat('tone');s2renderTone();
+  }
+  function s2toneNav(d){s2toneIdx=Math.max(0,Math.min(S2_TONE.length-1,s2toneIdx+d));s2renderTone();}
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 SEQUENCING LOGIC
+  // ══════════════════════════════════════════════════════
+  var s2seqIdx=0, s2seqAnswered={}, s2dragSrc=null, s2seqItems=[];
+  function s2shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function s2renderSeq(){
+    var s=S2_SEQ[s2seqIdx], done=s2seqAnswered[s2seqIdx];
+    document.getElementById('s2seqCount').textContent='Set '+(s2seqIdx+1)+' of '+S2_SEQ.length;
+    s2seqItems=done?done.itemsArr:s2shuffle(s.items.map(function(it){return{text:it.text,order:it.order};}));
+    var html='<div class="s2-passage-title">'+s.title+'</div><div class="s2-passage-box">'+s.passage+'</div>'+s2typeBadge('Sequencing');
+    html+='<div class="s2-q-text" style="margin:.5rem 0 .4rem">Drag the events into the order they happen in the passage:</div>';
+    html+='<ul class="s2-seq-list" id="s2seqList">';
+    s2seqItems.forEach(function(item,i){
+      var cls='s2-seq-item';
+      if(done){var correct=s.items.slice().sort(function(a,b){return a.order-b.order;})[i];cls+=item.text===(correct&&correct.text)?' s2-seq-correct':' s2-seq-wrong';}
+      html+='<li class="'+cls+'" draggable="'+(done?'false':'true')+'" data-i="'+i+'" ondragstart="s2ds(event,'+i+')" ondragover="s2do(event)" ondrop="s2dd(event,'+i+')" ondragleave="s2dl(event)">';
+      html+='<span class="s2-seq-num">'+(i+1)+'.</span><span>'+item.text+'</span></li>';
+    });
+    html+='</ul>';
+    if(done){
+      var perfect=done.perfect;
+      html+='<div class="s2-fb '+(perfect?'':'s2-fb-wrong')+'" style="display:block;'+(perfect?'background:var(--greenl);border-left:3px solid var(--green);border-radius:6px;padding:.5rem .7rem;':'')+'">';
+      if(perfect) html+='<strong>✓ Perfect order!</strong>';
+      else{
+        html+='<strong>Not quite.</strong> ✅ Green = correct. ❌ Red = wrong.<br><br><strong>Correct order:</strong><ol style="margin:.4rem 0 0 1.2rem;font-size:.85rem">';
+        s.items.slice().sort(function(a,b){return a.order-b.order;}).forEach(function(it){html+='<li>'+it.text+'</li>';});
+        html+='</ol><br><div class="s2-mistake-tip">⚠️ Common mistake: Ordering events by when they are described, not when they actually happen in the story.</div>';
+      }
+      html+='</div>';
+    }
+    html+='<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">';
+    if(!done) html+='<button class="tbtn tbtn-primary" onclick="s2submitSeq()">Check Order</button>';
+    html+='<button class="tbtn tbtn-outline" onclick="s2seqNav(1)">Next →</button></div>';
+    document.getElementById('s2seqContent').innerHTML=html;
+  }
+  function s2ds(e,i){s2dragSrc=i;e.currentTarget.classList.add('s2-dragging');e.dataTransfer.effectAllowed='move';}
+  function s2do(e){e.preventDefault();e.currentTarget.classList.add('s2-over');}
+  function s2dl(e){e.currentTarget.classList.remove('s2-over');}
+  function s2dd(e,i){
+    e.preventDefault();e.currentTarget.classList.remove('s2-over');
+    if(s2dragSrc===null||s2dragSrc===i)return;
+    var list=document.getElementById('s2seqList'),items=list.querySelectorAll('.s2-seq-item');
+    var src=items[s2dragSrc],tgt=items[i];
+    if(s2dragSrc<i)list.insertBefore(src,tgt.nextSibling);else list.insertBefore(src,tgt);
+    list.querySelectorAll('.s2-seq-item').forEach(function(li,idx){li.querySelector('.s2-seq-num').textContent=(idx+1)+'.';li.setAttribute('data-i',idx);});
+    document.querySelectorAll('.s2-seq-item').forEach(function(li){li.classList.remove('s2-dragging');});
+    s2dragSrc=null;
+  }
+  function s2submitSeq(){
+    var s=S2_SEQ[s2seqIdx],list=document.getElementById('s2seqList'),lis=list.querySelectorAll('.s2-seq-item');
+    var correctOrder=s.items.slice().sort(function(a,b){return a.order-b.order;}).map(function(it){return it.text;});
+    var userOrder=[];lis.forEach(function(li){userOrder.push(li.querySelector('span:last-child').textContent.trim());});
+    var perfect=userOrder.every(function(t,i){return t===correctOrder[i];});
+    var userItems=userOrder.map(function(t){return{text:t};});
+    lis.forEach(function(li,i){li.classList.remove('s2-over','s2-dragging');if(userOrder[i]===correctOrder[i])li.classList.add('s2-seq-correct');else li.classList.add('s2-seq-wrong');});
+    s2seqAnswered[s2seqIdx]={perfect:perfect,itemsArr:userItems};
+    s2bumpStat('seq');
+    var sub=document.querySelector('#s2seqContent .tbtn-primary');if(sub)sub.remove();
+    var fb=document.createElement('div');
+    fb.className='s2-fb s2-fb-wrong';fb.style.cssText='display:block;margin-top:.6rem';
+    if(perfect){fb.style.cssText='display:block;margin-top:.6rem;background:var(--greenl);border-left:3px solid var(--green);border-radius:6px;padding:.5rem .7rem;';fb.innerHTML='<strong>✓ Perfect order!</strong>';}
+    else{fb.innerHTML='<strong>Not quite.</strong> ✅ Green = correct. ❌ Red = wrong.<br><br><strong>Correct order:</strong><ol style="margin:.4rem 0 0 1.2rem;font-size:.85rem">'+correctOrder.map(function(t){return'<li>'+t+'</li>';}).join('')+'</ol><br><div class="s2-mistake-tip">⚠️ Common mistake: Ordering by when events are described, not when they happen in the story.</div>';}
+    var btnRow=document.querySelector('#s2seqContent > div:last-child');if(btnRow)btnRow.insertBefore(fb,btnRow.firstChild);
+  }
+  function s2seqNav(d){s2seqIdx=Math.max(0,Math.min(S2_SEQ.length-1,s2seqIdx+d));s2renderSeq();}
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 SUMMARY WRITING LOGIC
+  // ══════════════════════════════════════════════════════
+  var s2sumIdx=0, s2sumAnswered={}, s2sumShuffled=[];
+  function s2cw(t){return t.trim().split(/\s+/).filter(function(w){return w.length>0;}).length;}
+  function s2renderSum(){
+    var ex=S2_SUM[s2sumIdx], done=s2sumAnswered[s2sumIdx];
+    document.getElementById('s2sumCount').textContent='Exercise '+(s2sumIdx+1)+' of '+S2_SUM.length;
+    s2sumShuffled=done?done.pointOrder:s2shuffle(ex.points.map(function(p,i){return{text:p.text,correct:p.correct,idx:i};}));
+    var html='<div class="s2-passage-title">'+ex.title+'</div><div class="s2-passage-box">'+ex.passage+'</div>';
+    html+=s2typeBadge('Summary Writing')+'<div class="s2-q-text" style="margin:.5rem 0 .3rem">'+ex.question+'</div>';
+    html+='<div style="font-size:.8rem;color:var(--muted);margin-bottom:.4rem"><strong>Step 1</strong> — Tick the relevant points:</div>';
+    html+='<div class="s2-point-grid">';
+    s2sumShuffled.forEach(function(pt,i){
+      var cls='s2-point';
+      if(done){if(pt.correct&&done.checked.indexOf(i)!==-1)cls+=' s2-pt-correct';else if(!pt.correct&&done.checked.indexOf(i)!==-1)cls+=' s2-pt-wrong';else if(pt.correct&&done.checked.indexOf(i)===-1)cls+=' s2-pt-wrong';}
+      html+='<label class="'+cls+'"><input type="checkbox" id="s2pt'+i+'"'+(done?(done.checked.indexOf(i)!==-1?' checked':'')+' disabled':'')+'> '+pt.text+'</label>';
+    });
+    html+='</div>';
+    html+='<div style="font-size:.8rem;color:var(--muted);margin:.7rem 0 .3rem"><strong>Step 2</strong> — Write your summary (aim 80–100 words):</div>';
+    html+='<textarea class="s2-sum-box" id="s2sumWrite" rows="5"'+(done?' disabled':'')+'>'+(done?done.text:'')+'</textarea>';
+    if(done) html+='<div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">Word count: '+s2cw(done.text)+'</div>';
+    if(done){html+='<div class="s2-fb s2-fb-wrong" style="display:block;margin-top:.5rem"><div class="s2-mistake-tip">⚠️ Common mistake: Copying sentences from the passage. The examiner penalises lifted text — rewrite every idea in completely different words.</div><strong>Key points:</strong><ul style="margin:.3rem 0 .4rem 1rem;font-size:.85rem">'+ex.points.filter(function(p){return p.correct;}).map(function(p){return'<li>'+p.text+'</li>';}).join('')+'</ul><strong>Model summary:</strong><br><em>'+ex.model+'</em></div>';}
+    html+='<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">';
+    if(!done) html+='<button class="tbtn tbtn-primary" onclick="s2submitSum()">Submit Summary</button>';
+    html+='<button class="tbtn tbtn-outline" onclick="s2sumNav(1)">Next →</button></div>';
+    document.getElementById('s2sumContent').innerHTML=html;
+    if(!done){var ta=document.getElementById('s2sumWrite');ta.addEventListener('input',function(){var wce=document.getElementById('s2wce');if(!wce){wce=document.createElement('div');wce.id='s2wce';wce.style='font-size:.75rem;color:var(--muted);margin-top:.2rem';ta.after(wce);}wce.textContent='Word count: '+s2cw(ta.value);});}
+  }
+  function s2submitSum(){
+    var text=document.getElementById('s2sumWrite').value.trim();
+    if(!text){alert('Please write your summary first.');return;}
+    var checked=[];s2sumShuffled.forEach(function(pt,i){if(document.getElementById('s2pt'+i)&&document.getElementById('s2pt'+i).checked)checked.push(i);});
+    s2sumAnswered[s2sumIdx]={text:text,checked:checked,pointOrder:s2sumShuffled};s2bumpStat('sum');s2renderSum();
+  }
+  function s2sumNav(d){s2sumIdx=Math.max(0,Math.min(S2_SUM.length-1,s2sumIdx+d));s2renderSum();}
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 TAB SYSTEM
+  // ══════════════════════════════════════════════════════
+  function s2showTab(id,btn){
+    document.querySelectorAll('#sec2Shell .s2-tab-content').forEach(function(t){t.classList.remove('active');});
+    document.querySelectorAll('.s2-mtab').forEach(function(b){b.classList.remove('active');});
+    document.getElementById(id).classList.add('active');
+    if(btn) btn.classList.add('active');
+    if(id==='s2inferTab') s2renderInfer();
+    else if(id==='s2langTab') s2renderLang();
+    else if(id==='s2toneTab') s2renderTone();
+    else if(id==='s2seqTab') s2renderSeq();
+    else if(id==='s2sumTab') s2renderSum();
+  }
+
+  // ══════════════════════════════════════════════════════
+  //  SEC 2 INIT
+  // ══════════════════════════════════════════════════════
+  s2loadStats();
+
   </script>
+
+  <!-- SEC 2 SHELL -->
+  <div id="sec2Shell" style="display:none">
+    <!-- SEC 2 TABS -->
+    <div class="main-tabs" style="border-top:2px solid var(--border)">
+      <button class="mtab s2-mtab active" onclick="s2showTab('s2dashTab',this)">📊 Dashboard</button>
+      <button class="mtab s2-mtab" onclick="s2showTab('s2inferTab',this)">🔍 Inference</button>
+      <button class="mtab s2-mtab" onclick="s2showTab('s2langTab',this)">💬 Language in Context</button>
+      <button class="mtab s2-mtab" onclick="s2showTab('s2toneTab',this)">🎭 Tone &amp; Intent</button>
+      <button class="mtab s2-mtab" onclick="s2showTab('s2seqTab',this)">🔢 Sequencing</button>
+      <button class="mtab s2-mtab" onclick="s2showTab('s2sumTab',this)">✍️ Summary Writing</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="s2dashTab" class="tab-content s2-tab-content active" style="display:block">
+      <div style="max-width:860px;margin:0 auto;padding:1.2rem">
+        <div class="s2-welcome">
+          <div class="s2-level-badge">SEC 2 · G2 NA</div>
+          <h2>Welcome, Mokshith 👋</h2>
+          <p>Your G2 English practice is built around the five areas your teacher highlighted. Work through each drill tab, then track your progress here.</p>
+        </div>
+        <div class="s2-stat-grid">
+          <div class="s2-stat-card"><div class="s2-stat-num" id="s2d_infer">0</div><div class="s2-stat-lbl">Inference done</div></div>
+          <div class="s2-stat-card"><div class="s2-stat-num" id="s2d_lang">0</div><div class="s2-stat-lbl">Language drills</div></div>
+          <div class="s2-stat-card"><div class="s2-stat-num" id="s2d_tone">0</div><div class="s2-stat-lbl">Tone &amp; Intent</div></div>
+          <div class="s2-stat-card"><div class="s2-stat-num" id="s2d_seq">0</div><div class="s2-stat-lbl">Sequencing sets</div></div>
+          <div class="s2-stat-card"><div class="s2-stat-num" id="s2d_sum">0</div><div class="s2-stat-lbl">Summaries</div></div>
+        </div>
+        <div class="card">
+          <div style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;margin-bottom:.6rem">📋 Mrs Rajan's 5 focus areas</div>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div style="display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;background:var(--bluel);border-radius:7px;font-size:.85rem"><span>🔍</span><div><strong>Inference</strong> — draw conclusions from clues in the passage and explain how</div></div>
+            <div style="display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;background:var(--purplel);border-radius:7px;font-size:.85rem"><span>💬</span><div><strong>Language in Context</strong> — explain what a word means in the passage and its effect</div></div>
+            <div style="display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;background:#fdf2f8;border-radius:7px;font-size:.85rem"><span>🎭</span><div><strong>Tone &amp; Intent</strong> — identify the writer's attitude and how word choice conveys it</div></div>
+            <div style="display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;background:var(--amberl);border-radius:7px;font-size:.85rem"><span>🔢</span><div><strong>Sequencing</strong> — put events from the passage in the correct order</div></div>
+            <div style="display:flex;align-items:center;gap:.7rem;padding:.5rem .7rem;background:var(--greenl);border-radius:7px;font-size:.85rem"><span>✍️</span><div><strong>Summary Writing</strong> — identify key points, combine ideas, write in your own words</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFERENCE -->
+    <div id="s2inferTab" class="tab-content s2-tab-content" style="display:none">
+      <div style="max-width:860px;margin:0 auto;padding:1.2rem">
+        <div class="card">
+          <div style="font-size:.7rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem">🔍 Inference</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;margin-bottom:.5rem">Draw conclusions from clues in the passage</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:.8rem">Find the clue in the text and explain what it shows — do not just copy the passage.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;flex-wrap:wrap;gap:.4rem">
+            <span id="s2inferCount" style="font-size:.8rem;color:var(--muted)">Passage 1 of 8</span>
+            <div style="display:flex;gap:.4rem">
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2inferNav(-1)">← Prev</button>
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2inferNav(1)">Next →</button>
+            </div>
+          </div>
+          <div id="s2inferContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANGUAGE IN CONTEXT -->
+    <div id="s2langTab" class="tab-content s2-tab-content" style="display:none">
+      <div style="max-width:860px;margin:0 auto;padding:1.2rem">
+        <div class="card">
+          <div style="font-size:.7rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem">💬 Language in Context</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;margin-bottom:.5rem">Word &amp; phrase meaning in context</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:.8rem">Explain what the underlined word means <em>in this passage</em> — not just the dictionary meaning. Then explain the effect.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;flex-wrap:wrap;gap:.4rem">
+            <span id="s2langCount" style="font-size:.8rem;color:var(--muted)">Drill 1 of 10</span>
+            <div style="display:flex;gap:.4rem">
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2langNav(-1)">← Prev</button>
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2langNav(1)">Next →</button>
+            </div>
+          </div>
+          <div id="s2langContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TONE & INTENT -->
+    <div id="s2toneTab" class="tab-content s2-tab-content" style="display:none">
+      <div style="max-width:860px;margin:0 auto;padding:1.2rem">
+        <div class="card">
+          <div style="font-size:.7rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem">🎭 Tone &amp; Intent</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;margin-bottom:.5rem">Identify the writer's attitude and purpose</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:.8rem">Choose the writer's tone, then explain how their word choices reveal it.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;flex-wrap:wrap;gap:.4rem">
+            <span id="s2toneCount" style="font-size:.8rem;color:var(--muted)">Exercise 1 of 8</span>
+            <div style="display:flex;gap:.4rem">
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2toneNav(-1)">← Prev</button>
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2toneNav(1)">Next →</button>
+            </div>
+          </div>
+          <div id="s2toneContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEQUENCING -->
+    <div id="s2seqTab" class="tab-content s2-tab-content" style="display:none">
+      <div style="max-width:860px;margin:0 auto;padding:1.2rem">
+        <div class="card">
+          <div style="font-size:.7rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem">🔢 Sequencing</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;margin-bottom:.5rem">Put events in the correct order</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:.8rem">Drag the events into the order they happen in the passage. Read the passage first.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;flex-wrap:wrap;gap:.4rem">
+            <span id="s2seqCount" style="font-size:.8rem;color:var(--muted)">Set 1 of 8</span>
+            <div style="display:flex;gap:.4rem">
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2seqNav(-1)">← Prev</button>
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2seqNav(1)">Next →</button>
+            </div>
+          </div>
+          <div id="s2seqContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY WRITING -->
+    <div id="s2sumTab" class="tab-content s2-tab-content" style="display:none">
+      <div style="max-width:860px;margin:0 auto;padding:1.2rem">
+        <div class="card">
+          <div style="font-size:.7rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem">✍️ Summary Writing</div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:1rem;font-weight:700;margin-bottom:.5rem">Select key points and write a summary</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:.8rem"><strong>Step 1:</strong> Tick the relevant points. <strong>Step 2:</strong> Write a summary in your own words (80–100 words).</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;flex-wrap:wrap;gap:.4rem">
+            <span id="s2sumCount" style="font-size:.8rem;color:var(--muted)">Exercise 1 of 6</span>
+            <div style="display:flex;gap:.4rem">
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2sumNav(-1)">← Prev</button>
+              <button class="tbtn tbtn-outline" style="font-size:.76rem;padding:.3rem .75rem" onclick="s2sumNav(1)">Next →</button>
+            </div>
+          </div>
+          <div id="s2sumContent"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end sec2Shell -->
+
+  </div><!-- end sec1Shell -->
+
 </body>
-<</html>
+</html>
