@@ -19977,9 +19977,12 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
   // ══════════════════════════════════════════════════════
   //  SEC 2 INIT
   // ══════════════════════════════════════════════════════
-  s2loadStats();
+  // s2loadStats called after DOM ready
+  document.addEventListener('DOMContentLoaded', function(){ s2loadStats(); });
 
   </script>
+
+  </div><!-- end sec1Shell -->
 
   <!-- SEC 2 SHELL -->
   <div id="sec2Shell" style="display:none">
@@ -20116,8 +20119,6 @@ He has a talent <span class="g-prep" title="✓ Preposition: 'talent for' — fi
       </div>
     </div>
   </div><!-- end sec2Shell -->
-
-  </div><!-- end sec1Shell -->
 
 </body>
 </html>
